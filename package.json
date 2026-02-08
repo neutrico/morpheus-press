@@ -1,0 +1,16 @@
+{
+  "name": "morpheus-press",
+  "version": "1.0.0",
+  "description": "AI-powered planning and automation system for Morpheus Press (novel-to-comic publishing platform)",
+  "private": true,
+  "scripts": {
+    "plan": "python3 scripts/planning/run-pipeline.py",
+    "plan:dry-run": "python3 scripts/planning/run-pipeline.py --dry-run",
+    "automate": "python3 scripts/automation/task-automation-agent.py",
+    "issues:create": "python3 scripts/create-github-issues.py",
+    "issues:high-ai": "python3 scripts/create-github-issues.py --ai-high-only"
+  },
+  "keywords": ["planning", "automation", "ai", "copilot", "github-actions"],
+  "author": "neutrico",
+  "license": "MIT"
+}

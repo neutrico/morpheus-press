@@ -1,0 +1,1150 @@
+project:
+  owner: neutrico
+  repo: morpheus
+  projectV2Number: 1
+safe:
+  pi:
+    name: PI-2026-Q1
+    start: '2026-02-10'
+    iterationLengthDays: 14
+    iterations:
+    - I1
+    - I2
+    - I3
+    - I4
+    - I5
+    - I6
+    - I7
+    capacity:
+      pointsPerIteration: 30
+
+# GitHub Issues native fields (not labels!)
+issueTypes:
+  - Task       # Concrete implementation work
+  - Feature    # User-facing functionality
+  - Bug        # Defects and fixes
+
+milestones:
+  - name: M0 - Infrastructure & Setup
+    description: 'Dev environment, CI/CD, testing framework, monitoring, security, deployment pipelines'
+    state: open
+  - name: M1 - Backend Services
+    description: 'API layer, database, authentication, book management, ingestion pipeline, semantic search'
+    state: open
+  - name: M2 - ML Training & Development
+    description: 'Dataset preparation, model training (dialogue, NER, scenes), evaluation, W&B integration, active learning'
+    state: open
+  - name: M3 - Content Generation Pipeline
+    description: 'Prompt engineering, SDXL image generation, quality assessment, ComfyUI integration, batch processing'
+    state: open
+  - name: M4 - Dashboard & UI
+    description: 'Web interface for book/comic management, preview components, quality control dashboard'
+    state: open
+  - name: M5 - Product Assembly
+    description: 'Comic layout engine, panel generation, PDF export, archive creation, print-ready output'
+    state: open
+  - name: M6 - Commerce & Distribution
+    description: 'E-commerce (Stripe, storefront, checkout), distribution (Discord, Reddit, browser extension, WordPress)'
+    state: open
+  - name: M7 - Launch & Release
+    description: 'Final integration testing, production deployment, launch procedures'
+    state: open
+
+# Labels are for categorization, NOT for issue types
+labels:
+  area:
+  - 'area: setup'
+  - 'area: backend'
+  - 'area: ml'
+  - 'area: ingestion'
+  - 'area: image-gen'
+  - 'area: comic'
+  - 'area: distribution'
+  - 'area: ecommerce'
+  - 'area: release'
+  priority:
+  - 'priority:p0'
+  - 'priority:p1'
+  - 'priority:p2'
+  - 'priority:p3'
+  status:
+  - 'status:triage'
+  - 'status:ready'
+  - 'status:in-progress'
+  - 'status:blocked'
+  - 'status:done'
+  # Effort and Risk are GitHub Projects V2 custom fields, not labels
+  
+# GitHub Projects V2 Custom Fields (not part of Issues API)
+projectFields:
+  priority:
+    name: Priority
+    type: SINGLE_SELECT
+    options:
+    - P0
+    - P1
+    - P2
+    - P3
+  effort:
+    name: Effort
+    type: NUMBER
+  iteration:
+    name: Iteration
+    type: ITERATION
+  risk:
+    name: Risk
+    type: SINGLE_SELECT
+    options:
+    - Low
+    - Medium
+    - High
+
+# Flat GitHub Issues structure (native API compatibility)
+# Each issue maps directly to GitHub Issues API fields
+issues:
+  # ============================================================
+  # M0 - Infrastructure & Setup: Project Infrastructure
+  # ============================================================
+  - key: T1
+    title: 'Tech Stack Decision Documentation'
+    type: Task
+    milestone: M0 - Infrastructure & Setup
+    iteration: I1
+    priority: p0
+    effort: 2
+    area: setup
+    dependsOn: []
+    github_issue: 1
+
+  - key: T2
+    title: 'GitHub Milestones & Issues Creation'
+    type: Task
+    milestone: M0 - Infrastructure & Setup
+    iteration: I1
+    priority: p0
+    effort: 2
+    area: setup
+    dependsOn: []
+    github_issue: 2
+
+  - key: T3
+    title: 'Database Schema v2 Migration'
+    type: Task
+    milestone: M0 - Infrastructure & Setup
+    iteration: I1
+    priority: p0
+    effort: 5
+    area: setup
+    dependsOn: []
+    github_issue: 3
+
+  - key: T4
+    title: 'Testing Infrastructure Setup'
+    type: Task
+    milestone: M0 - Infrastructure & Setup
+    iteration: I1
+    priority: p0
+    effort: 3
+    area: setup
+    dependsOn: []
+    github_issue: 4
+
+  - key: T5
+    title: 'Weights & Biases Integration'
+    type: Task
+    milestone: M0 - Infrastructure & Setup
+    iteration: I1
+    priority: p1
+    effort: 3
+    area: ml
+    dependsOn: []
+    github_issue: 5
+
+  - key: T6
+    title: 'CI/CD Workflows Setup'
+    type: Task
+    milestone: M0 - Infrastructure & Setup
+    iteration: I1
+    priority: p0
+    effort: 3
+    area: setup
+    dependsOn: [T4]
+    github_issue: 6
+
+  - key: T7
+    title: 'Mock Mode for External Services'
+    type: Task
+    milestone: M0 - Infrastructure & Setup
+    iteration: I1
+    priority: p1
+    effort: 2
+    area: setup
+    dependsOn: []
+    github_issue: 7
+
+  - key: T8
+    title: 'Project Timeline & Cost Estimates'
+    type: Task
+    milestone: M0 - Infrastructure & Setup
+    iteration: I1
+    priority: p1
+    effort: 2
+    area: setup
+    dependsOn: []
+    github_issue: 8
+
+  - key: T9
+    title: 'Storybook 8 Setup for Component Development'
+    type: Task
+    milestone: M0 - Infrastructure & Setup
+    iteration: I1
+    priority: p1
+    effort: 3
+    area: setup
+    dependsOn: []
+    github_issue: 9
+
+  - key: T10
+    title: 'shadcn/ui Component Audit & Verification'
+    type: Task
+    milestone: M0 - Infrastructure & Setup
+    iteration: I1
+    priority: p1
+    effort: 2
+    area: setup
+    dependsOn: []
+    github_issue: 10
+
+  - key: T11
+    title: 'Test Environments Setup (Staging + Production)'
+    type: Task
+    milestone: M0 - Infrastructure & Setup
+    iteration: I1
+    priority: p0
+    effort: 3
+    area: setup
+    dependsOn: []
+    github_issue: 11
+
+  - key: T12
+    title: 'Monitoring & Observability Setup'
+    type: Task
+    milestone: M0 - Infrastructure & Setup
+    iteration: I1
+    priority: p0
+    effort: 3
+    area: setup
+    dependsOn: []
+    github_issue: 12
+
+  - key: T13
+    title: 'Security & Compliance Infrastructure'
+    type: Task
+    milestone: M0 - Infrastructure & Setup
+    iteration: I1
+    priority: p0
+    effort: 5
+    area: setup
+    dependsOn: []
+    github_issue: 13
+
+  - key: T14
+    title: 'API Standards & Best Practices'
+    type: Task
+    milestone: M0 - Infrastructure & Setup
+    iteration: I1
+    priority: p0
+    effort: 2
+    area: backend
+    dependsOn: []
+    github_issue: 14
+
+  - key: T15
+    title: 'Documentation Standards & Templates'
+    type: Task
+    milestone: M0 - Infrastructure & Setup
+    iteration: I1
+    priority: p1
+    effort: 2
+    area: setup
+    dependsOn: []
+    github_issue: 15
+
+  - key: T16
+    title: 'Deployment Strategy & Procedures'
+    type: Task
+    milestone: M0 - Infrastructure & Setup
+    iteration: I1
+    priority: p0
+    effort: 3
+    area: setup
+    dependsOn: []
+    github_issue: 16
+
+  - key: T17
+    title: 'SLA/SLO/SLI Definitions'
+    type: Task
+    milestone: M0 - Infrastructure & Setup
+    iteration: I1
+    priority: p1
+    effort: 2
+    area: setup
+    dependsOn: []
+    github_issue: 17
+
+  - key: T18
+    title: 'Performance Budgets & Optimization'
+    type: Task
+    milestone: M0 - Infrastructure & Setup
+    iteration: I1
+    priority: p1
+    effort: 3
+    area: setup
+    dependsOn: []
+    github_issue: 18
+
+  # ============================================================
+  # M1 - Backend Services: API Layer & Book Ingestion
+  # ============================================================
+  - key: T19
+    title: 'Dataset Preparation for Dialogue Extraction'
+    type: Task
+    milestone: M2 - ML Training & Development
+    iteration: I2
+    priority: p0
+    effort: 5
+    area: ml
+    dependsOn: []
+    github_issue: 19
+
+  - key: T20
+    title: 'Polish Language Model Selection & Validation'
+    type: Task
+    milestone: M2 - ML Training & Development
+    iteration: I2
+    priority: p0
+    effort: 3
+    area: ml
+    dependsOn: []
+    github_issue: 20
+
+  - key: T21
+    title: 'Dialogue Extraction Model Training'
+    type: Task
+    milestone: M2 - ML Training & Development
+    iteration: I2
+    priority: p0
+    effort: 8
+    area: ml
+    dependsOn: [T19, T20]
+    github_issue: 21
+
+  - key: T22
+    title: 'Character Extraction Training (Named Entity Recognition)'
+    type: Task
+    milestone: M2 - ML Training & Development
+    iteration: I2
+    priority: p0
+    effort: 5
+    area: ml
+    dependsOn: [T19, T20]
+    github_issue: 22
+
+  - key: T23
+    title: 'Backend TypeScript Port'
+    type: Task
+    milestone: M1 - Backend Services
+    iteration: I2
+    priority: p0
+    effort: 8
+    area: backend
+    dependsOn: []
+    github_issue: 23
+
+  - key: T24
+    title: 'Supabase Database Setup with RLS'
+    type: Task
+    milestone: M1 - Backend Services
+    iteration: I2
+    priority: p0
+    effort: 5
+    area: backend
+    dependsOn: []
+    github_issue: 24
+
+  - key: T25
+    title: 'API Routes Implementation'
+    type: Task
+    milestone: M1 - Backend Services
+    iteration: I2
+    priority: p0
+    effort: 5
+    area: backend
+    dependsOn: [T23, T24]
+    github_issue: 25
+
+  - key: T26
+    title: 'Authentication Integration'
+    type: Task
+    milestone: M1 - Backend Services
+    iteration: I2
+    priority: p0
+    effort: 3
+    area: backend
+    dependsOn: [T24]
+    github_issue: 26
+
+  - key: T27
+    title: 'Backend Unit Tests (Vitest)'
+    type: Task
+    milestone: M1 - Backend Services
+    iteration:  I2
+    priority: p0
+    effort: 5
+    area: backend
+    dependsOn: [T25]
+    github_issue: 27
+
+  - key: T28
+    title: 'Mock Mode for Backend Services'
+    type: Task
+    milestone: M1 - Backend Services
+    iteration: I2
+    priority: p1
+    effort: 2
+    area: backend
+    dependsOn: [T25]
+    github_issue: 28
+
+  - key: T29
+    title: 'Error Handling Strategy'
+    type: Task
+    milestone: M1 - Backend Services
+    iteration: I2
+    priority: p0
+    effort: 2
+    area: backend
+    dependsOn: []
+    github_issue: 29
+
+  - key: T30
+    title: 'Logging & Observability Setup'
+    type: Task
+    milestone: M1 - Backend Services
+    iteration: I2
+    priority: p0
+    effort: 2
+    area: backend
+    dependsOn: []
+    github_issue: 30
+
+  - key: T31
+    title: 'Query Performance Optimization'
+    type: Task
+    milestone: M1 - Backend Services
+    iteration: I2
+    priority: p1
+    effort: 3
+    area: backend
+    dependsOn: [T24]
+    github_issue: 31
+
+  - key: T32
+    title: 'API Documentation & OpenAPI'
+    type: Task
+    milestone: M1 - Backend Services
+    iteration: I2
+    priority: p1
+    effort: 2
+    area: backend
+    dependsOn: [T25]
+    github_issue: 32
+
+  - key: T33
+    title: 'Code Review & Standards Process'
+    type: Task
+    milestone: M1 - Backend Services
+    iteration: I2
+    priority: p1
+    effort: 1
+    area: backend
+    dependsOn: []
+    github_issue: 33
+
+  - key: T34
+    title: 'Training Data Generation Service'
+    type: Task
+    milestone: M2 - ML Training & Development
+    iteration: I2
+    priority: p1
+    effort: 5
+    area: ml
+    dependsOn: [T21]
+    github_issue: 34
+
+  - key: T35
+    title: 'Active Learning Loop - User Corrections to Training Data'
+    type: Task
+    milestone: M2 - ML Training & Development
+    iteration: I2
+    priority: p2
+    effort: 3
+    area: ml
+    dependsOn: [T34]
+    github_issue: 35
+
+  - key: T36
+    title: 'Dialogue Classification Service - Intent, Tone, Emotion'
+    type: Task
+    milestone: M2 - ML Training & Development
+    iteration: I2
+    priority: p2
+    effort: 5
+    area: ml
+    dependsOn: [T21]
+    github_issue: 36
+
+  # ============================================================
+  # M2 - ML Training & Development: Model Training & Services
+  # ============================================================
+  - key: T37
+    title: 'Wolne Lektury API Integration'
+    type: Feature
+    milestone: M1 - Backend Services
+    iteration: I3
+    priority: p0
+    effort: 3
+    area: ingestion
+    dependsOn: [T25]
+    github_issue: 37
+
+  - key: T38
+    title: 'Book Upload Handler'
+    type: Feature
+    milestone: M1 - Backend Services
+    iteration: I3
+    priority: p0
+    effort: 3
+    area: ingestion
+    dependsOn: [T25]
+    github_issue: 38
+
+  - key: T39
+    title: 'Chapter Extraction & Parsing'
+    type: Feature
+    milestone: M1 - Backend Services
+    iteration: I3
+    priority: p0
+    effort: 5
+    area: ingestion
+    dependsOn: [T38]
+    github_issue: 39
+
+  - key: T40
+    title: 'Text Preprocessing Pipeline'
+    type: Task
+    milestone: M1 - Backend Services
+    iteration: I3
+    priority: p0
+    effort: 5
+    area: ingestion
+    dependsOn: [T39]
+    github_issue: 40
+
+  - key: T41
+    title: 'Scene Extraction Service'
+    type: Feature
+    milestone: M2 - ML Training & Development
+    iteration: I3
+    priority: p0
+    effort: 5
+    area: ml
+    dependsOn: [T40, T21]
+    github_issue: 41
+
+  - key: T42
+    title: 'Character Profiling Service'
+    type: Feature
+    milestone: M2 - ML Training & Development
+    iteration: I3
+    priority: p0
+    effort: 5
+    area: ml
+    dependsOn: [T40, T22]
+    github_issue: 42
+
+  - key: T43
+    title: 'Embedding Generation Service'
+    type: Task
+    milestone: M2 - ML Training & Development
+    iteration: I3
+    priority: p0
+    effort: 3
+    area: ml
+    dependsOn: [T41, T42]
+    github_issue: 43
+
+  - key: T44
+    title: 'Semantic Search Implementation'
+    type: Feature
+    milestone: M1 - Backend Services
+    iteration: I3
+    priority: p0
+    effort: 5
+    area: ingestion
+    dependsOn: [T43]
+    github_issue: 44
+
+  - key: T45
+    title: 'Book Status & Progress Tracking'
+    type: Feature
+    milestone: M1 - Backend Services
+    iteration: I3
+    priority: p0
+    effort: 3
+    area: ingestion
+    dependsOn: [T38]
+    github_issue: 45
+
+  - key: T46
+    title: 'Error Recovery & Retries'
+    type: Task
+    milestone: M1 - Backend Services
+    iteration: I3
+    priority: p0
+    effort: 3
+    area: backend
+    dependsOn: [T29]
+    github_issue: 46
+
+  - key: T47
+    title: 'M2 Integration Testing'
+    type: Task
+    milestone: M1 - Backend Services
+    iteration: I3
+    priority: p0
+    effort: 5
+    area: ingestion
+    dependsOn: [T44, T45, T46]
+    github_issue: 47
+
+  - key: T48
+    title: 'Literary Cultural Context Service'
+    type: Feature
+    milestone: M2 - ML Training & Development
+    iteration: I3
+    priority: p2
+    effort: 5
+    area: ml
+    dependsOn: [T40]
+    github_issue: 48
+
+  - key: T49
+    title: 'Book Timeline Extractor'
+    type: Feature
+    milestone: M2 - ML Training & Development
+    iteration: I3
+    priority: p2
+    effort: 3
+    area: ml
+    dependsOn: [T41]
+    github_issue: 49
+
+  # ============================================================
+  # M3 - Content Generation Pipeline: Image & Prompt Generation
+  # ============================================================
+  - key: T50
+    title: 'Prompt Engineering Service'
+    type: Feature
+    milestone: M3 - Content Generation Pipeline
+    iteration: I4
+    priority: p0
+    effort: 5
+    area: image-gen
+    dependsOn: [T41, T42]
+    github_issue: 50
+
+  - key: T51
+    title: 'Character Description Service'
+    type: Feature
+    milestone: M3 - Content Generation Pipeline
+    iteration: I4
+    priority: p0
+    effort: 3
+    area: image-gen
+    dependsOn: [T42]
+    github_issue: 51
+
+  - key: T52
+    title: 'Batch Image Generation'
+    type: Feature
+    milestone: M3 - Content Generation Pipeline
+    iteration: I4
+    priority: p0
+    effort: 5
+    area: image-gen
+    dependsOn: [T50]
+    github_issue: 52
+
+  - key: T53
+    title: 'Location & Environment Service'
+    type: Feature
+    milestone: M3 - Content Generation Pipeline
+    iteration: I4
+    priority: p0
+    effort: 3
+    area: image-gen
+    dependsOn: [T41]
+    github_issue: 53
+
+  - key: T54
+    title: 'Image Quality Assessment'
+    type: Feature
+    milestone: M3 - Content Generation Pipeline
+    iteration: I4
+    priority: p0
+    effort: 3
+    area: image-gen
+    dependsOn: [T52]
+    github_issue: 54
+
+  - key: T55
+    title: 'Mood & Atmosphere Service'
+    type: Feature
+    milestone: M3 - Content Generation Pipeline
+    iteration: I4
+    priority: p1
+    effort: 3
+    area: image-gen
+    dependsOn: [T41]
+    github_issue: 55
+
+  - key: T56
+    title: 'Prompt Caching & Optimization'
+    type: Task
+    milestone: M3 - Content Generation Pipeline
+    iteration: I4
+    priority: p1
+    effort: 2
+    area: image-gen
+    dependsOn: [T50]
+    github_issue: 56
+
+  - key: T57
+    title: 'Generation Progress Tracking'
+    type: Task
+    milestone: M3 - Content Generation Pipeline
+    iteration: I4
+    priority: p0
+    effort: 2
+    area: image-gen
+    dependsOn: [T52]
+    github_issue: 57
+
+  - key: T58
+    title: 'SDXL LoRA Training'
+    type: Task
+    milestone: M2 - ML Training & Development
+    iteration: I4
+    priority: p1
+    effort: 8
+    area: ml
+    dependsOn: [T52]
+    github_issue: 58
+
+  - key: T59
+    title: 'SDXL Prompt Validation'
+    type: Feature
+    milestone: M3 - Content Generation Pipeline
+    iteration: I4
+    priority: p0
+    effort: 2
+    area: image-gen
+    dependsOn: [T50]
+    github_issue: 59
+
+  - key: T60
+    title: 'M3 Integration Testing'
+    type: Task
+    milestone: M3 - Content Generation Pipeline
+    iteration: I4
+    priority: p0
+    effort: 5
+    area: image-gen
+    dependsOn: [T54, T57, T59]
+    github_issue: 60
+
+  # ============================================================
+  # M4 - Dashboard & UI: Web Interface Components
+  # ============================================================
+  - key: T61
+    title: 'ComfyUI Integration'
+    type: Task
+    milestone: M3 - Content Generation Pipeline
+    iteration: I5
+    priority: p0
+    effort: 5
+    area: comic
+    dependsOn: [T52]
+    github_issue: 61
+
+  - key: T62
+    title: 'Image Enhancement Pipeline'
+    type: Feature
+    milestone: M3 - Content Generation Pipeline
+    iteration: I5
+    priority: p0
+    effort: 3
+    area: comic
+    dependsOn: [T61]
+    github_issue: 62
+
+  - key: T63
+    title: 'Comic Layout & Composition'
+    type: Feature
+    milestone: M5 - Product Assembly
+    iteration: I5
+    priority: p0
+    effort: 5
+    area: comic
+    dependsOn: []
+    github_issue: 63
+
+  - key: T64
+    title: 'Panel Generation'
+    type: Feature
+    milestone: M5 - Product Assembly
+    iteration: I5
+    priority: p0
+    effort: 5
+    area: comic
+    dependsOn: [T62, T63]
+    github_issue: 64
+
+  - key: T65
+    title: 'Comic Metadata'
+    type: Task
+    milestone: M5 - Product Assembly
+    iteration: I5
+    priority: p0
+    effort: 2
+    area: comic
+    dependsOn: []
+    github_issue: 65
+
+  - key: T66
+    title: 'PDF Generation'
+    type: Feature
+    milestone: M5 - Product Assembly
+    iteration: I5
+    priority: p0
+    effort: 5
+    area: comic
+    dependsOn: [T64, T65]
+    github_issue: 66
+
+  - key: T67
+    title: 'Download Manager'
+    type: Feature
+    milestone: M5 - Product Assembly
+    iteration: I5
+    priority: p0
+    effort: 3
+    area: comic
+    dependsOn: [T66]
+    github_issue: 67
+
+  - key: T68
+    title: 'Archive Creation'
+    type: Feature
+    milestone: M5 - Product Assembly
+    iteration: I5
+    priority: p0
+    effort: 2
+    area: comic
+    dependsOn: [T64]
+    github_issue: 68
+
+  - key: T69
+    title: 'Print-Ready Output'
+    type: Feature
+    milestone: M5 - Product Assembly
+    iteration: I5
+    priority: p0
+    effort: 3
+    area: comic
+    dependsOn: [T66]
+    github_issue: 69
+
+  - key: T70
+    title: 'Quality Control Dashboard'
+    type: Feature
+    milestone: M4 - Dashboard & UI
+    iteration: I5
+    priority: p1
+    effort: 3
+    area: comic
+    dependsOn: [T64]
+    github_issue: 70
+
+  - key: T71
+    title: 'M4 Integration Testing'
+    type: Task
+    milestone: M5 - Product Assembly
+    iteration: I5
+    priority: p0
+    effort: 5
+    area: comic
+    dependsOn: [T67, T68, T69]
+    github_issue: 71
+
+  - key: T72
+    title: 'Comic Preview'
+    type: Feature
+    milestone: M4 - Dashboard & UI
+    iteration: I5
+    priority: p1
+    effort: 3
+    area: comic
+    dependsOn: [T64]
+    github_issue: 72
+
+  - key: T73
+    title: 'Variant Generation'
+    type: Feature
+    milestone: M5 - Product Assembly
+    iteration: I5
+    priority: p2
+    effort: 3
+    area: comic
+    dependsOn: [T64]
+    github_issue: 73
+
+  # ============================================================
+  # M5 - Product Assembly: Comic Layout & Export
+  # ============================================================
+  - key: T74
+    title: 'Discord Bot'
+    type: Task
+    milestone: M6 - Commerce & Distribution
+    iteration: I6
+    priority: p1
+    effort: 5
+    area: distribution
+    dependsOn: []
+    github_issue: 74
+
+  - key: T75
+    title: 'Discord Command Handler'
+    type: Task
+    milestone: M6 - Commerce & Distribution
+    iteration: I6
+    priority: p1
+    effort: 3
+    area: distribution
+    dependsOn: [T74]
+    github_issue: 75
+
+  - key: T76
+    title: 'Reddit Integration'
+    type: Task
+    milestone: M6 - Commerce & Distribution
+    iteration: I6
+    priority: p2
+    effort: 3
+    area: distribution
+    dependsOn: []
+    github_issue: 76
+
+  - key: T77
+    title: 'Browser Extension'
+    type: Task
+    milestone: M6 - Commerce & Distribution
+    iteration: I6
+    priority: p1
+    effort: 5
+    area: distribution
+    dependsOn: []
+    github_issue: 77
+
+  - key: T78
+    title: 'Extension Comics Viewer'
+    type: Task
+    milestone: M6 - Commerce & Distribution
+    iteration: I6
+    priority: p1
+    effort: 3
+    area: distribution
+    dependsOn: [T77]
+    github_issue: 78
+
+  - key: T79
+    title: 'WordPress Plugin'
+    type: Task
+    milestone: M6 - Commerce & Distribution
+    iteration: I6
+    priority: p2
+    effort: 5
+    area: distribution
+    dependsOn: []
+    github_issue: 79
+
+  - key: T80
+    title: 'Plugin Content Display'
+    type: Task
+    milestone: M6 - Commerce & Distribution
+    iteration: I6
+    priority: p2
+    effort: 3
+    area: distribution
+    dependsOn: [T79]
+    github_issue: 80
+
+  - key: T81
+    title: 'Social Sharing'
+    type: Task
+    milestone: M6 - Commerce & Distribution
+    iteration: I6
+    priority: p1
+    effort: 2
+    area: distribution
+    dependsOn: []
+    github_issue: 81
+
+  - key: T82
+    title: 'Analytics Tracking'
+    type: Task
+    milestone: M6 - Commerce & Distribution
+    iteration: I6
+    priority: p1
+    effort: 2
+    area: distribution
+    dependsOn: []
+    github_issue: 82
+
+  # ============================================================
+  # M6 - Commerce & Distribution: E-commerce & Social Channels
+  # ============================================================
+  - key: T83
+    title: 'Stripe Integration'
+    type: Feature
+    milestone: M6 - Commerce & Distribution
+    iteration: I6
+    priority: p0
+    effort: 5
+    area: ecommerce
+    dependsOn: [T25]
+    github_issue: 83
+
+  - key: T84
+    title: 'Stripe Webhook Handler'
+    type: Task
+    milestone: M6 - Commerce & Distribution
+    iteration: I6
+    priority: p0
+    effort: 3
+    area: ecommerce
+    dependsOn: [T83]
+    github_issue: 84
+
+  - key: T85
+    title: 'Storefront UI'
+    type: Feature
+    milestone: M6 - Commerce & Distribution
+    iteration: I6
+    priority: p0
+    effort: 5
+    area: ecommerce
+    dependsOn: []
+    github_issue: 85
+
+  - key: T86
+    title: 'Cart Management'
+    type: Feature
+    milestone: M6 - Commerce & Distribution
+    iteration: I6
+    priority: p0
+    effort: 3
+    area: ecommerce
+    dependsOn: [T85]
+    github_issue: 86
+
+  - key: T87
+    title: 'Checkout Flow'
+    type: Feature
+    milestone: M6 - Commerce & Distribution
+    iteration: I6
+    priority: p0
+    effort: 5
+    area: ecommerce
+    dependsOn: [T83, T86]
+    github_issue: 87
+
+  - key: T88
+    title: 'Order Management'
+    type: Feature
+    milestone: M6 - Commerce & Distribution
+    iteration: I6
+    priority: p0
+    effort: 3
+    area: ecommerce
+    dependsOn: [T87]
+    github_issue: 88
+
+  - key: T89
+    title: 'Inventory Tracking'
+    type: Task
+    milestone: M6 - Commerce & Distribution
+    iteration: I6
+    priority: p1
+    effort: 2
+    area: ecommerce
+    dependsOn: [T88]
+    github_issue: 89
+
+  - key: T90
+    title: 'Fulfillment Integration'
+    type: Task
+    milestone: M6 - Commerce & Distribution
+    iteration: I6
+    priority: p1
+    effort: 3
+    area: ecommerce
+    dependsOn: [T88]
+    github_issue: 90
+
+  # ============================================================
+  # M7 - Launch & Release: Production Release
+  # ============================================================
+  - key: T91
+    title: 'Final Integration Testing'
+    type: Task
+    milestone: M7 - Launch & Release
+    iteration: I7
+    priority: p0
+    effort: 5
+    area: release
+    dependsOn: []
+    github_issue: 91
+
+  - key: T92
+    title: 'Production Deployment'
+    type: Task
+    milestone: M7 - Launch & Release
+    iteration: I7
+    priority: p0
+    effort: 3
+    area: release
+    dependsOn: [T91]
+    github_issue: 92
+
+  - key: T93
+    title: 'Launch & Release Notes'
+    type: Task
+    milestone: M7 - Launch & Release
+    iteration: I7
+    priority: p0
+    effort: 2
+    area: release
+    dependsOn: [T92]
+    github_issue: 93

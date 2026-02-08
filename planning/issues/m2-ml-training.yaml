@@ -1,0 +1,3486 @@
+milestone: M2 - ML Training & Development
+task_count: 13
+issues:
+- key: T19
+  title: Dataset Preparation for Dialogue Extraction
+  type: Task
+  milestone: M2 - ML Training & Development
+  iteration: I2
+  priority: p0
+  effort: 5
+  area: ml
+  dependsOn: []
+  agent_notes:
+    research_findings: "**Context:**\nDataset preparation for dialogue extraction\
+      \ is foundational to Morpheus's novel-to-comic transformation pipeline. This\
+      \ task involves creating structured datasets from novel text to train ML models\
+      \ that can identify, classify, and extract character dialogue for comic panel\
+      \ generation. The extracted dialogue data will feed into both the story segmentation\
+      \ and character speech bubble generation systems. This is critical for M2 as\
+      \ it enables the ML models to understand narrative structure and character interactions.\n\
+      \n**Technical Approach:**\nRecommended approach uses a multi-stage pipeline:\
+      \ (1) Text preprocessing with spaCy/NLTK for tokenization and sentence segmentation,\
+      \ (2) Dialogue detection using rule-based patterns combined with transformer-based\
+      \ classification, (3) Character attribution using named entity recognition and\
+      \ coreference resolution, (4) Dataset formatting for training with proper train/validation/test\
+      \ splits. Store processed datasets in Supabase with JSONB columns for flexible\
+      \ schema evolution. Use Hugging Face datasets library for efficient loading\
+      \ and streaming during training.\n\n**AI Suitability Analysis:**\n- High AI\
+      \ effectiveness: Data preprocessing pipelines, regex pattern generation for\
+      \ dialogue detection, test dataset creation, CRUD operations for dataset management,\
+      \ boilerplate ML data loading code\n- Medium AI effectiveness: Integration with\
+      \ Supabase storage, API endpoints for dataset serving, dialogue classification\
+      \ model fine-tuning scripts\n- Low AI effectiveness: Dialogue extraction algorithm\
+      \ design, dataset schema decisions, quality evaluation metrics definition, character\
+      \ attribution logic\n\n**Dependencies:**\n- External: spacy, nltk, transformers,\
+      \ datasets (HuggingFace), pandas, scikit-learn\n- Internal: Supabase client\
+      \ configuration, shared ML utilities, authentication middleware\n\n**Risks:**\n\
+      - Data quality inconsistency: Implement rigorous validation schemas and quality\
+      \ metrics\n- Character misattribution: Use multiple attribution strategies (NER\
+      \ + coreference + speaker patterns)\n- Dataset bias toward specific genres:\
+      \ Ensure diverse novel sources and balanced sampling\n- Storage costs for large\
+      \ datasets: Implement efficient compression and tiered storage\n\n**Complexity\
+      \ Notes:**\nMore complex than initially estimated due to the nuanced nature\
+      \ of dialogue attribution across different writing styles. However, AI assistance\
+      \ will significantly accelerate the data processing pipeline development and\
+      \ test generation. Expect 60-70% of implementation to be AI-friendly boilerplate.\n\
+      \n**Key Files:**\n- packages/ml/src/data/dialogue-extractor.ts: Core extraction\
+      \ logic\n- packages/ml/src/data/dataset-builder.ts: Dataset preparation pipeline\
+      \  \n- packages/backend/src/routes/datasets.ts: API endpoints for dataset management\n\
+      - packages/ml/tests/data/: Comprehensive test suites for data quality\n"
+    design_decisions:
+    - decision: Use hybrid rule-based + ML approach for dialogue detection
+      rationale: Rule-based patterns handle clear cases (quotation marks, dialogue
+        tags) while ML handles edge cases and ambiguous attributions
+      alternatives_considered:
+      - Pure ML approach
+      - Pure rule-based approach
+      ai_implementation_note: AI agent can generate comprehensive regex patterns and
+        implement the rule-based detection logic efficiently
+    - decision: Store datasets in Supabase with JSONB for flexibility
+      rationale: Allows schema evolution without migrations, enables complex queries,
+        integrates with existing auth
+      alternatives_considered:
+      - S3 + metadata DB
+      - Pure file storage
+      ai_implementation_note: AI agent excellent at generating CRUD operations and
+        database schema management code
+    - decision: Use spaCy for NLP preprocessing pipeline
+      rationale: Production-ready, excellent performance, strong NER capabilities,
+        good TypeScript bindings via Python subprocess
+      alternatives_considered:
+      - NLTK
+      - Native JS NLP libraries
+      ai_implementation_note: AI agent can generate Python-Node.js bridge code and
+        error handling
+    researched_at: '2026-02-08T18:32:18.268480'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:14:54.755735'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: ff23c20a
+    planning_hash: 35a3f893
+  technical_notes:
+    approach: 'Implement a three-stage pipeline: (1) Novel text ingestion and cleaning
+      with spaCy preprocessing, (2) Dialogue extraction using quotation pattern matching
+      combined with transformer-based sentence classification, (3) Character attribution
+      via NER and coreference resolution. Store processed datasets in Supabase with
+      proper indexing for ML training access. Create RESTful endpoints for dataset
+      management and streaming during model training.
+
+      '
+    external_dependencies:
+    - name: spacy
+      version: ^3.7.0
+      reason: NLP preprocessing, NER, and linguistic analysis
+    - name: '@huggingface/transformers'
+      version: ^2.17.0
+      reason: Transformer models for dialogue classification
+    - name: natural
+      version: ^6.12.0
+      reason: JavaScript NLP utilities for text processing
+    - name: compromise
+      version: ^14.10.0
+      reason: Lightweight NLP for character name extraction
+    files_to_modify:
+    - path: packages/shared/src/types/index.ts
+      changes: Add DialogueDataset, CharacterAttribution, and DatasetMetadata type
+        definitions
+    - path: packages/backend/src/lib/supabase.ts
+      changes: Add datasets table schema and query helpers for dialogue data
+    new_files:
+    - path: packages/ml/src/data/dialogue-extractor.ts
+      purpose: Core dialogue detection and character attribution logic using spaCy/transformers
+    - path: packages/ml/src/data/dataset-builder.ts
+      purpose: Dataset preparation pipeline with train/val/test splitting and quality
+        validation
+    - path: packages/ml/src/data/preprocessing/text-cleaner.ts
+      purpose: Novel text preprocessing, tokenization, and normalization utilities
+    - path: packages/ml/src/data/validation/quality-metrics.ts
+      purpose: Data quality assessment and validation rule engine
+    - path: packages/backend/src/routes/datasets.ts
+      purpose: RESTful API endpoints for dataset management and streaming
+    - path: packages/ml/src/utils/ml-dataset-loader.ts
+      purpose: HuggingFace datasets integration for efficient ML training data loading
+    - path: supabase/migrations/20240115_create_datasets_table.sql
+      purpose: Database schema for storing processed dialogue datasets with proper
+        indexing
+  acceptance_criteria:
+  - criterion: Novel text successfully processed into structured dialogue datasets
+      with character attribution
+    verification: Run `npm test packages/ml/src/data/dialogue-extractor.test.ts` and
+      verify >90% dialogue detection accuracy on test corpus
+  - criterion: Dataset API endpoints support CRUD operations and streaming for ML
+      training
+    verification: Execute integration tests and verify GET /api/datasets streams data
+      in chunks, POST creates datasets with proper validation
+  - criterion: Processed datasets stored in Supabase with proper indexing and compression
+    verification: Query Supabase datasets table, verify JSONB schema includes dialogue_text,
+      character_id, context fields with btree indexes
+  - criterion: Data quality validation catches common issues (misattributed dialogue,
+      malformed text)
+    verification: Run validation pipeline on corrupted test data and verify 100% detection
+      of quality issues with detailed error reporting
+  - criterion: Pipeline handles multiple novel formats and writing styles without
+      degradation
+    verification: Process test novels from 3+ genres (fantasy, mystery, romance) and
+      maintain >85% dialogue extraction accuracy across all
+  testing:
+    unit_tests:
+    - file: packages/ml/src/data/__tests__/dialogue-extractor.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Standard quoted dialogue extraction
+      - Complex nested quotations and interruptions
+      - Character attribution with pronouns and names
+      - 'Edge cases: single quotes, em-dashes, no attribution'
+    - file: packages/ml/src/data/__tests__/dataset-builder.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Pipeline processing end-to-end
+      - Train/validation/test split generation
+      - Data validation and error handling
+      - Compression and serialization
+    - file: packages/backend/src/__tests__/datasets.test.ts
+      coverage_target: 85%
+      scenarios:
+      - CRUD operations for datasets
+      - Authentication and authorization
+      - Pagination and filtering
+      - Error responses and validation
+    integration_tests:
+    - file: packages/ml/src/__tests__/integration/dialogue-pipeline.test.ts
+      scenarios:
+      - Full novel processing pipeline with Supabase storage
+      - Dataset streaming for ML training workflows
+      - Performance benchmarking with large text files
+    manual_testing:
+    - step: Upload sample novel through API endpoint
+      expected: Dialogue dataset created with proper character attribution and storage
+        in Supabase
+    - step: Stream dataset for model training simulation
+      expected: Data loads efficiently in batches with consistent format
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.65
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Setup spaCy, NLTK, transformers dependencies and basic imports'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Define dialogue dataset schema and character attribution strategy'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement text preprocessing pipeline with spaCy tokenization'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create regex patterns and rule-based dialogue detection'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design character attribution algorithm combining NER + coreference'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Build dataset validation and quality metrics framework'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement Supabase integration with JSONB storage and indexing'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create REST API endpoints for dataset CRUD operations'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate comprehensive unit and integration test suites'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Validate data quality on diverse novel corpus and tune parameters'
+      done: false
+      ai_friendly: false
+- key: T20
+  title: Polish Language Model Selection & Validation
+  type: Task
+  milestone: M2 - ML Training & Development
+  iteration: I2
+  priority: p0
+  effort: 3
+  area: ml
+  dependsOn: []
+  agent_notes:
+    research_findings: "**Context:**\nThis task addresses the critical need to intelligently\
+      \ select and validate language models for different stages of the novel-to-comic\
+      \ transformation pipeline. Different tasks (text summarization, dialogue extraction,\
+      \ scene description, character analysis) may benefit from different models or\
+      \ configurations. The goal is to create a robust model selection system that\
+      \ can dynamically choose the best LLM for each specific task while validating\
+      \ outputs for quality and consistency.\n\n**Technical Approach:**\nImplement\
+      \ a model registry and selection service that can:\n1. Define model capabilities\
+      \ and performance metrics for different task types\n2. Implement a scoring system\
+      \ based on cost, latency, and quality metrics\n3. Create validation pipelines\
+      \ that assess output quality using multiple criteria\n4. Support A/B testing\
+      \ between models for continuous optimization\n5. Integrate with existing OpenAI/Anthropic\
+      \ APIs while allowing for future model additions\n\n**AI Suitability Analysis:**\n\
+      - High AI effectiveness: Model response validation logic, test data generation,\
+      \ API integration boilerplate, configuration file creation, basic scoring algorithms\n\
+      - Medium AI effectiveness: Model performance benchmarking code, validation rule\
+      \ implementations, database schema for model metrics\n- Low AI effectiveness:\
+      \ Model selection strategy design, quality assessment criteria definition, performance\
+      \ weighting decisions, validation rule business logic\n\n**Dependencies:**\n\
+      - External: zod (validation), ioredis (caching model responses), p-queue (rate\
+      \ limiting), @anthropic-ai/sdk, openai\n- Internal: Supabase client, existing\
+      \ ML service infrastructure, logging service, configuration management\n\n**Risks:**\n\
+      - Model API rate limits: Implement intelligent caching and request queuing\n\
+      - Cost explosion from testing multiple models: Set budget limits and sampling\
+      \ strategies  \n- Validation bias: Use diverse validation datasets and multiple\
+      \ assessment criteria\n- Model availability changes: Abstract model interfaces\
+      \ and maintain fallback options\n\n**Complexity Notes:**\nInitially appears\
+      \ straightforward but complexity increases with validation sophistication. AI\
+      \ agents can significantly accelerate the configuration management and basic\
+      \ validation logic, but human judgment crucial for defining quality metrics\
+      \ and selection criteria. Estimate 20-30% faster delivery with AI assistance.\n\
+      \n**Key Files:**\n- apps/backend/src/services/ml/model-selector.ts: Core selection\
+      \ logic\n- apps/backend/src/services/ml/model-validator.ts: Output validation\
+      \ service\n- apps/backend/src/config/models.ts: Model registry configuration\n\
+      - packages/shared/src/types/ml.ts: Model and validation type definitions\n"
+    design_decisions:
+    - decision: Plugin-based model registry with scoring system
+      rationale: Allows easy addition of new models and customizable selection criteria
+        without code changes
+      alternatives_considered:
+      - Hard-coded model selection
+      - Simple round-robin approach
+      - External model management service
+      ai_implementation_note: AI can generate plugin boilerplate and scoring algorithm
+        implementations
+    - decision: Multi-tier validation with configurable thresholds
+      rationale: Enables quality control while allowing flexibility for different
+        use cases and quality requirements
+      alternatives_considered:
+      - Single validation rule
+      - Manual validation only
+      - No validation
+      ai_implementation_note: AI excellent for generating validation test cases and
+        threshold configuration logic
+    - decision: Redis-based caching with TTL for model responses
+      rationale: Reduces API costs and latency for repeated similar requests while
+        ensuring freshness
+      alternatives_considered:
+      - No caching
+      - Database caching
+      - In-memory only
+      ai_implementation_note: AI can implement entire caching layer including cache
+        key strategies
+    researched_at: '2026-02-08T18:32:42.574110'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:15:20.412671'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 8dc2f7a6
+    planning_hash: 0e92b400
+  technical_notes:
+    approach: 'Create a ModelSelector service that maintains a registry of available
+      models with their capabilities, costs, and performance metrics. Implement a
+      scoring algorithm that weighs factors like quality, speed, and cost to select
+      optimal models for each task type. Build a validation pipeline that assesses
+      outputs using configurable criteria (coherence, relevance, format compliance).
+      Cache validated results to minimize redundant API calls and costs.
+
+      '
+    external_dependencies:
+    - name: zod
+      version: ^3.22.4
+      reason: Runtime validation of model outputs and configuration schemas
+    - name: ioredis
+      version: ^5.3.2
+      reason: Caching model responses and validation results
+    - name: p-queue
+      version: ^7.4.1
+      reason: Rate limiting and queuing model API requests
+    - name: '@anthropic-ai/sdk'
+      version: ^0.17.1
+      reason: Enhanced Anthropic Claude API integration
+    files_to_modify:
+    - path: packages/shared/src/types/ml.ts
+      changes: Add ModelCapabilities, TaskType, ValidationCriteria, and ModelMetrics
+        interfaces
+    - path: apps/backend/src/services/ml/index.ts
+      changes: Export new ModelSelector and ModelValidator services
+    new_files:
+    - path: apps/backend/src/services/ml/model-selector.ts
+      purpose: Core service for intelligent model selection based on task requirements
+        and performance metrics
+    - path: apps/backend/src/services/ml/model-validator.ts
+      purpose: Output validation service with configurable quality assessment criteria
+    - path: apps/backend/src/config/models.ts
+      purpose: Model registry configuration with capabilities, costs, and performance
+        baselines
+    - path: apps/backend/src/services/ml/model-registry.ts
+      purpose: Dynamic model registry management with performance tracking
+    - path: apps/backend/src/utils/model-scoring.ts
+      purpose: Scoring algorithms for model selection based on cost/quality/latency
+    - path: apps/backend/src/middleware/model-rate-limiter.ts
+      purpose: Rate limiting middleware for model API calls with queue management
+    - path: apps/backend/database/migrations/001_model_metrics.sql
+      purpose: Database schema for storing model performance metrics and validation
+        results
+  acceptance_criteria:
+  - criterion: Model selection service can dynamically choose optimal models for different
+      task types (summarization, dialogue extraction, scene description, character
+      analysis)
+    verification: Unit tests verify ModelSelector.selectModel() returns expected model
+      for each task type with confidence scores
+  - criterion: Validation pipeline assesses output quality with configurable criteria
+      and produces quality scores between 0-100
+    verification: Integration tests confirm ModelValidator.validateOutput() produces
+      consistent scores for same input across multiple runs
+  - criterion: System supports A/B testing between models with performance tracking
+      and cost monitoring
+    verification: Manual verification of model comparison dashboard showing cost/latency/quality
+      metrics over time
+  - criterion: Model registry maintains fallback options and gracefully handles model
+      unavailability
+    verification: Integration tests simulate API failures and verify fallback model
+      selection works correctly
+  - criterion: Caching system reduces API costs by 60%+ for repeated similar requests
+    verification: Performance tests demonstrate cache hit rates and cost reduction
+      metrics in test environment
+  testing:
+    unit_tests:
+    - file: apps/backend/src/services/ml/__tests__/model-selector.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Model selection for each task type
+      - Scoring algorithm with different weights
+      - Fallback selection when primary model unavailable
+      - Cost limit enforcement
+    - file: apps/backend/src/services/ml/__tests__/model-validator.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Output validation for different content types
+      - Quality scoring consistency
+      - Format compliance checks
+      - Invalid response handling
+    - file: apps/backend/src/config/__tests__/models.test.ts
+      coverage_target: 95%
+      scenarios:
+      - Model registry configuration loading
+      - Model capability validation
+      - Schema compliance checks
+    integration_tests:
+    - file: apps/backend/src/__tests__/integration/model-selection-flow.test.ts
+      scenarios:
+      - End-to-end model selection and validation pipeline
+      - Cache integration with Redis
+      - Rate limiting with p-queue
+      - Multi-model comparison workflow
+    manual_testing:
+    - step: Submit text for summarization task through API
+      expected: System selects appropriate model (GPT-4 or Claude) and returns validated
+        summary with quality score
+    - step: Monitor model performance dashboard over 1 week
+      expected: Cost tracking, latency metrics, and quality scores populate correctly
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.7
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create type definitions for model interfaces and validation criteria
+        in packages/shared/src/types/ml.ts'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Define model selection strategy and quality assessment criteria
+        weights'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement model registry configuration with initial model definitions'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build ModelSelector service with scoring algorithm implementation'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create ModelValidator service with configurable validation rules'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement caching layer with Redis integration for model responses'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Add rate limiting middleware using p-queue for API calls'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate comprehensive unit tests for all service methods'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create database migration for model metrics tracking'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Review model selection logic and validation criteria for business
+        requirements'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Write integration tests for end-to-end model selection pipeline'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Validate model performance baselines and adjust scoring weights'
+      done: false
+      ai_friendly: false
+- key: T21
+  title: Dialogue Extraction Model Training
+  type: Task
+  milestone: M2 - ML Training & Development
+  iteration: I2
+  priority: p0
+  effort: 8
+  area: ml
+  dependsOn:
+  - T19
+  - T20
+  agent_notes:
+    research_findings: '**Context:**
+
+      Dialogue extraction is critical for novel-to-comic transformation as it identifies
+      and structures conversational elements that become speech bubbles. This task
+      involves training a custom model to accurately extract dialogue lines, speaker
+      identification, and emotional context from novel text. This is needed because
+      generic NLP models often miss nuanced dialogue patterns, attribution complexities,
+      and the specific formatting required for comic panel generation. The business
+      value is enabling accurate character speech bubble generation with proper speaker
+      attribution and emotional tone.
+
+
+      **Technical Approach:**
+
+      Recommended approach uses fine-tuning strategies on transformer models (BERT/RoBERTa
+      for classification, T5/FLAN-T5 for generation) with custom training data. Architecture
+      should include: 1) Data preprocessing pipeline for dialogue annotation, 2) Multi-task
+      learning for dialogue detection + speaker identification + emotion classification,
+      3) Model training infrastructure using Hugging Face Transformers, 4) Model evaluation
+      and validation pipeline, 5) Integration with existing Morpheus ML pipeline via
+      RunPod or local inference. Consider using spaCy for preprocessing, Weights &
+      Biases for experiment tracking, and MLflow for model versioning.
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: Data preprocessing scripts, model training boilerplate,
+      evaluation metrics implementation, API integration code, unit tests for data
+      pipelines, Docker containerization
+
+      - Medium AI effectiveness: Custom loss function implementation, data augmentation
+      strategies, hyperparameter tuning scripts, model serving endpoints
+
+      - Low AI effectiveness: Training data annotation guidelines, model architecture
+      design decisions, evaluation criteria definition, dialogue pattern analysis,
+      domain-specific feature engineering
+
+
+      **Dependencies:**
+
+      - External: transformers, torch, datasets, tokenizers, wandb, mlflow, spacy,
+      scikit-learn, numpy, pandas
+
+      - Internal: Existing ML service architecture, RunPod integration, novel preprocessing
+      pipeline, comic generation service API
+
+
+      **Risks:**
+
+      - Training data quality: Implement robust annotation guidelines and inter-annotator
+      agreement metrics
+
+      - Model overfitting: Use cross-validation, early stopping, and diverse training
+      data sources
+
+      - Inference latency: Optimize model size vs accuracy tradeoff, consider distillation
+      for production
+
+      - Integration complexity: Design clear API contracts between dialogue extraction
+      and comic generation services
+
+      - Computational costs: Monitor training costs and implement efficient batch
+      processing
+
+
+      **Complexity Notes:**
+
+      More complex than initially estimated due to multi-modal nature (dialogue +
+      speaker + emotion). However, AI assistance will significantly accelerate implementation
+      of training pipelines and boilerplate code. The complexity lies in data preparation
+      and model architecture decisions, not implementation mechanics.
+
+
+      **Key Files:**
+
+      - packages/ml-service/src/dialogue/: New service directory for dialogue extraction
+
+      - packages/ml-service/src/training/: Training pipeline implementation
+
+      - packages/ml-service/src/models/: Model definitions and loading utilities
+
+      - packages/ml-service/config/training.yaml: Training configuration
+
+      - packages/shared/types/dialogue.ts: Shared TypeScript interfaces
+
+      '
+    design_decisions:
+    - decision: Use multi-task learning with shared encoder for dialogue detection,
+        speaker identification, and emotion classification
+      rationale: Shared representations improve performance on related tasks and reduce
+        model size compared to separate models
+      alternatives_considered:
+      - Separate models for each task
+      - Pipeline approach with sequential models
+      - End-to-end generation model
+      ai_implementation_note: AI can generate the multi-head model architecture, loss
+        function weighting, and training loop boilerplate
+    - decision: Fine-tune RoBERTa-base as the foundation model
+      rationale: Strong performance on text classification tasks, reasonable size
+        for fine-tuning, good dialogue understanding capabilities
+      alternatives_considered:
+      - BERT-base
+      - DistilBERT for speed
+      - T5 for generation approach
+      - Custom transformer architecture
+      ai_implementation_note: AI can implement the fine-tuning setup, tokenization,
+        and model configuration
+    - decision: Create custom dataset format with dialogue spans, speaker labels,
+        and emotion annotations
+      rationale: Enables precise training targets and evaluation metrics, supports
+        multi-task learning objectives
+      alternatives_considered:
+      - IOB tagging format
+      - JSON conversation format
+      - Simple text classification labels
+      ai_implementation_note: AI can generate data loading, preprocessing, and augmentation
+        code once format is defined
+    researched_at: '2026-02-08T18:33:10.835554'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:15:53.069263'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 5b39b416
+    planning_hash: 98b5d55a
+  technical_notes:
+    approach: 'Implement a multi-task transformer-based model fine-tuned on novel
+      dialogue data. Create training pipeline using Hugging Face ecosystem with custom
+      dataset preparation, model training with mixed objectives (detection + classification),
+      and integration with existing Morpheus ML infrastructure. Deploy via RunPod
+      with optimized inference endpoints. Include comprehensive evaluation suite and
+      experiment tracking for iterative improvement.
+
+      '
+    external_dependencies:
+    - name: transformers
+      version: ^4.35.0
+      reason: Hugging Face transformers library for model fine-tuning and inference
+    - name: torch
+      version: ^2.1.0
+      reason: PyTorch backend for model training and inference
+    - name: datasets
+      version: ^2.14.0
+      reason: Hugging Face datasets library for data loading and processing
+    - name: wandb
+      version: ^0.16.0
+      reason: Experiment tracking and hyperparameter optimization
+    - name: spacy
+      version: ^3.7.0
+      reason: Text preprocessing and linguistic feature extraction
+    - name: scikit-learn
+      version: ^1.3.0
+      reason: Evaluation metrics and data splitting utilities
+    files_to_modify:
+    - path: packages/ml-service/src/config/models.yaml
+      changes: Add dialogue extraction model configuration section
+    - path: packages/ml-service/src/api/routes.py
+      changes: Add dialogue extraction endpoints
+    - path: packages/ml-service/requirements.txt
+      changes: Add transformers, datasets, wandb, mlflow dependencies
+    - path: packages/shared/types/dialogue.ts
+      changes: Define TypeScript interfaces for dialogue extraction response
+    new_files:
+    - path: packages/ml-service/src/dialogue/preprocessor.py
+      purpose: Handle dialogue annotation, tokenization, and data preparation
+    - path: packages/ml-service/src/dialogue/model.py
+      purpose: Define transformer-based multi-task dialogue extraction model
+    - path: packages/ml-service/src/dialogue/dataset.py
+      purpose: Custom dataset class for dialogue training data loading
+    - path: packages/ml-service/src/dialogue/inference.py
+      purpose: Optimized inference pipeline for production use
+    - path: packages/ml-service/src/training/dialogue_trainer.py
+      purpose: Training orchestration with experiment tracking and validation
+    - path: packages/ml-service/src/training/config/dialogue_training.yaml
+      purpose: Training hyperparameters and model configuration
+    - path: packages/ml-service/src/utils/dialogue_metrics.py
+      purpose: Custom evaluation metrics for multi-task dialogue extraction
+    - path: packages/ml-service/data/dialogue_samples.jsonl
+      purpose: Sample training data with annotations for development
+    - path: packages/ml-service/scripts/prepare_training_data.py
+      purpose: Data preparation and annotation validation script
+    - path: packages/ml-service/docker/dialogue-training.Dockerfile
+      purpose: Containerized training environment with GPU support
+    - path: packages/ml-service/docs/dialogue-extraction.md
+      purpose: Comprehensive documentation for model and API usage
+  acceptance_criteria:
+  - criterion: Dialogue extraction model achieves >85% F1 score on test dataset for
+      dialogue detection, speaker identification, and emotion classification
+    verification: 'Run evaluation script: python packages/ml-service/src/training/evaluate.py
+      --test-split and check metrics.json output'
+  - criterion: Model inference endpoint responds within 2 seconds for novel chapters
+      up to 5000 words
+    verification: Performance test via packages/ml-service/tests/performance/dialogue_inference_test.py
+      with sample chapters
+  - criterion: Training pipeline supports configurable hyperparameters and experiment
+      tracking via W&B
+    verification: Execute training with different configs and verify W&B dashboard
+      shows tracked experiments
+  - criterion: Service integrates with existing ML pipeline and exposes REST API for
+      dialogue extraction
+    verification: Integration test hits /api/ml/dialogue/extract endpoint and validates
+      response schema
+  - criterion: Comprehensive documentation covers model architecture, training process,
+      and API usage
+    verification: Check packages/ml-service/docs/dialogue-extraction.md contains setup,
+      usage, and troubleshooting sections
+  testing:
+    unit_tests:
+    - file: packages/ml-service/tests/unit/dialogue/test_preprocessor.py
+      coverage_target: 90%
+      scenarios:
+      - Text tokenization and dialogue annotation
+      - Speaker attribution parsing
+      - Emotion label encoding/decoding
+      - Batch processing with padding
+    - file: packages/ml-service/tests/unit/dialogue/test_model.py
+      coverage_target: 85%
+      scenarios:
+      - Model forward pass with valid inputs
+      - Multi-task loss computation
+      - Model serialization/deserialization
+      - Inference output format validation
+    - file: packages/ml-service/tests/unit/training/test_trainer.py
+      coverage_target: 85%
+      scenarios:
+      - Training step execution
+      - Evaluation metrics calculation
+      - Checkpoint saving/loading
+      - Early stopping logic
+    integration_tests:
+    - file: packages/ml-service/tests/integration/test_dialogue_pipeline.py
+      scenarios:
+      - End-to-end training pipeline execution
+      - Model serving via RunPod integration
+      - API request/response validation
+      - Error handling for malformed inputs
+    - file: packages/ml-service/tests/integration/test_ml_service_integration.py
+      scenarios:
+      - Integration with existing novel processing pipeline
+      - Database persistence of extracted dialogues
+      - Cross-service communication with comic generation
+    manual_testing:
+    - step: Upload sample novel chapter via admin interface
+      expected: Dialogue extraction completes with structured output showing speakers,
+        emotions, and dialogue text
+    - step: Monitor training progress in W&B dashboard during model training
+      expected: Loss curves, metrics, and system resources are tracked correctly
+    - step: Test model performance on different novel genres (fantasy, romance, mystery)
+      expected: Consistent accuracy across genres with appropriate speaker attribution
+  estimates:
+    development: 4.5
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7.5
+    ai_acceleration_factor: 0.55
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Setup project structure and create base Python files with imports
+        and class skeletons'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement data preprocessing pipeline with tokenization and annotation
+        handling'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design multi-task model architecture and define training objectives'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement model class using Hugging Face transformers with multi-task
+        heads'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create custom dataset class with proper batching and collation functions'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build training pipeline with W&B integration and checkpoint management'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Prepare and annotate training dataset with dialogue examples
+        and quality validation'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement evaluation metrics calculation and model performance tracking'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create REST API endpoints for dialogue extraction service'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Write comprehensive unit tests for all components with high coverage'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement integration tests for end-to-end pipeline functionality'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create Docker containerization for training and inference environments'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Conduct model training experiments and hyperparameter tuning'
+      done: false
+      ai_friendly: false
+    - task: '[HUMAN] Review model performance, validate results, and conduct final
+        integration testing'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Generate comprehensive documentation with API references and usage
+        examples'
+      done: false
+      ai_friendly: true
+- key: T22
+  title: Character Extraction Training (Named Entity Recognition)
+  type: Task
+  milestone: M2 - ML Training & Development
+  iteration: I2
+  priority: p0
+  effort: 5
+  area: ml
+  dependsOn:
+  - T19
+  - T20
+  agent_notes:
+    research_findings: '**Context:**
+
+      Character extraction is fundamental to Morpheus''s novel-to-comic transformation
+      pipeline. When users upload novels, the system must identify and extract character
+      information (names, descriptions, relationships, personalities) to generate
+      consistent visual representations across comic panels. This task involves training
+      a Named Entity Recognition (NER) model specifically optimized for literary character
+      extraction, going beyond basic person name detection to understand character
+      attributes, aliases, and contextual relationships within narrative text.
+
+
+      **Technical Approach:**
+
+      Recommend a hybrid approach using spaCy 3.x as the core NER framework with custom
+      pipeline components. Create training datasets from public domain literature
+      with character annotations. Use transfer learning from pre-trained models (en_core_web_trf)
+      and fine-tune with literature-specific character data. Implement active learning
+      pipeline where the model improves from user corrections. Deploy as a microservice
+      that can be called during novel processing, with caching layer for processed
+      text chunks. Consider using Hugging Face Transformers for comparison benchmarking
+      against spaCy results.
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: Data preprocessing scripts, evaluation metrics implementation,
+      REST API boilerplate, unit tests for data validation, training pipeline orchestration
+      code
+
+      - Medium AI effectiveness: Custom spaCy component development, model evaluation
+      analysis, integration with existing ML pipeline, data annotation tooling
+
+      - Low AI effectiveness: Training data annotation strategy, model architecture
+      decisions, hyperparameter tuning strategy, active learning feedback loop design
+
+
+      **Dependencies:**
+
+      - External: spacy[transformers], datasets, wandb, pydantic, redis (caching),
+      torch/tensorflow
+
+      - Internal: Existing ML pipeline service, novel text preprocessing service,
+      character database schema, authentication middleware
+
+
+      **Risks:**
+
+      - Training data quality: Mitigate with diverse literature sources and multiple
+      annotators
+
+      - Model drift over time: Implement continuous evaluation and retraining pipeline
+
+      - Performance on different literary genres: Create genre-specific evaluation
+      sets
+
+      - Character disambiguation (same name, different characters): Use contextual
+      embeddings and relationship graphs
+
+      - Scaling training compute: Use RunPod integration for distributed training
+
+
+      **Complexity Notes:**
+
+      More complex than initial estimate due to literature-specific challenges (archaic
+      names, fictional entities, narrative structure). However, AI agents will significantly
+      accelerate data pipeline development and testing infrastructure. Estimate 40%
+      velocity boost from AI assistance on boilerplate and testing code.
+
+
+      **Key Files:**
+
+      - apps/ml-service/src/ner/: New service directory
+
+      - apps/ml-service/src/ner/training.py: Training pipeline
+
+      - apps/ml-service/src/ner/inference.py: Character extraction API
+
+      - apps/ml-service/src/models/character.py: Character entity models
+
+      - packages/shared/src/types/character.ts: TypeScript character types
+
+      - apps/ml-service/tests/ner/: Comprehensive test suite
+
+      '
+    design_decisions:
+    - decision: Use spaCy 3.x with custom pipeline components over pure Transformer
+        models
+      rationale: Better production performance, easier deployment, extensible architecture
+        for adding character relationship detection later
+      alternatives_considered:
+      - Hugging Face Transformers only
+      - Custom PyTorch implementation
+      - Cloud ML APIs
+      ai_implementation_note: AI can generate spaCy pipeline boilerplate, training
+        loops, and evaluation metrics efficiently
+    - decision: Implement active learning feedback loop with user corrections
+      rationale: Character extraction quality improves with domain-specific feedback
+        from actual novel processing
+      alternatives_considered:
+      - Static model training only
+      - Periodic retraining without feedback
+      ai_implementation_note: AI excellent for feedback collection APIs and retraining
+        orchestration logic
+    - decision: Deploy as separate microservice with Redis caching
+      rationale: Character extraction is computationally expensive and results are
+        reusable across comic generation phases
+      alternatives_considered:
+      - Inline processing
+      - Database-only caching
+      - In-memory caching
+      ai_implementation_note: AI can scaffold entire microservice structure and caching
+        logic
+    researched_at: '2026-02-08T18:33:40.018018'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:16:25.591648'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 43a41809
+    planning_hash: 52dca745
+  technical_notes:
+    approach: 'Build a spaCy-based NER pipeline with custom character entity types
+      (CHAR_NAME, CHAR_DESC, CHAR_ALIAS). Create training dataset by annotating public
+      domain novels with character information using prodigy or custom annotation
+      tools. Train custom model using spaCy''s training API with transfer learning
+      from transformer base models. Deploy as FastAPI microservice integrated with
+      existing ML pipeline, using Redis for caching extracted characters per text
+      chunk. Implement feedback collection API for continuous model improvement.
+
+      '
+    external_dependencies:
+    - name: spacy[transformers]
+      version: ^3.7.0
+      reason: Core NER framework with transformer support for character extraction
+    - name: datasets
+      version: ^2.14.0
+      reason: Efficient training data loading and preprocessing for literature datasets
+    - name: wandb
+      version: ^0.16.0
+      reason: Training experiment tracking and model performance monitoring
+    - name: redis
+      version: ^4.6.0
+      reason: Caching extracted character data to avoid reprocessing text chunks
+    - name: prodigy
+      version: ^1.14.0
+      reason: 'Optional: Professional annotation tool for creating high-quality training
+        data'
+    files_to_modify:
+    - path: apps/ml-service/src/api/routes.py
+      changes: Add character extraction endpoints and integrate with existing ML pipeline
+        routes
+    - path: apps/ml-service/src/config/settings.py
+      changes: Add NER model configuration, Redis settings, and training hyperparameters
+    - path: packages/shared/src/types/ml.ts
+      changes: Add character extraction request/response TypeScript interfaces
+    new_files:
+    - path: apps/ml-service/src/ner/models/character_extractor.py
+      purpose: Core spaCy NER pipeline with custom character entity components
+    - path: apps/ml-service/src/ner/training/trainer.py
+      purpose: Training orchestration with transfer learning and active learning integration
+    - path: apps/ml-service/src/ner/training/data_preparation.py
+      purpose: Literature dataset preprocessing and annotation format conversion
+    - path: apps/ml-service/src/ner/inference/character_service.py
+      purpose: FastAPI service for character extraction with Redis caching
+    - path: apps/ml-service/src/ner/evaluation/metrics.py
+      purpose: Model performance evaluation and benchmarking against baseline models
+    - path: apps/ml-service/src/ner/utils/text_processing.py
+      purpose: Literature-specific text preprocessing and character context analysis
+    - path: apps/ml-service/src/models/character_entity.py
+      purpose: Pydantic models for character entities and extraction results
+    - path: apps/ml-service/src/ner/feedback/active_learner.py
+      purpose: Active learning pipeline for continuous model improvement from user
+        feedback
+    - path: apps/ml-service/data/training/literature_annotations.json
+      purpose: Training dataset with annotated character entities from public domain
+        novels
+    - path: apps/ml-service/models/ner/character_model/
+      purpose: Directory for trained spaCy model artifacts and configuration
+  acceptance_criteria:
+  - criterion: NER model extracts character names with >85% F1 score on literature
+      test set
+    verification: Run `python -m pytest apps/ml-service/tests/ner/test_model_performance.py::test_character_extraction_accuracy`
+      and check metrics output
+  - criterion: Character extraction API responds within 2 seconds for 10KB text chunks
+    verification: Load test using `apps/ml-service/tests/ner/test_performance.py::test_api_response_time`
+      with sample novel chapters
+  - criterion: System distinguishes between different characters with same names using
+      contextual analysis
+    verification: Run disambiguation test with `apps/ml-service/tests/ner/test_disambiguation.py`
+      using prepared test cases with duplicate character names
+  - criterion: Active learning pipeline accepts user corrections and improves model
+      performance
+    verification: Execute feedback integration test in `apps/ml-service/tests/ner/test_active_learning.py`
+      showing model improvement after corrections
+  - criterion: Character extraction microservice integrates with novel processing
+      pipeline
+    verification: End-to-end test in `apps/ml-service/tests/integration/test_novel_processing.py`
+      processes complete novel and returns structured character data
+  testing:
+    unit_tests:
+    - file: apps/ml-service/tests/ner/test_character_extractor.py
+      coverage_target: 90%
+      scenarios:
+      - Extract single character from simple text
+      - Handle multiple characters in complex narrative
+      - Process archaic names and fictional entities
+      - Error handling for malformed input
+      - Character alias detection and linking
+    - file: apps/ml-service/tests/ner/test_training_pipeline.py
+      coverage_target: 85%
+      scenarios:
+      - Training data validation and preprocessing
+      - Model training with custom spaCy components
+      - Transfer learning from pre-trained models
+      - Training metrics calculation and logging
+    - file: apps/ml-service/tests/ner/test_inference_api.py
+      coverage_target: 88%
+      scenarios:
+      - FastAPI endpoint validation
+      - Request/response serialization
+      - Redis caching behavior
+      - Error responses for invalid inputs
+    integration_tests:
+    - file: apps/ml-service/tests/integration/test_ner_pipeline.py
+      scenarios:
+      - Complete character extraction workflow from novel upload to character database
+      - Feedback loop integration with user corrections
+      - Performance under concurrent requests
+    - file: apps/ml-service/tests/integration/test_model_serving.py
+      scenarios:
+      - Model loading and inference in production environment
+      - Redis cache integration with character data persistence
+    manual_testing:
+    - step: Upload Project Gutenberg novel through web interface
+      expected: Character extraction completes with identified characters displayed
+        in dashboard
+    - step: Correct misidentified character name through UI feedback
+      expected: System accepts correction and shows improved results on similar text
+    - step: Process novels from different genres (fantasy, romance, mystery)
+      expected: Consistent character extraction quality across literary genres
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.6
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Setup project structure and install dependencies (spacy, transformers,
+        redis, datasets)'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design character entity taxonomy and annotation schema for literature
+        domain'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement data preparation pipeline for converting literature texts
+        to spaCy training format'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Curate and annotate training dataset from Project Gutenberg novels
+        with character entities'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Build custom spaCy pipeline with character-specific NER components
+        and entity ruler'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement training orchestration with transfer learning from en_core_web_trf'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Tune hyperparameters and evaluate model performance on validation
+        set'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Create FastAPI inference service with Redis caching and request
+        validation'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement active learning feedback collection and model retraining
+        pipeline'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Write comprehensive test suite covering unit, integration, and performance
+        tests'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Conduct end-to-end validation with diverse literature samples
+        and review model outputs'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Generate API documentation and integration examples for character
+        extraction service'
+      done: false
+      ai_friendly: true
+- key: T34
+  title: Training Data Generation Service
+  type: Task
+  milestone: M2 - ML Training & Development
+  iteration: I2
+  priority: p1
+  effort: 5
+  area: ml
+  dependsOn:
+  - T21
+  agent_notes:
+    research_findings: '**Context:**
+
+      Training Data Generation Service is critical for fine-tuning Morpheus''s ML
+      models (LLMs for script generation, Stable Diffusion for visual consistency).
+      This service automatically generates high-quality training datasets by:
+
+      1. Processing existing novels/comics to create script-to-panel mappings
+
+      2. Generating synthetic training data for edge cases
+
+      3. Creating prompt-image pairs for character/style consistency
+
+      4. Augmenting datasets with variations (lighting, angles, expressions)
+
+
+      Business value: Improves comic quality, reduces manual curation, enables personalized
+      model fine-tuning per user preference.
+
+
+      **Technical Approach:**
+
+      - Queue-based processing (BullMQ) for long-running generation tasks
+
+      - Separate worker processes for CPU-intensive operations
+
+      - Streaming responses for real-time progress updates
+
+      - MinIO/S3 for training data storage with metadata in PostgreSQL
+
+      - Validation pipeline to ensure data quality before training
+
+      - Integration with existing RunPod Stable Diffusion pipeline
+
+      - RESTful API for triggering generation + WebSocket for progress
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: CRUD operations for training data management, API route
+      boilerplate, database schema migrations, test suites, data validation schemas
+
+      - Medium AI effectiveness: Queue worker implementation, file processing pipelines,
+      integration with existing ML services
+
+      - Low AI effectiveness: Training data quality assessment algorithms, prompt
+      engineering strategies, ML model evaluation metrics
+
+
+      **Dependencies:**
+
+      - External: BullMQ, ioredis, @supabase/storage-js, sharp (image processing),
+      pdf-parse (novel processing)
+
+      - Internal: Existing RunPod integration, Supabase database, authentication middleware,
+      ML service abstractions
+
+
+      **Risks:**
+
+      - Storage costs: Generate massive datasets; mitigate with compression + lifecycle
+      policies
+
+      - Processing time: Complex generation takes hours; mitigate with progress tracking
+      + resumable jobs
+
+      - Data quality: Poor training data degrades models; mitigate with validation
+      pipeline
+
+      - Memory usage: Large image processing; mitigate with streaming + worker isolation
+
+
+      **Complexity Notes:**
+
+      Higher complexity than initially estimated due to:
+
+      - Need for robust queue system with failure recovery
+
+      - Complex data validation requirements
+
+      - Integration with multiple ML services
+
+      AI will significantly accelerate CRUD and boilerplate (60% of work), but core
+      algorithms require careful human design.
+
+
+      **Key Files:**
+
+      - apps/backend/src/services/training-data.ts: Core service logic
+
+      - apps/backend/src/workers/data-generation.ts: Queue worker implementation
+
+      - apps/backend/src/routes/training-data.ts: API endpoints
+
+      - packages/database/migrations/: Training data schema
+
+      - apps/dashboard/src/pages/training-data/: Admin interface
+
+      '
+    design_decisions:
+    - decision: Use BullMQ with Redis for job queue management
+      rationale: Training data generation is CPU-intensive and long-running, requires
+        progress tracking, retry logic, and horizontal scaling
+      alternatives_considered:
+      - Direct processing
+      - AWS SQS
+      - Celery-like custom queue
+      ai_implementation_note: AI can generate complete queue setup, job definitions,
+        and worker boilerplate from patterns
+    - decision: Separate training data storage from application database
+      rationale: Training datasets are large, have different access patterns, and
+        need lifecycle management
+      alternatives_considered:
+      - Store everything in PostgreSQL
+      - Local filesystem
+      ai_implementation_note: AI can implement S3/MinIO integration and metadata management
+        CRUD operations
+    - decision: Streaming API with WebSocket progress updates
+      rationale: Users need real-time feedback on long-running generation processes
+      alternatives_considered:
+      - Polling-based status
+      - Email notifications only
+      ai_implementation_note: AI can scaffold WebSocket handlers and progress tracking
+        from existing patterns
+    researched_at: '2026-02-08T18:34:05.916555'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:16:55.324372'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: c4cd95f1
+    planning_hash: 497e3661
+  technical_notes:
+    approach: 'Build a microservice architecture with API endpoints for triggering
+      training data generation, BullMQ workers for processing, and WebSocket connections
+      for progress updates. Implement data validation pipelines to ensure quality
+      before storage. Use existing Supabase infrastructure for metadata and MinIO
+      for binary storage. Create admin dashboard for monitoring and manual data curation.
+
+      '
+    external_dependencies:
+    - name: bullmq
+      version: ^5.0.0
+      reason: Robust Redis-based job queue with progress tracking and retry logic
+    - name: ioredis
+      version: ^5.3.0
+      reason: Redis client for BullMQ and caching
+    - name: sharp
+      version: ^0.33.0
+      reason: High-performance image processing for data augmentation
+    - name: pdf-parse
+      version: ^1.1.1
+      reason: Extract text from PDF novels for script generation training data
+    - name: '@aws-sdk/client-s3'
+      version: ^3.450.0
+      reason: Store training datasets in S3-compatible storage (MinIO)
+    files_to_modify:
+    - path: apps/backend/src/lib/supabase.ts
+      changes: Add training data storage bucket configuration
+    - path: apps/backend/src/middleware/auth.ts
+      changes: Add admin role check for training data endpoints
+    - path: packages/database/supabase/migrations/20240115000000_training_data.sql
+      changes: Create training_data, training_jobs, data_validation_results tables
+    new_files:
+    - path: apps/backend/src/services/training-data.ts
+      purpose: Core training data generation orchestration service
+    - path: apps/backend/src/workers/data-generation.ts
+      purpose: BullMQ worker for processing training data generation jobs
+    - path: apps/backend/src/routes/training-data.ts
+      purpose: RESTful API endpoints for training data operations
+    - path: apps/backend/src/services/data-validation.ts
+      purpose: Quality assessment and validation pipeline for generated data
+    - path: apps/backend/src/lib/file-processors/novel-processor.ts
+      purpose: Extract and parse content from novel files (PDF, EPUB)
+    - path: apps/backend/src/lib/file-processors/comic-processor.ts
+      purpose: Process existing comics to extract panel-script mappings
+    - path: apps/backend/src/websockets/training-progress.ts
+      purpose: WebSocket handler for real-time progress updates
+    - path: apps/dashboard/src/pages/training-data/index.tsx
+      purpose: Admin dashboard for monitoring training data jobs
+    - path: apps/dashboard/src/components/TrainingDataJobCard.tsx
+      purpose: Individual job display component with progress and actions
+    - path: packages/shared/src/types/training-data.ts
+      purpose: TypeScript interfaces for training data structures
+  acceptance_criteria:
+  - criterion: Training data generation API accepts novel/comic files and returns
+      job IDs with progress tracking
+    verification: POST /api/training-data/generate returns 202 with job_id, WebSocket
+      /ws/training-data/:job_id streams progress updates
+  - criterion: Queue workers process files to generate script-to-panel mappings and
+      store in MinIO with metadata in PostgreSQL
+    verification: Upload test novel PDF, verify generated training pairs in storage
+      with valid metadata records in training_data table
+  - criterion: Data validation pipeline rejects low-quality training samples with
+      configurable thresholds
+    verification: Submit corrupted/low-res images, verify rejection in validation
+      logs and excluded from final dataset
+  - criterion: Admin dashboard displays generation jobs with status, progress, and
+      manual curation tools
+    verification: Navigate to /dashboard/training-data, verify job listing, progress
+      bars, and approve/reject functionality
+  - criterion: System handles concurrent generation jobs with proper resource isolation
+      and failure recovery
+    verification: Start 5+ concurrent jobs, simulate worker crashes, verify job resumption
+      and no memory leaks
+  testing:
+    unit_tests:
+    - file: apps/backend/src/__tests__/services/training-data.test.ts
+      coverage_target: 85%
+      scenarios:
+      - TrainingDataService.createJob() with valid parameters
+      - Data validation with various quality thresholds
+      - Error handling for malformed input files
+      - Metadata extraction from different file formats
+    - file: apps/backend/src/__tests__/workers/data-generation.test.ts
+      coverage_target: 80%
+      scenarios:
+      - Novel processing pipeline with mock PDF
+      - Image augmentation with different parameters
+      - Queue job completion and failure scenarios
+    integration_tests:
+    - file: apps/backend/src/__tests__/integration/training-data-flow.test.ts
+      scenarios:
+      - 'End-to-end: file upload → processing → storage → retrieval'
+      - WebSocket progress updates during generation
+      - Integration with RunPod Stable Diffusion pipeline
+    - file: apps/dashboard/src/__tests__/training-data.test.tsx
+      scenarios:
+      - Admin interface job management
+      - Real-time progress display
+    manual_testing:
+    - step: Upload 50MB novel PDF via API
+      expected: Job completes within 10 minutes, generates 100+ training pairs
+    - step: Monitor WebSocket during generation
+      expected: Progress updates every 5 seconds, final completion notification
+    - step: Test concurrent job processing
+      expected: Multiple jobs process simultaneously without interference
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.65
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create database migration for training data schema (tables: training_jobs,
+        training_data, data_validation_results)'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement TrainingDataService class with CRUD operations and job
+        orchestration methods'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design data quality assessment algorithms and validation thresholds'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Create BullMQ worker implementation for data generation processing'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build RESTful API routes for job creation, status, and data retrieval'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement WebSocket handlers for real-time progress updates'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Integrate with existing RunPod Stable Diffusion pipeline for
+        image generation'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Create file processor classes for novel/comic parsing (PDF, EPUB
+        support)'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build admin dashboard components for job monitoring and data curation'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Write comprehensive test suites (unit + integration)'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Performance testing with large files and optimization tuning'
+      done: false
+      ai_friendly: false
+    - task: '[HUMAN] Security review and data privacy compliance check'
+      done: false
+      ai_friendly: false
+- key: T35
+  title: Active Learning Loop - User Corrections to Training Data
+  type: Task
+  milestone: M2 - ML Training & Development
+  iteration: I2
+  priority: p2
+  effort: 3
+  area: ml
+  dependsOn:
+  - T34
+  agent_notes:
+    research_findings: "**Context:**\nActive learning loops create a feedback mechanism\
+      \ where user corrections on generated content (comic panels, character descriptions,\
+      \ dialogue) are fed back into the training pipeline to improve model performance\
+      \ over time. This is crucial for Morpheus because comic generation is highly\
+      \ subjective - users will have specific preferences for art styles, character\
+      \ consistency, and narrative flow that generic models can't capture. By capturing\
+      \ user corrections (regeneration requests, manual edits, quality ratings), we\
+      \ can create domain-specific training data that makes the platform progressively\
+      \ better at generating content users actually want.\n\n**Technical Approach:**\n\
+      Implement a feedback collection system that captures user interactions with\
+      \ generated content, processes corrections into training-compatible formats,\
+      \ and feeds them back to fine-tuning pipelines. Use a event-driven architecture\
+      \ where user corrections trigger data processing workflows. Store correction\
+      \ events in Supabase with proper schema for different content types (image prompts,\
+      \ text generation, style parameters). Create background jobs using BullMQ or\
+      \ similar to process corrections into training datasets. Integrate with existing\
+      \ ML pipeline to periodically retrain or fine-tune models using accumulated\
+      \ feedback data.\n\n**AI Suitability Analysis:**\n- High AI effectiveness: CRUD\
+      \ operations for feedback storage, API endpoints for capturing corrections,\
+      \ database schema migrations, test suite creation, data transformation utilities,\
+      \ background job implementations\n- Medium AI effectiveness: Event handling\
+      \ logic, data pipeline orchestration, integration with existing ML services,\
+      \ validation logic for different feedback types\n- Low AI effectiveness: Feedback\
+      \ weighting algorithms, training data quality assessment, model retraining strategy\
+      \ decisions, business logic for when to trigger retraining\n\n**Dependencies:**\n\
+      - External: bullmq (job queue), zod (validation), p-queue (concurrency control),\
+      \ csv-parser (dataset export)\n- Internal: Existing ML service APIs, user management\
+      \ system, comic generation pipeline, Supabase database schema, shared validation\
+      \ types\n\n**Risks:**\n- Data quality degradation: Users might provide poor\
+      \ feedback - implement validation and weighting systems\n- Storage costs: Large\
+      \ volumes of feedback data - implement data retention policies and compression\n\
+      - Privacy concerns: User corrections contain personal preferences - ensure proper\
+      \ anonymization\n- Training bias: Feedback from power users could skew model\
+      \ - implement demographic balancing\n- Performance impact: Real-time feedback\
+      \ collection could slow UI - use async processing with optimistic updates\n\n\
+      **Complexity Notes:**\nMore complex than initially estimated due to the need\
+      \ for robust data pipeline architecture and integration with existing ML workflows.\
+      \ However, AI assistance will significantly accelerate implementation of the\
+      \ data collection and processing components. The feedback loop logic itself\
+      \ is straightforward, but ensuring data quality and preventing model degradation\
+      \ requires careful architecture decisions.\n\n**Key Files:**\n- packages/database/schema/feedback.sql:\
+      \ Feedback storage schema\n- apps/api/src/routes/feedback/index.ts: Feedback\
+      \ collection endpoints  \n- packages/ml-service/src/training/active-learning.ts:\
+      \ Training data processing\n- apps/dashboard/src/components/FeedbackCapture.tsx:\
+      \ UI components for corrections\n- packages/shared/src/types/feedback.ts: Shared\
+      \ TypeScript types\n- apps/api/src/jobs/process-feedback.ts: Background processing\
+      \ jobs\n"
+    design_decisions:
+    - decision: Event-driven feedback collection with async processing
+      rationale: Prevents UI blocking while ensuring all user interactions are captured
+        for training
+      alternatives_considered:
+      - Synchronous feedback processing
+      - Batch feedback collection
+      - Manual feedback curation
+      ai_implementation_note: AI can generate the entire event handling infrastructure
+        and job queue setup
+    - decision: Multi-modal feedback schema supporting text, image, and rating corrections
+      rationale: Comic generation involves multiple content types that each need different
+        correction mechanisms
+      alternatives_considered:
+      - Separate feedback systems per content type
+      - Generic feedback blob storage
+      - External feedback service
+      ai_implementation_note: AI can create comprehensive database schemas and validation
+        logic for all feedback types
+    - decision: Weighted feedback system based on user expertise and consistency
+      rationale: Prevents bad actors or inconsistent feedback from degrading model
+        quality
+      alternatives_considered:
+      - Equal weight for all feedback
+      - Admin-curated feedback only
+      - Community voting on corrections
+      ai_implementation_note: AI can implement the weighting calculation logic but
+        human judgment needed for weighting strategy
+    researched_at: '2026-02-08T18:34:35.159776'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:17:26.247939'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: '20695803'
+    planning_hash: 1c166ca0
+  technical_notes:
+    approach: 'Implement a comprehensive feedback collection system that captures
+      user corrections across all content types (images, text, parameters) and stores
+      them with rich context metadata. Create async processing pipelines that transform
+      raw feedback into training-compatible datasets, applying quality filters and
+      user weighting. Build integration points with existing ML services to periodically
+      trigger model updates using accumulated feedback. Design the system to be privacy-compliant
+      and scalable, with proper data retention and anonymization policies.
+
+      '
+    external_dependencies:
+    - name: bullmq
+      version: ^5.0.0
+      reason: Reliable job queue for async feedback processing
+    - name: zod
+      version: ^3.22.0
+      reason: Runtime validation for feedback data structures
+    - name: p-queue
+      version: ^8.0.0
+      reason: Concurrency control for ML pipeline interactions
+    - name: csv-writer
+      version: ^1.6.0
+      reason: Export feedback datasets for training pipeline consumption
+    files_to_modify:
+    - path: packages/database/migrations/add_feedback_tables.sql
+      changes: Add feedback, feedback_processing_jobs, and user_feedback_stats tables
+    - path: apps/api/src/routes/index.ts
+      changes: Mount feedback routes at /api/feedback
+    - path: packages/shared/src/types/index.ts
+      changes: Export feedback types for cross-package usage
+    - path: apps/dashboard/src/pages/admin/index.tsx
+      changes: Add feedback analytics and job monitoring sections
+    new_files:
+    - path: packages/database/schema/feedback.sql
+      purpose: Database schema for feedback storage with proper indexing
+    - path: packages/shared/src/types/feedback.ts
+      purpose: TypeScript types for feedback data structures and API contracts
+    - path: apps/api/src/routes/feedback/index.ts
+      purpose: REST endpoints for feedback CRUD operations
+    - path: apps/api/src/routes/feedback/collect.ts
+      purpose: Endpoint for capturing user corrections in real-time
+    - path: apps/api/src/services/feedback.service.ts
+      purpose: Business logic for feedback processing and validation
+    - path: apps/api/src/jobs/process-feedback.ts
+      purpose: Background job for transforming feedback into training data
+    - path: apps/api/src/jobs/cleanup-feedback.ts
+      purpose: Data retention and privacy compliance job
+    - path: packages/ml-service/src/training/active-learning.ts
+      purpose: ML integration for processing feedback into training datasets
+    - path: packages/ml-service/src/utils/dataset-generator.ts
+      purpose: Utilities for converting feedback to ML training formats
+    - path: apps/dashboard/src/components/FeedbackCapture.tsx
+      purpose: UI components for collecting user corrections
+    - path: apps/dashboard/src/components/FeedbackStats.tsx
+      purpose: Admin dashboard for monitoring feedback and training metrics
+    - path: apps/api/src/middleware/feedback-rate-limit.ts
+      purpose: Rate limiting to prevent feedback spam
+  acceptance_criteria:
+  - criterion: User corrections are captured and stored with full context for all
+      content types (image, text, style parameters)
+    verification: POST to /api/feedback endpoints stores data in feedback table with
+      user_id, content_type, original_content, corrected_content, and metadata fields
+      populated
+  - criterion: Feedback processing pipeline transforms corrections into ML-compatible
+      training datasets within 24 hours
+    verification: BullMQ job processes feedback queue, generates CSV/JSON training
+      files in packages/ml-service/data/feedback/, verifiable via job dashboard
+  - criterion: System handles 1000+ feedback events per hour without UI performance
+      degradation
+    verification: Load test with 1000 concurrent feedback submissions completes in
+      <2s per request, background processing queues successfully
+  - criterion: User privacy is maintained through data anonymization and retention
+      policies
+    verification: Feedback records contain hashed user IDs, PII scrubbing functions
+      remove personal data, automated cleanup job removes data >90 days old
+  - criterion: ML service integration triggers model fine-tuning when feedback threshold
+      reached
+    verification: When feedback count >100 items for a model, ML service /retrain
+      endpoint called automatically, training job status tracked in database
+  testing:
+    unit_tests:
+    - file: apps/api/src/__tests__/feedback/feedback.service.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Create feedback with valid data
+      - Validate feedback schema with invalid inputs
+      - User anonymization function works correctly
+      - Feedback weighting calculation
+    - file: apps/api/src/__tests__/jobs/process-feedback.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Process feedback batch successfully
+      - Handle malformed feedback data
+      - Dataset generation with different content types
+      - Training threshold calculation
+    - file: packages/ml-service/src/__tests__/training/active-learning.test.ts
+      coverage_target: 80%
+      scenarios:
+      - Transform feedback to training format
+      - Apply quality filters to feedback data
+      - Trigger retraining conditions
+    integration_tests:
+    - file: apps/api/src/__tests__/integration/feedback-pipeline.test.ts
+      scenarios:
+      - End-to-end feedback collection to dataset generation
+      - ML service integration for model updates
+      - Background job processing with real queue
+    manual_testing:
+    - step: Submit feedback through comic editor UI components
+      expected: Feedback captured immediately, user sees confirmation, no UI lag
+    - step: Verify feedback processing in admin dashboard
+      expected: Jobs appear in queue, progress tracked, datasets generated
+    - step: Test privacy compliance with sample user data
+      expected: Personal data anonymized, retention policies enforced
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.65
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create database schema and migration files for feedback storage'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate TypeScript types and validation schemas using Zod'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design feedback weighting algorithm and training trigger logic'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement REST API endpoints for feedback collection'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create feedback service layer with CRUD operations'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement BullMQ background jobs for feedback processing'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build dataset generation utilities for ML training formats'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create React components for feedback capture UI'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Integrate with existing ML service APIs and test model retraining'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Write comprehensive unit and integration tests'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement rate limiting and privacy protection middleware'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Review data privacy compliance and security measures'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Create admin dashboard components for feedback monitoring'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Performance testing and optimization review'
+      done: false
+      ai_friendly: false
+- key: T36
+  title: Dialogue Classification Service - Intent, Tone, Emotion
+  type: Task
+  milestone: M2 - ML Training & Development
+  iteration: I2
+  priority: p2
+  effort: 5
+  area: ml
+  dependsOn:
+  - T21
+  agent_notes:
+    research_findings: '**Context:**
+
+      This service classifies dialogue in novels to optimize comic adaptation by understanding
+      conversational context, emotional undertones, and speaker intent. For novel-to-comic
+      transformation, this enables better visual representation decisions (panel layouts,
+      character expressions, speech bubble styling) and improved narrative flow. The
+      service analyzes dialogue segments to extract intent (question, command, statement),
+      tone (formal, casual, aggressive), and emotion (anger, joy, sadness, fear) -
+      critical for generating appropriate visual elements and maintaining story coherence.
+
+
+      **Technical Approach:**
+
+      Implement a multi-classification ML pipeline using transformer models fine-tuned
+      for dialogue analysis. Primary approach: OpenAI GPT-4/Claude for few-shot classification
+      with structured prompts, fallback to local transformer models (BERT-based) via
+      RunPod. Create a service layer that processes dialogue chunks, applies multiple
+      classifiers simultaneously, and returns structured classification results. Use
+      confidence scoring and ensemble methods for improved accuracy. Cache classifications
+      in Supabase for performance optimization.
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: Service boilerplate code, API route handlers, database
+      schemas, unit tests, data validation schemas, prompt templates, response parsing
+      logic
+
+      - Medium AI effectiveness: Classification prompt engineering, model integration
+      code, error handling workflows, caching strategies
+
+      - Low AI effectiveness: Classification taxonomy design, model selection decisions,
+      confidence threshold tuning, prompt optimization strategies
+
+
+      **Dependencies:**
+
+      - External: @anthropic-ai/sdk, openai, transformers.js, zod (validation), ioredis
+      (caching)
+
+      - Internal: Existing LLM service abstraction, dialogue extraction service (likely
+      from T34/T35), database models for storing classifications
+
+
+      **Risks:**
+
+      - API rate limits/costs: Implement intelligent caching and batch processing
+      strategies
+
+      - Classification inconsistency: Use ensemble methods and confidence thresholds
+      with fallback chains
+
+      - Performance bottlenecks: Cache frequently accessed classifications and implement
+      async processing queues
+
+      - Prompt drift: Version control prompts and implement A/B testing for prompt
+      variations
+
+
+      **Complexity Notes:**
+
+      Medium complexity task with high AI acceleration potential. The structured nature
+      of classification makes it very AI-friendly for implementation, but requires
+      human expertise for taxonomy design and model selection. AI agents can handle
+      70-80% of the implementation work (CRUD, API integration, testing), significantly
+      accelerating development velocity.
+
+
+      **Key Files:**
+
+      - packages/ml/src/services/dialogue-classifier.ts: Core classification service
+
+      - packages/ml/src/types/dialogue-classification.ts: Type definitions and schemas
+
+      - packages/backend/src/routes/ml/classify-dialogue.ts: API endpoints
+
+      - packages/database/src/schemas/dialogue-classifications.sql: Database schema
+
+      - packages/ml/src/prompts/dialogue-classification.ts: Structured prompts
+
+      '
+    design_decisions:
+    - decision: Multi-model ensemble approach with OpenAI/Anthropic primary, local
+        model fallback
+      rationale: Balances accuracy (cloud models excel at nuanced classification)
+        with cost control and reliability (local fallback prevents service outages)
+      alternatives_considered:
+      - Pure cloud-based classification
+      - Pure local model approach
+      - Rule-based classification system
+      ai_implementation_note: AI agent can generate model integration code, API clients,
+        and fallback logic patterns
+    - decision: Hierarchical classification taxonomy (Intent->Tone->Emotion) with
+        confidence scoring
+      rationale: Structured approach allows for granular control and confidence-based
+        decision making in comic generation pipeline
+      alternatives_considered:
+      - Single multi-class classifier
+      - Independent parallel classifiers
+      - Sequential classification chain
+      ai_implementation_note: AI can implement the classification pipeline logic and
+        confidence calculation algorithms
+    - decision: Dialogue chunk-based processing with context windows
+      rationale: Maintains conversational context while keeping processing units manageable
+        for both performance and cost optimization
+      alternatives_considered:
+      - Sentence-level classification
+      - Full conversation analysis
+      - Speaker-turn based processing
+      ai_implementation_note: AI agent excellent for implementing chunking algorithms
+        and context window management
+    researched_at: '2026-02-08T18:35:04.292456'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:17:49.765828'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 8d0ac000
+    planning_hash: '73240605'
+  technical_notes:
+    approach: 'Create a dialogue classification service that accepts text chunks and
+      returns structured classification data (intent, tone, emotion) with confidence
+      scores. Implement a multi-tiered approach: OpenAI/Anthropic APIs for primary
+      classification with carefully crafted few-shot prompts, backed by local transformer
+      models via RunPod for cost optimization and fallback reliability. Use Supabase
+      for caching classifications and storing training data, with Redis for high-frequency
+      access patterns. Design the service to be asynchronous and batch-capable for
+      processing entire novels efficiently.
+
+      '
+    external_dependencies:
+    - name: '@anthropic-ai/sdk'
+      version: ^0.17.0
+      reason: Claude API integration for dialogue classification
+    - name: openai
+      version: ^4.28.0
+      reason: GPT-4 classification capabilities
+    - name: transformers.js
+      version: ^2.10.0
+      reason: Local transformer model execution for fallback classification
+    - name: zod
+      version: ^3.22.0
+      reason: Runtime validation for classification schemas and API responses
+    - name: ioredis
+      version: ^5.3.0
+      reason: High-performance caching for frequently accessed classifications
+    - name: p-queue
+      version: ^8.0.0
+      reason: Rate limiting and batch processing for external API calls
+    files_to_modify:
+    - path: packages/ml/src/services/llm-service.ts
+      changes: Add dialogue classification method to existing LLM abstraction
+    - path: packages/backend/src/routes/ml/index.ts
+      changes: Import and register dialogue classification routes
+    - path: packages/database/src/types/index.ts
+      changes: Export dialogue classification table types
+    new_files:
+    - path: packages/ml/src/services/dialogue-classifier.ts
+      purpose: Core classification service with multi-provider support
+    - path: packages/ml/src/types/dialogue-classification.ts
+      purpose: TypeScript interfaces and Zod schemas for classification data
+    - path: packages/ml/src/prompts/dialogue-classification.ts
+      purpose: Structured prompts and few-shot examples for LLM classification
+    - path: packages/backend/src/routes/ml/classify-dialogue.ts
+      purpose: REST API endpoints for single and batch classification
+    - path: packages/database/src/schemas/dialogue-classifications.sql
+      purpose: Database schema for caching classification results
+    - path: packages/ml/src/utils/classification-cache.ts
+      purpose: Caching layer with Redis and Supabase integration
+    - path: packages/ml/src/config/classification-models.ts
+      purpose: Configuration for model providers, thresholds, and fallback chains
+  acceptance_criteria:
+  - criterion: Service correctly classifies dialogue intent with 85%+ accuracy
+    verification: 'Run test suite against labeled dataset: `npm test dialogue-classifier.test.ts`'
+  - criterion: API returns structured classification data within 2 seconds for single
+      dialogue
+    verification: 'Performance test: `curl -w ''@curl-format.txt'' POST /api/ml/classify-dialogue`'
+  - criterion: Batch processing handles 100+ dialogue chunks without memory leaks
+    verification: 'Load test with monitoring: `k6 run batch-classification-test.js`'
+  - criterion: Classifications are cached and retrieved correctly from database
+    verification: Integration test validates cache hit/miss behavior in test database
+  - criterion: Fallback chain activates when primary LLM service fails
+    verification: Mock primary service failure, verify secondary model activation
+      in logs
+  testing:
+    unit_tests:
+    - file: packages/ml/src/services/__tests__/dialogue-classifier.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Single dialogue classification with all providers
+      - Batch processing with mixed success/failure
+      - Cache hit/miss scenarios
+      - Confidence threshold filtering
+      - Invalid input handling
+    - file: packages/ml/src/prompts/__tests__/dialogue-classification.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Prompt template rendering with various inputs
+      - Few-shot example formatting
+      - Response parsing edge cases
+    integration_tests:
+    - file: packages/backend/src/__tests__/integration/classify-dialogue.test.ts
+      scenarios:
+      - End-to-end API classification flow
+      - Database persistence and retrieval
+      - Error propagation through service layers
+      - Rate limiting behavior
+    manual_testing:
+    - step: Test with dialogue from various novel genres (romance, thriller, sci-fi)
+      expected: Consistent classification quality across genres
+    - step: Monitor API response times during batch processing
+      expected: Response times remain under 2s per dialogue
+  estimates:
+    development: 3.5
+    code_review: 0.5
+    testing: 0.8
+    documentation: 0.3
+    total: 5.1
+    ai_acceleration_factor: 0.55
+  progress:
+    status: not-started
+    checklist:
+    - task: '[HUMAN] Define classification taxonomy (intent/tone/emotion categories)'
+      done: false
+      ai_friendly: false
+    - task: '[HUMAN] Design confidence threshold strategy and fallback chain'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Create TypeScript interfaces and Zod validation schemas'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate database migration for classification cache table'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement structured prompt templates with few-shot examples'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build core classification service with multi-provider support'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create caching layer with Redis/Supabase integration'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement REST API endpoints with batch processing support'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate comprehensive unit and integration tests'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Fine-tune prompts and confidence thresholds based on test results'
+      done: false
+      ai_friendly: false
+    - task: '[HUMAN] Code review and architecture validation'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Generate API documentation and usage examples'
+      done: false
+      ai_friendly: true
+- key: T41
+  title: Scene Extraction Service
+  type: Feature
+  milestone: M2 - ML Training & Development
+  iteration: I3
+  priority: p0
+  effort: 5
+  area: ml
+  dependsOn:
+  - T40
+  - T21
+  agent_notes:
+    research_findings: '**Context:**
+
+      Scene Extraction Service is a critical ML pipeline component that analyzes novel
+      text to identify and segment distinct narrative scenes. This service bridges
+      the gap between raw novel content and structured comic panels by understanding
+      narrative flow, setting changes, character interactions, and dramatic beats.
+      For Morpheus, this enables automatic comic panel generation by breaking novels
+      into visually coherent scenes that can be illustrated and sequenced appropriately.
+
+
+      **Technical Approach:**
+
+      - Microservice architecture using Fastify 5 with dedicated /scenes endpoints
+
+      - LLM-powered scene detection using OpenAI/Anthropic APIs with structured output
+
+      - Natural Language Processing pipeline combining rule-based heuristics with
+      AI analysis
+
+      - Scene boundary detection using paragraph breaks, dialogue patterns, setting
+      changes
+
+      - Supabase storage for scene metadata, boundaries, and extracted content
+
+      - Queue-based processing for large novels using Bull/BullMQ
+
+      - Caching layer with Redis for repeated scene analysis requests
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: Service boilerplate, CRUD operations for scene storage,
+      test fixtures, API route handlers, database schema migrations, queue job handlers
+
+      - Medium AI effectiveness: LLM prompt engineering, scene boundary detection
+      algorithms, text preprocessing pipelines, API integration code
+
+      - Low AI effectiveness: Scene detection logic architecture, prompt design strategy,
+      quality metrics definition, scene coherence evaluation
+
+
+      **Dependencies:**
+
+      - External: openai ^4.0.0, @anthropic-ai/sdk, natural ^6.0.0, compromise ^14.0.0,
+      bullmq ^4.0.0
+
+      - Internal: Existing novel upload service, user authentication, ML pipeline
+      orchestrator, comic panel generation service
+
+
+      **Risks:**
+
+      - Scene boundary accuracy: Implement confidence scoring and human review workflows
+
+      - LLM API costs: Add request caching, batch processing, and cost monitoring
+
+      - Processing time for large novels: Use streaming analysis and progress tracking
+
+      - Scene coherence quality: Develop evaluation metrics and A/B testing framework
+
+
+      **Complexity Notes:**
+
+      More complex than initially estimated due to subjective nature of scene boundaries
+      and need for context understanding. However, AI agents excel at the extensive
+      API integration and data processing boilerplate, potentially accelerating development
+      by 60-70%.
+
+
+      **Key Files:**
+
+      - apps/api/src/services/scene-extraction/: New service directory structure
+
+      - apps/api/src/routes/scenes/: REST endpoints for scene operations
+
+      - packages/database/migrations/: Scene-related table schemas
+
+      - packages/ml-types/: TypeScript interfaces for scene data structures
+
+      '
+    design_decisions:
+    - decision: Hybrid LLM + Rule-based Scene Detection
+      rationale: Combines AI understanding of narrative structure with reliable heuristics
+        for performance and cost control
+      alternatives_considered:
+      - Pure LLM approach
+      - Pure NLP rule-based
+      - Computer vision on formatted text
+      ai_implementation_note: AI agent can generate extensive rule-based detection
+        patterns and LLM integration code
+    - decision: Streaming Scene Analysis for Large Novels
+      rationale: Enables real-time progress feedback and handles memory constraints
+        for 500+ page novels
+      alternatives_considered:
+      - Batch processing entire novel
+      - Chapter-by-chapter analysis
+      ai_implementation_note: AI agent excellent for implementing streaming data structures
+        and progress tracking
+    - decision: Scene Confidence Scoring System
+      rationale: Enables quality control and human review workflows for low-confidence
+        scene boundaries
+      alternatives_considered:
+      - Binary scene detection
+      - Manual scene marking only
+      ai_implementation_note: AI agent can implement scoring algorithms and threshold-based
+        routing logic
+    researched_at: '2026-02-08T18:35:31.620319'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:18:19.323575'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 54c91380
+    planning_hash: f76991eb
+  technical_notes:
+    approach: 'Build a FastifyJS microservice that accepts novel text input and returns
+      structured scene data with boundaries, metadata, and confidence scores. Use
+      a two-phase approach: first apply rule-based heuristics for obvious scene breaks
+      (chapter boundaries, significant whitespace, setting indicators), then enhance
+      with LLM analysis for nuanced narrative transitions. Implement queue-based processing
+      for large texts with real-time progress updates. Store results in Supabase with
+      indexing for fast retrieval during comic generation.
+
+      '
+    external_dependencies:
+    - name: openai
+      version: ^4.20.0
+      reason: GPT-4 API for intelligent scene boundary detection and narrative analysis
+    - name: '@anthropic-ai/sdk'
+      version: ^0.9.0
+      reason: Claude API as fallback for scene analysis, better at literary text understanding
+    - name: natural
+      version: ^6.12.0
+      reason: Tokenization, sentence boundary detection, and basic NLP preprocessing
+    - name: compromise
+      version: ^14.10.0
+      reason: Lightweight NLP for named entity recognition and grammar analysis
+    - name: bullmq
+      version: ^4.15.0
+      reason: Queue system for processing large novels asynchronously with progress
+        tracking
+    - name: ioredis
+      version: ^5.3.0
+      reason: Redis client for caching scene analysis results and queue management
+    files_to_modify:
+    - path: packages/database/supabase/migrations/001_create_scenes_tables.sql
+      changes: Add scenes, scene_jobs tables with proper indexes
+    - path: packages/ml-types/src/index.ts
+      changes: Export Scene, SceneMetadata, SceneJob TypeScript interfaces
+    - path: apps/api/src/app.ts
+      changes: Register scenes routes and queue initialization
+    new_files:
+    - path: apps/api/src/services/scene-extraction/scene-detector.ts
+      purpose: Rule-based scene boundary detection using NLP heuristics
+    - path: apps/api/src/services/scene-extraction/llm-analyzer.ts
+      purpose: LLM-powered scene analysis using OpenAI/Anthropic APIs
+    - path: apps/api/src/services/scene-extraction/scene-service.ts
+      purpose: Main service orchestrating detection pipeline and data persistence
+    - path: apps/api/src/services/scene-extraction/text-processor.ts
+      purpose: Text preprocessing, chunking, and normalization utilities
+    - path: apps/api/src/services/scene-extraction/queue-processor.ts
+      purpose: BullMQ job handlers for async scene extraction processing
+    - path: apps/api/src/routes/scenes/index.ts
+      purpose: 'REST endpoints: POST /extract, POST /extract-async, GET /jobs/{id},
+        GET /{id}'
+    - path: apps/api/src/routes/scenes/schemas.ts
+      purpose: Fastify JSON schemas for request/response validation
+    - path: packages/ml-types/src/scene-types.ts
+      purpose: TypeScript interfaces for Scene, SceneMetadata, SceneJob, SceneExtractRequest
+  acceptance_criteria:
+  - criterion: Service accepts novel text and returns structured scene data with boundaries,
+      metadata, and confidence scores
+    verification: POST /api/scenes/extract with novel text returns 200 with scene
+      array containing start/end positions, content, metadata, and confidence >= 0.7
+  - criterion: Queue-based processing handles novels >10k words with progress tracking
+    verification: POST /api/scenes/extract-async returns job ID, GET /api/scenes/jobs/{id}
+      shows progress, completed job retrievable via GET /api/scenes/{sceneId}
+  - criterion: Scene boundary detection accuracy >80% using hybrid rule-based + LLM
+      approach
+    verification: Integration test with known novel samples validates scene boundaries
+      match expected segmentation within 20% variance
+  - criterion: API responds within 2s for texts <5k words, queues larger texts
+    verification: Performance test shows <2s response for small texts, large texts
+      return immediate job ID with background processing
+  - criterion: Service integrates with existing auth and stores scene data in Supabase
+    verification: Authenticated requests succeed, unauthorized fail with 401, scene
+      data persisted in scenes table with proper user association
+  testing:
+    unit_tests:
+    - file: apps/api/src/services/scene-extraction/__tests__/scene-detector.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Rule-based scene boundary detection with chapter breaks
+      - Dialogue transition detection
+      - Setting change indicators
+      - Confidence score calculation
+      - Text preprocessing edge cases
+    - file: apps/api/src/services/scene-extraction/__tests__/llm-analyzer.test.ts
+      coverage_target: 85%
+      scenarios:
+      - LLM prompt generation
+      - Response parsing and validation
+      - API error handling
+      - Rate limiting and retries
+    - file: apps/api/src/services/scene-extraction/__tests__/scene-service.test.ts
+      coverage_target: 90%
+      scenarios:
+      - End-to-end scene extraction pipeline
+      - Queue job creation and processing
+      - Database persistence
+      - Caching logic
+    integration_tests:
+    - file: apps/api/src/routes/scenes/__tests__/scenes.integration.test.ts
+      scenarios:
+      - Complete scene extraction workflow with auth
+      - Async processing with job status polling
+      - Error handling for malformed input
+      - Cache hit/miss scenarios
+    manual_testing:
+    - step: Upload sample novel chapter via API
+      expected: Returns scene array with 3-5 scenes, proper boundaries, confidence
+        >0.7
+    - step: Submit large novel (>10k words) for async processing
+      expected: Immediate job ID response, progress tracking works, final results
+        retrievable
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.65
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create database migration for scenes and scene_jobs tables'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate TypeScript interfaces for scene data structures'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design scene detection algorithm architecture and LLM prompts'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement text preprocessing and rule-based boundary detection'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build LLM analyzer with OpenAI/Anthropic integration'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create scene service orchestrating the full pipeline'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement BullMQ queue processing for async operations'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build Fastify routes with proper validation schemas'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate comprehensive unit and integration tests'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Review scene detection quality and tune confidence scoring'
+      done: false
+      ai_friendly: false
+    - task: '[HUMAN] Performance testing and optimization review'
+      done: false
+      ai_friendly: false
+- key: T42
+  title: Character Profiling Service
+  type: Feature
+  milestone: M2 - ML Training & Development
+  iteration: I3
+  priority: p0
+  effort: 5
+  area: ml
+  dependsOn:
+  - T40
+  - T22
+  agent_notes:
+    research_findings: "**Context:**\nCharacter Profiling Service is essential for\
+      \ consistent comic generation across panels. When transforming novels to comics,\
+      \ characters must maintain visual consistency (appearance, clothing, expressions)\
+      \ and narrative consistency (personality traits, speech patterns). This service\
+      \ extracts character profiles from novel text and maintains character state\
+      \ throughout the comic generation pipeline. Without this, generated comics would\
+      \ have characters that look different in each panel or act inconsistently with\
+      \ their literary descriptions.\n\n**Technical Approach:**\n- NLP-based character\
+      \ extraction using OpenAI/Anthropic APIs to parse character descriptions, dialogue,\
+      \ and actions\n- Vector embeddings for character similarity matching and deduplication\
+      \ \n- Character state management with versioning (characters evolve throughout\
+      \ stories)\n- Integration with Stable Diffusion for visual consistency prompts\n\
+      - Caching layer using Redis for frequently accessed character profiles\n- RESTful\
+      \ API service in Fastify with TypeScript for type safety\n- Database schema\
+      \ in Supabase for character storage with JSONB for flexible attributes\n\n**AI\
+      \ Suitability Analysis:**\n- High AI effectiveness: CRUD operations, API routes,\
+      \ database schemas, unit tests, character data models, parsing utilities\n-\
+      \ Medium AI effectiveness: LLM prompt engineering, character matching algorithms,\
+      \ API integrations\n- Low AI effectiveness: Character extraction logic design,\
+      \ similarity scoring algorithms, state management architecture\n\n**Dependencies:**\n\
+      - External: openai, @anthropic-ai/sdk, @supabase/supabase-js, ioredis, zod (validation),\
+      \ compromise (NLP parsing)\n- Internal: shared types package, authentication\
+      \ service, novel processing pipeline\n\n**Risks:**\n- Character extraction accuracy:\
+      \ Use multiple LLM calls with validation prompts\n- Performance with large novels:\
+      \ Implement streaming processing and chunking\n- Character deduplication false\
+      \ positives: Human review interface for edge cases\n- LLM API costs: Implement\
+      \ smart caching and rate limiting\n\n**Complexity Notes:**\nInitially seems\
+      \ straightforward but character consistency across long narratives is complex.\
+      \ NLP accuracy varies significantly with novel writing styles. AI agents will\
+      \ accelerate CRUD and testing but human judgment needed for extraction logic\
+      \ and similarity algorithms. Estimate 40% faster development with AI assistance.\n\
+      \n**Key Files:**\n- apps/backend/src/services/character-profiling/: new service\
+      \ directory\n- apps/backend/src/routes/characters.ts: REST API endpoints\n-\
+      \ packages/database/migrations/: character tables schema\n- packages/shared/src/types/character.ts:\
+      \ shared character types\n"
+    design_decisions:
+    - decision: Use multi-pass LLM extraction with validation
+      rationale: Single-pass extraction misses nuanced character details. Multi-pass
+        with different prompts (physical, personality, relationships) provides comprehensive
+        profiles.
+      alternatives_considered:
+      - Single comprehensive prompt
+      - Rule-based NLP extraction
+      - Hybrid ML model training
+      ai_implementation_note: AI can generate comprehensive prompt templates and validation
+        schemas, plus error handling for API failures
+    - decision: Vector embeddings for character similarity matching
+      rationale: Character names may vary (nicknames, titles) but semantic similarity
+        in descriptions should merge profiles. Embeddings handle this better than
+        string matching.
+      alternatives_considered:
+      - Fuzzy string matching
+      - Rule-based name resolution
+      - Manual character linking
+      ai_implementation_note: AI excellent for embedding generation utilities and
+        similarity threshold tuning code
+    - decision: JSONB storage for flexible character attributes
+      rationale: Character attributes vary widely between novels (fantasy vs contemporary).
+        JSONB provides flexibility while maintaining queryability.
+      alternatives_considered:
+      - Rigid relational schema
+      - Document database
+      - Key-value attributes table
+      ai_implementation_note: AI can generate comprehensive Zod schemas and database
+        migration scripts
+    researched_at: '2026-02-08T18:35:59.917738'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:18:50.748061'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: e617dca9
+    planning_hash: 3d4c6173
+  technical_notes:
+    approach: 'Build a microservice that processes novel text chunks through LLM APIs
+      to extract character mentions, descriptions, and actions. Store character profiles
+      in Supabase with vector embeddings for similarity matching. Implement character
+      state versioning to track character development throughout stories. Provide
+      REST API for comic generation pipeline to fetch consistent character descriptions.
+      Use Redis caching for performance and implement streaming processing for large
+      novels.
+
+      '
+    external_dependencies:
+    - name: openai
+      version: ^4.20.0
+      reason: GPT-4 API for character extraction and description generation
+    - name: '@anthropic-ai/sdk'
+      version: ^0.9.0
+      reason: Claude API as fallback and validation for character analysis
+    - name: compromise
+      version: ^14.10.0
+      reason: NLP preprocessing to identify names and entities before LLM processing
+    - name: ioredis
+      version: ^5.3.0
+      reason: Redis client for caching character profiles and embeddings
+    - name: '@pinecone-database/pinecone'
+      version: ^1.1.0
+      reason: Vector database for character similarity matching and deduplication
+    - name: zod
+      version: ^3.22.0
+      reason: Schema validation for character profile data structures
+    files_to_modify:
+    - path: apps/backend/src/app.ts
+      changes: Add character profiling routes registration
+    - path: apps/backend/package.json
+      changes: 'Add dependencies: openai, @anthropic-ai/sdk, ioredis, compromise,
+        @supabase/supabase-js'
+    - path: apps/backend/src/config/database.ts
+      changes: Add character profiling database configuration
+    new_files:
+    - path: apps/backend/src/services/character-profiling/character-extractor.ts
+      purpose: LLM-powered character extraction from novel text
+    - path: apps/backend/src/services/character-profiling/character-matcher.ts
+      purpose: Vector similarity matching and deduplication logic
+    - path: apps/backend/src/services/character-profiling/character-state-manager.ts
+      purpose: Character versioning and evolution tracking
+    - path: apps/backend/src/services/character-profiling/character-cache.ts
+      purpose: Redis caching layer for character profiles
+    - path: apps/backend/src/services/character-profiling/index.ts
+      purpose: Service barrel exports and initialization
+    - path: apps/backend/src/routes/characters.ts
+      purpose: REST API endpoints for character management
+    - path: packages/shared/src/types/character.ts
+      purpose: Shared TypeScript types for character data models
+    - path: packages/database/migrations/20240315_create_characters_tables.sql
+      purpose: Database schema for characters, character_versions, character_embeddings
+        tables
+    - path: apps/backend/src/services/character-profiling/prompts/extraction-prompts.ts
+      purpose: LLM prompt templates for character extraction
+    - path: apps/backend/src/services/character-profiling/utils/text-chunker.ts
+      purpose: Novel text processing and chunking utilities
+  acceptance_criteria:
+  - criterion: Character extraction API processes novel text and identifies unique
+      characters with descriptions, dialogue patterns, and key attributes
+    verification: POST /api/characters/extract with novel text returns JSON array
+      of character profiles with name, description, traits, and confidence scores
+  - criterion: Character deduplication correctly identifies same character across
+      different mentions (nicknames, titles, pronouns) with >85% accuracy
+    verification: Run integration test suite with known character variants, verify
+      character_similarity_score and merged profiles
+  - criterion: Character state versioning tracks character development across story
+      chapters while maintaining visual consistency prompts
+    verification: GET /api/characters/{id}/versions returns chronological character
+      states, POST /api/characters/{id}/evolve updates character maintaining visual_description_base
+  - criterion: System handles large novels (>100k words) with streaming processing
+      and maintains <2s response time for character lookups
+    verification: Load test with 100k+ word novel, verify processing completes and
+      Redis cache provides sub-2s GET /api/characters/{id} responses
+  - criterion: Generated character profiles integrate with Stable Diffusion pipeline
+      providing consistent visual prompts
+    verification: Character profile visual_prompt field generates consistent character
+      images when passed to SD API, manual visual comparison test
+  testing:
+    unit_tests:
+    - file: apps/backend/src/services/character-profiling/__tests__/character-extractor.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Extract characters from dialogue-heavy text
+      - Handle text with no character mentions
+      - Parse character descriptions and attributes
+      - Error handling for malformed LLM responses
+    - file: apps/backend/src/services/character-profiling/__tests__/character-matcher.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Match characters with different name variations
+      - Reject false positive matches
+      - Handle edge cases with similar character names
+      - Vector similarity scoring accuracy
+    - file: apps/backend/src/services/character-profiling/__tests__/character-state-manager.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Create character state versions
+      - Merge character evolution while preserving base traits
+      - Handle concurrent state updates
+      - State rollback functionality
+    integration_tests:
+    - file: apps/backend/src/__tests__/integration/character-profiling-flow.test.ts
+      scenarios:
+      - End-to-end novel processing with character extraction and deduplication
+      - Character API CRUD operations with database persistence
+      - Redis caching integration and cache invalidation
+      - LLM API integration with retry logic and error handling
+    manual_testing:
+    - step: Upload sample novel chapter through character extraction endpoint
+      expected: Characters extracted with accurate descriptions and relationships
+        mapped
+    - step: Test character similarity matching with character name variations
+      expected: Same character identified across 'Elizabeth', 'Lizzy', 'Miss Bennet'
+        references
+    - step: Verify character visual consistency prompts generate similar images
+      expected: Multiple SD generations of same character maintain consistent appearance
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.6
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create shared character TypeScript types and interfaces'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate database migration scripts for character tables'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design character extraction prompts and similarity scoring algorithm'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement character-extractor service with OpenAI/Anthropic integration'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build character-matcher service with vector similarity logic'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Review and tune character matching accuracy and similarity thresholds'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement character-state-manager with versioning logic'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create Redis caching layer for character profiles'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build REST API routes with input validation and error handling'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate comprehensive unit test suites for all services'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Write integration tests for end-to-end character profiling flow'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Performance testing and optimization of LLM API calls and caching'
+      done: false
+      ai_friendly: false
+    - task: '[HUMAN] Manual testing of character consistency and accuracy with sample
+        novels'
+      done: false
+      ai_friendly: false
+- key: T43
+  title: Embedding Generation Service
+  type: Task
+  milestone: M2 - ML Training & Development
+  iteration: I3
+  priority: p0
+  effort: 3
+  area: ml
+  dependsOn:
+  - T41
+  - T42
+  agent_notes:
+    research_findings: '**Context:**
+
+      Embedding Generation Service is critical for Morpheus''s ML pipeline - it converts
+      text (novel chapters, character descriptions) and images (generated comic panels)
+      into vector embeddings for semantic similarity search, content recommendation,
+      and style consistency. This enables features like finding similar scenes across
+      chapters, maintaining character visual consistency, and powering the recommendation
+      engine for the storefront.
+
+
+      **Technical Approach:**
+
+      - Use sentence-transformers for text embeddings (all-MiniLM-L6-v2 for general
+      text, clip-ViT-B-32 for image-text alignment)
+
+      - CLIP models for image embeddings to enable cross-modal search
+
+      - Vector storage in Supabase with pgvector extension
+
+      - Async queue system (Bull/BullMQ) for batch processing large novels
+
+      - Caching layer with Redis for frequently accessed embeddings
+
+      - RESTful service with streaming support for real-time embedding generation
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: Service boilerplate, CRUD operations for embeddings,
+      test suites, API route handlers, database schemas
+
+      - Medium AI effectiveness: Queue job processing, error handling, batch processing
+      logic, integration with existing ML services
+
+      - Low AI effectiveness: Embedding model selection, vector similarity thresholds,
+      chunking strategies for long text, performance optimization decisions
+
+
+      **Dependencies:**
+
+      - External: @huggingface/transformers, sentence-transformers (Python bridge),
+      @supabase/supabase-js, bullmq, ioredis
+
+      - Internal: Needs integration with content processing service, character tracking
+      system, and RunPod image generation pipeline
+
+
+      **Risks:**
+
+      - Memory usage: Large models can consume significant RAM - implement model lazy
+      loading and batching
+
+      - Latency: Embedding generation can be slow - use caching and async processing
+
+      - Vector storage costs: pgvector queries can be expensive - implement proper
+      indexing and query optimization
+
+      - Model drift: Embeddings may become inconsistent over time - version embedding
+      models and provide migration paths
+
+
+      **Complexity Notes:**
+
+      More complex than initially estimated due to cross-modal requirements (text
+      + image embeddings). However, AI agents excel at the heavy lifting (model integration,
+      API wrappers, queue processing), making the 70% of implementation highly automatable.
+      Main complexity lies in architectural decisions around chunking strategies and
+      similarity thresholds.
+
+
+      **Key Files:**
+
+      - packages/ml-service/src/services/embedding.service.ts: Core embedding generation
+      logic
+
+      - packages/ml-service/src/queues/embedding.queue.ts: Async processing queue
+
+      - packages/database/migrations/: pgvector schema setup
+
+      - packages/ml-service/src/routes/embeddings.ts: REST API endpoints
+
+      - apps/backend/src/plugins/ml.plugin.ts: Integration with main Fastify app
+
+      '
+    design_decisions:
+    - decision: 'Hybrid approach: lightweight sentence-transformers for text, CLIP
+        for cross-modal tasks'
+      rationale: Balances performance and capability - sentence-transformers are fast
+        for text-only tasks, CLIP enables image-text similarity which is crucial for
+        comic generation consistency
+      alternatives_considered:
+      - OpenAI embeddings API (expensive for volume)
+      - Single CLIP model for everything (slower for text-only)
+      - Custom trained embeddings (too complex for M2)
+      ai_implementation_note: AI can generate the model loading, inference pipelines,
+        and API wrappers - focus human effort on model selection and chunking strategies
+    - decision: Supabase pgvector for vector storage with Redis caching layer
+      rationale: Leverages existing Supabase infrastructure, pgvector provides excellent
+        similarity search, Redis reduces redundant embedding generation
+      alternatives_considered:
+      - Pinecone (additional service dependency)
+      - Weaviate (complex setup)
+      - In-memory storage (not persistent)
+      ai_implementation_note: AI excellent for generating database schemas, query
+        builders, and cache management logic
+    - decision: BullMQ for async processing with priority queues
+      rationale: Handles batch processing of entire novels, supports retry logic,
+        integrates well with existing Redis infrastructure
+      alternatives_considered:
+      - Simple async functions (no retry/persistence)
+      - AWS SQS (additional cloud dependency)
+      - Custom queue system (reinventing wheel)
+      ai_implementation_note: AI can generate queue job definitions, retry logic,
+        and monitoring endpoints
+    researched_at: '2026-02-08T18:36:31.414721'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:19:18.542537'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 473cb465
+    planning_hash: f2924df4
+  technical_notes:
+    approach: 'Create a dedicated embedding microservice within the ml-service package
+      that exposes REST endpoints for text/image embedding generation. Implement async
+      queue processing for batch operations (embedding entire novels). Use sentence-transformers
+      for text embeddings and CLIP for cross-modal tasks. Store vectors in Supabase
+      pgvector with Redis caching. Integrate with existing content processing pipeline
+      to automatically generate embeddings during novel ingestion and comic generation
+      phases.
+
+      '
+    external_dependencies:
+    - name: '@huggingface/transformers'
+      version: ^2.17.0
+      reason: JavaScript interface for transformer models, enables client-side embedding
+        generation
+    - name: sentence-transformers
+      version: ^2.2.2
+      reason: Python package for high-quality sentence embeddings - needs Python bridge
+        or API wrapper
+    - name: bullmq
+      version: ^4.15.0
+      reason: Robust queue system for batch embedding processing with Redis backend
+    - name: pgvector
+      version: ^0.1.8
+      reason: PostgreSQL extension for vector similarity search (Supabase native support)
+    - name: '@supabase/postgrest-js'
+      version: ^1.9.0
+      reason: Enhanced queries for vector similarity search operations
+    - name: ioredis
+      version: ^5.3.2
+      reason: Redis client for caching embeddings and queue management
+    files_to_modify:
+    - path: packages/database/supabase/migrations/20240101000000_add_pgvector.sql
+      changes: Add pgvector extension and embedding tables with proper indexes
+    - path: packages/ml-service/package.json
+      changes: 'Add dependencies: @huggingface/transformers, sentence-transformers-js,
+        bullmq, ioredis'
+    - path: apps/backend/src/plugins/ml.plugin.ts
+      changes: Register embedding routes and initialize queue connections
+    - path: packages/shared/src/types/embeddings.ts
+      changes: Add TypeScript interfaces for embedding requests/responses
+    new_files:
+    - path: packages/ml-service/src/services/embedding.service.ts
+      purpose: Core embedding generation logic with model management and caching
+    - path: packages/ml-service/src/models/text-embedder.ts
+      purpose: Sentence-transformers wrapper with lazy loading and batching
+    - path: packages/ml-service/src/models/image-embedder.ts
+      purpose: CLIP model wrapper for image embedding generation
+    - path: packages/ml-service/src/queues/embedding.queue.ts
+      purpose: Bull queue processing for batch embedding jobs
+    - path: packages/ml-service/src/routes/embeddings.ts
+      purpose: REST API endpoints for embedding generation and similarity search
+    - path: packages/ml-service/src/utils/text-chunker.ts
+      purpose: Smart text chunking for long content with overlap handling
+    - path: packages/ml-service/src/utils/vector-storage.ts
+      purpose: Supabase pgvector operations with query optimization
+    - path: packages/ml-service/src/cache/embedding.cache.ts
+      purpose: Redis-based caching layer for frequently accessed embeddings
+    - path: packages/database/supabase/migrations/20240115000000_embedding_tables.sql
+      purpose: Create text_embeddings, image_embeddings, and similarity search functions
+  acceptance_criteria:
+  - criterion: Text embedding generation API returns 384-dimensional vectors for input
+      text using sentence-transformers
+    verification: POST /api/v1/embeddings/text with sample text returns array of 384
+      floats
+  - criterion: Image embedding generation API returns 512-dimensional CLIP vectors
+      for uploaded images
+    verification: POST /api/v1/embeddings/image with test image returns array of 512
+      floats
+  - criterion: Batch processing queue handles novel chapter embedding with <30s processing
+      time per chapter
+    verification: Queue job processes 5000-word chapter and stores embeddings in database
+      within 30 seconds
+  - criterion: Vector similarity search returns semantically related content with
+      >0.7 similarity scores
+    verification: Query embedding finds related stored embeddings with cosine similarity
+      >= 0.7
+  - criterion: Service handles 100 concurrent embedding requests with <5s p95 latency
+    verification: Load test with 100 concurrent requests shows p95 response time under
+      5 seconds
+  testing:
+    unit_tests:
+    - file: packages/ml-service/src/services/__tests__/embedding.service.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Text embedding generation with valid input
+      - Image embedding generation with valid image buffer
+      - Chunking long text into optimal sizes
+      - Caching hit and miss scenarios
+      - Error handling for invalid inputs
+      - Model lazy loading behavior
+    - file: packages/ml-service/src/queues/__tests__/embedding.queue.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Queue job processing success
+      - Batch processing with chunking
+      - Queue failure and retry logic
+      - Progress tracking updates
+    integration_tests:
+    - file: packages/ml-service/src/__tests__/integration/embedding-api.test.ts
+      scenarios:
+      - End-to-end text embedding API flow
+      - End-to-end image embedding API flow
+      - Batch processing queue integration
+      - Database vector storage and retrieval
+      - Redis caching integration
+      - Cross-modal similarity search
+    manual_testing:
+    - step: Upload novel chapter via content processing API
+      expected: Embeddings automatically generated and stored with pgvector indexes
+    - step: Generate comic panel via RunPod integration
+      expected: Image embeddings created and linked to character/scene metadata
+    - step: Search for similar scenes across different novels
+      expected: Returns ranked results with similarity scores and proper pagination
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.65
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Setup database schema with pgvector extension and embedding tables'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Define chunking strategies and similarity thresholds based on
+        content types'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement sentence-transformers text embedding service with model
+        lazy loading'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement CLIP image embedding service with buffer handling'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create Redis caching layer with TTL and invalidation logic'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build Bull queue system for batch processing with progress tracking'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement REST API endpoints with proper validation and error handling'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create vector storage utilities with pgvector integration and similarity
+        search'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate comprehensive unit and integration test suites'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Performance optimization and memory management tuning'
+      done: false
+      ai_friendly: false
+    - task: '[HUMAN] Integration testing with existing content processing pipeline'
+      done: false
+      ai_friendly: false
+- key: T48
+  title: Literary Cultural Context Service
+  type: Feature
+  milestone: M2 - ML Training & Development
+  iteration: I3
+  priority: p2
+  effort: 5
+  area: ml
+  dependsOn:
+  - T40
+  agent_notes:
+    research_findings: "**Context:**\nA Literary Cultural Context Service is essential\
+      \ for generating culturally appropriate and accurate comic adaptations from\
+      \ novels. This service would analyze literary works to extract cultural, historical,\
+      \ and social context that informs visual representation decisions. For example,\
+      \ adapting \"Pride and Prejudice\" requires understanding Regency-era clothing,\
+      \ architecture, social customs, and class dynamics to generate accurate comic\
+      \ panels. Without this context, AI-generated visuals might produce anachronistic\
+      \ or culturally inappropriate imagery that breaks immersion and reduces adaptation\
+      \ quality.\n\n**Technical Approach:**\nImplement a microservice that combines\
+      \ NLP analysis with cultural knowledge databases. Use LLM-based text analysis\
+      \ to extract cultural markers (time period, geography, social class, customs)\
+      \ from novel text, then enrich this with structured cultural context data. Create\
+      \ a context scoring system that weights different cultural elements by relevance\
+      \ and confidence. Integrate with existing ML pipeline to provide context-aware\
+      \ prompts for image generation.\n\n**AI Suitability Analysis:**\n- High AI effectiveness:\
+      \ CRUD operations for cultural context storage, boilerplate service setup, database\
+      \ schemas, test scaffolding, API endpoint generation, data transformation utilities\n\
+      - Medium AI effectiveness: LLM prompt engineering for cultural extraction, integration\
+      \ with existing ML pipeline, caching layer implementation, API documentation\n\
+      - Low AI effectiveness: Cultural knowledge curation strategy, context weighting\
+      \ algorithms, cultural sensitivity validation logic, cross-cultural accuracy\
+      \ assessment\n\n**Dependencies:**\n- External: @anthropic-ai/sdk, openai, langchain,\
+      \ cultural-knowledge APIs (potentially DBpedia, Wikidata), date parsing libraries\n\
+      - Internal: Existing ML pipeline service, novel processing service, image generation\
+      \ prompts system, user preference service\n\n**Risks:**\n- Cultural bias in\
+      \ training data: Implement diverse cultural consultants and bias detection\n\
+      - API costs for cultural analysis: Cache aggressively and batch process where\
+      \ possible  \n- Accuracy of cultural extraction: Human validation workflow for\
+      \ high-stakes adaptations\n- Performance impact on generation pipeline: Async\
+      \ processing with intelligent caching\n\n**Complexity Notes:**\nMore complex\
+      \ than initially estimated due to cultural sensitivity requirements and need\
+      \ for accuracy validation. However, AI agents can significantly accelerate the\
+      \ service infrastructure and basic NLP integration work, allowing human focus\
+      \ on cultural accuracy and ethical considerations.\n\n**Key Files:**\n- apps/api/src/services/cultural-context/:\
+      \ New service directory\n- packages/shared/src/types/cultural-context.ts: Shared\
+      \ type definitions\n- apps/api/src/routes/cultural-context.ts: API endpoints\n\
+      - packages/ml/src/context-analyzer.ts: LLM-based cultural extraction\n- apps/api/src/lib/cultural-knowledge-db.ts:\
+      \ Cultural data integration\n"
+    design_decisions:
+    - decision: Hybrid approach combining LLM analysis with structured cultural databases
+      rationale: LLMs excel at extracting implicit cultural markers from text, but
+        structured databases provide authoritative facts about historical periods,
+        geography, and customs
+      alternatives_considered:
+      - Pure LLM approach
+      - Rule-based cultural extraction
+      - Crowdsourced cultural tagging
+      ai_implementation_note: AI agent can generate the service boilerplate, database
+        integration, and LLM prompt templates, while humans design the cultural accuracy
+        validation logic
+    - decision: Microservice architecture with async processing
+      rationale: Cultural analysis is computationally expensive and doesn't need to
+        block the main adaptation pipeline. Separate service allows independent scaling
+        and development.
+      alternatives_considered:
+      - Embedded service within ML pipeline
+      - Client-side cultural processing
+      - Batch-only processing
+      ai_implementation_note: AI agent excellent for generating Fastify service structure,
+        async job processing setup, and API integration patterns
+    researched_at: '2026-02-08T18:36:58.381290'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:19:44.851385'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 17de3d99
+    planning_hash: 8ea78c96
+  technical_notes:
+    approach: 'Create a dedicated Fastify microservice that accepts novel text chunks
+      and returns structured cultural context objects. Use LLMs to extract cultural
+      markers (time, place, social dynamics) and enrich with authoritative cultural
+      databases. Implement confidence scoring and human validation workflows for accuracy.
+      Cache results aggressively and provide both real-time and batch processing modes
+      for different use cases.
+
+      '
+    external_dependencies:
+    - name: '@anthropic-ai/sdk'
+      version: ^0.20.0
+      reason: Claude for nuanced cultural context extraction from literary text
+    - name: langchain
+      version: ^0.1.0
+      reason: Chain together cultural analysis steps and manage LLM interactions
+    - name: sparql-http-client
+      version: ^2.4.1
+      reason: Query structured cultural knowledge from Wikidata/DBpedia
+    - name: compromise
+      version: ^14.10.0
+      reason: NLP preprocessing for cultural marker identification
+    files_to_modify:
+    - path: apps/api/src/server.ts
+      changes: Register cultural-context routes and service initialization
+    - path: packages/ml/src/pipeline.ts
+      changes: Integrate cultural context enrichment in image generation workflow
+    new_files:
+    - path: apps/api/src/services/cultural-context/index.ts
+      purpose: Main cultural context service with text analysis orchestration
+    - path: apps/api/src/services/cultural-context/cultural-analyzer.ts
+      purpose: LLM-based cultural marker extraction logic
+    - path: apps/api/src/services/cultural-context/knowledge-enricher.ts
+      purpose: Integration with external cultural databases (DBpedia, Wikidata)
+    - path: apps/api/src/services/cultural-context/confidence-scorer.ts
+      purpose: Cultural context confidence calculation and weighting
+    - path: apps/api/src/routes/cultural-context.ts
+      purpose: REST API endpoints for cultural analysis requests
+    - path: apps/api/src/lib/cultural-knowledge-db.ts
+      purpose: Database adapter for cultural context storage and caching
+    - path: packages/shared/src/types/cultural-context.ts
+      purpose: TypeScript interfaces for cultural context objects
+    - path: packages/ml/src/context-analyzer.ts
+      purpose: ML package integration for cultural context processing
+    - path: apps/api/src/services/cultural-context/cache.ts
+      purpose: Redis-based caching layer for cultural analysis results
+  acceptance_criteria:
+  - criterion: Service extracts cultural markers (time period, geography, social class,
+      customs) from novel text with >80% accuracy on validation dataset
+    verification: Run integration test suite with pre-validated literary excerpts
+      and verify extracted markers match expert annotations
+  - criterion: API responds to cultural context requests within 2 seconds for text
+      chunks up to 5000 characters
+    verification: 'Execute load test with k6: `npm run test:load -- cultural-context`
+      and verify p95 < 2000ms'
+  - criterion: Service integrates with ML pipeline to enhance image generation prompts
+      with cultural context
+    verification: 'Manual test: Submit Pride and Prejudice excerpt, verify generated
+      image prompts include ''Regency era'', ''English countryside'', ''1810s fashion'''
+  - criterion: Cultural context confidence scoring system provides reliability metrics
+      for downstream services
+    verification: Unit test confidence calculation algorithm and verify scores between
+      0-1 with appropriate thresholds
+  - criterion: Comprehensive API documentation with cultural context examples available
+    verification: Check `/docs/cultural-context` endpoint returns OpenAPI spec with
+      example requests/responses
+  testing:
+    unit_tests:
+    - file: packages/ml/src/__tests__/context-analyzer.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Extract time period from historical fiction text
+      - Identify geographical markers in descriptive passages
+      - Handle malformed or non-literary text gracefully
+      - Calculate confidence scores for cultural markers
+    - file: apps/api/src/services/cultural-context/__tests__/service.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Process text chunk and return structured context
+      - Cache results for repeated text analysis
+      - Handle API timeout and fallback scenarios
+      - Validate context enrichment from knowledge databases
+    integration_tests:
+    - file: apps/api/src/__tests__/integration/cultural-context.test.ts
+      scenarios:
+      - End-to-end cultural analysis pipeline with real novel excerpts
+      - Integration with external cultural knowledge APIs
+      - ML pipeline context injection workflow
+    manual_testing:
+    - step: Submit Victorian novel excerpt via API endpoint
+      expected: Returns context object with Victorian era markers, British geography,
+        class structure indicators
+    - step: Test cultural sensitivity with diverse literary sources
+      expected: Appropriate context extraction without cultural bias or stereotyping
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.65
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Setup service directory structure and boilerplate files'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create TypeScript interfaces for cultural context types'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design cultural marker extraction algorithm and weighting strategy'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement LLM integration for text analysis using langchain'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build REST API endpoints with Fastify schema validation'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create database schemas and caching layer implementation'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Implement cultural sensitivity validation and bias detection'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Write comprehensive unit test suites for all services'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate integration tests for ML pipeline connection'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Manual testing with diverse cultural content and bias review'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Generate API documentation with OpenAPI spec'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Code review focusing on cultural accuracy and ethical considerations'
+      done: false
+      ai_friendly: false
+- key: T49
+  title: Book Timeline Extractor
+  type: Feature
+  milestone: M2 - ML Training & Development
+  iteration: I3
+  priority: p2
+  effort: 3
+  area: ml
+  dependsOn:
+  - T41
+  agent_notes:
+    research_findings: '**Context:**
+
+      The Book Timeline Extractor is needed to analyze uploaded novels and extract
+      a chronological sequence of key events, character introductions, and plot points.
+      This is crucial for the comic transformation pipeline as it provides the structured
+      narrative foundation that the ML models use to generate coherent comic panels,
+      maintain character consistency across scenes, and ensure proper story pacing.
+      Without timeline extraction, the system would struggle to understand narrative
+      flow and could generate disjointed or out-of-sequence comic content.
+
+
+      **Technical Approach:**
+
+      Implement a multi-stage NLP pipeline using LLM-based text analysis:
+
+      1. Chapter/section segmentation using regex and NLP sentence boundaries
+
+      2. LLM-powered event extraction with structured prompts (OpenAI/Anthropic)
+
+      3. Timeline reconstruction using temporal markers and narrative sequence
+
+      4. Character tracking across timeline events
+
+      5. Event classification (dialogue, action, description, setting changes)
+
+      6. PostgreSQL storage with temporal relationships and JSON event metadata
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: API integration boilerplate, database schemas, test
+      fixtures, CRUD operations for timeline storage, prompt template generation
+
+      - Medium AI effectiveness: LLM response parsing, event classification logic,
+      timeline sorting algorithms, error handling patterns
+
+      - Low AI effectiveness: Prompt engineering strategy, narrative understanding
+      heuristics, timeline conflict resolution logic, performance optimization decisions
+
+
+      **Dependencies:**
+
+      - External: @anthropic-ai/sdk, openai, natural (NLP utilities), date-fns (temporal
+      parsing), zod (schema validation)
+
+      - Internal: Existing LLM service infrastructure, book upload/storage system,
+      database models, shared TypeScript types
+
+
+      **Risks:**
+
+      - LLM hallucination in event extraction: Use multiple validation passes and
+      confidence scoring
+
+      - Large book processing timeouts: Implement chunked processing with progress
+      tracking
+
+      - Timeline accuracy with complex narratives: Add human review workflow for timeline
+      validation
+
+      - Token costs scaling with book length: Implement smart chunking and caching
+      strategies
+
+
+      **Complexity Notes:**
+
+      More complex than initially estimated due to narrative understanding requirements.
+      However, AI agents can significantly accelerate the boilerplate-heavy aspects
+      (API integrations, data models, tests). The core challenge is designing effective
+      prompts and validation logic, which requires human architectural thinking.
+
+
+      **Key Files:**
+
+      - packages/ml/src/services/timeline-extractor.ts: Main service implementation
+
+      - packages/ml/src/types/timeline.ts: TypeScript interfaces for events/timeline
+
+      - packages/database/migrations/: Timeline and event tables
+
+      - packages/ml/src/prompts/timeline-extraction.ts: LLM prompt templates
+
+      - packages/api/src/routes/books/timeline.ts: REST endpoints for timeline operations
+
+      '
+    design_decisions:
+    - decision: Use LLM-based extraction over rule-based NLP
+      rationale: Modern LLMs excel at narrative understanding and context extraction
+        compared to traditional NLP libraries. Provides better handling of literary
+        language, metaphors, and complex temporal structures.
+      alternatives_considered:
+      - spaCy + rule-based extraction
+      - Fine-tuned transformer models
+      - Hybrid LLM + NLP approach
+      ai_implementation_note: AI agent can generate comprehensive prompt templates,
+        API integration code, and test scenarios for LLM interactions
+    - decision: PostgreSQL JSON columns for event metadata storage
+      rationale: Provides flexibility for varying event properties while maintaining
+        relational integrity for timeline ordering and character relationships. Enables
+        complex queries on event attributes.
+      alternatives_considered:
+      - Pure JSON document store
+      - Separate tables for each event type
+      - Graph database approach
+      ai_implementation_note: AI agent can create database schemas, migration files,
+        and TypeScript types for JSON validation
+    - decision: Chunked processing with progress tracking
+      rationale: Books can be 50k-200k+ words. Chunking prevents timeouts, enables
+        parallel processing, and provides user feedback. Critical for production scalability.
+      alternatives_considered:
+      - Full document processing
+      - Chapter-by-chapter sequential
+      - Streaming processing
+      ai_implementation_note: AI agent can implement job queue integration, progress
+        tracking APIs, and error recovery mechanisms
+    researched_at: '2026-02-08T18:37:26.595126'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:20:10.644317'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 2331bc27
+    planning_hash: 5bfc1b74
+  technical_notes:
+    approach: 'Build a service that accepts uploaded book text and returns a structured
+      timeline of narrative events. The service will use chunked text processing to
+      send segments to LLMs with carefully crafted prompts for event extraction. Events
+      will be validated, deduplicated, and stored in PostgreSQL with temporal relationships.
+      The system will support incremental processing and provide real-time progress
+      updates through WebSocket or polling endpoints.
+
+      '
+    external_dependencies:
+    - name: '@anthropic-ai/sdk'
+      version: ^0.24.0
+      reason: Primary LLM for narrative analysis and event extraction
+    - name: natural
+      version: ^6.0.0
+      reason: Text preprocessing, sentence tokenization, and basic NLP utilities
+    - name: date-fns
+      version: ^2.30.0
+      reason: Parsing and normalizing temporal expressions found in text
+    - name: zod
+      version: ^3.22.0
+      reason: Runtime validation of LLM responses and timeline data structures
+    - name: bullmq
+      version: ^4.15.0
+      reason: Job queue for background timeline processing of large books
+    files_to_modify:
+    - path: packages/database/src/models/book.ts
+      changes: Add timeline extraction status fields and relationships
+    - path: packages/api/src/routes/books/index.ts
+      changes: Add timeline extraction trigger endpoint
+    new_files:
+    - path: packages/ml/src/services/timeline-extractor.ts
+      purpose: Main timeline extraction orchestration service
+    - path: packages/ml/src/services/event-classifier.ts
+      purpose: LLM-based event classification and metadata extraction
+    - path: packages/ml/src/services/character-tracker.ts
+      purpose: Character entity recognition and consistency tracking
+    - path: packages/ml/src/types/timeline.ts
+      purpose: TypeScript interfaces for timeline events and metadata
+    - path: packages/ml/src/prompts/timeline-extraction.ts
+      purpose: LLM prompt templates for event extraction
+    - path: packages/database/migrations/20240115_create_timeline_tables.sql
+      purpose: Database schema for timelines and events
+    - path: packages/api/src/routes/books/timeline.ts
+      purpose: REST endpoints for timeline CRUD operations
+    - path: packages/ml/src/utils/text-chunker.ts
+      purpose: Smart text chunking with context preservation
+    - path: packages/ml/src/utils/temporal-parser.ts
+      purpose: Extract and normalize temporal expressions
+  acceptance_criteria:
+  - criterion: System extracts chronological timeline of events from uploaded book
+      text with at least 90% accuracy for main plot points
+    verification: Upload test novels and manually verify extracted events match narrative
+      sequence using GET /api/books/{id}/timeline
+  - criterion: Timeline extraction completes within 30 seconds for books up to 100k
+      words with progress tracking
+    verification: Time extraction process and verify WebSocket progress updates are
+      sent every 10% completion
+  - criterion: Each timeline event includes structured metadata (characters, location,
+      event_type, confidence_score, chapter_reference)
+    verification: Query timeline events via API and validate all required fields are
+      present with correct data types
+  - criterion: Character consistency tracking identifies and links character appearances
+      across timeline events
+    verification: Verify character entity linking in timeline events for multi-chapter
+      character arcs
+  - criterion: System handles large books through chunked processing without memory
+      issues or timeouts
+    verification: Process 200k+ word novels and monitor memory usage stays under 512MB
+      during extraction
+  testing:
+    unit_tests:
+    - file: packages/ml/src/services/__tests__/timeline-extractor.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Event extraction from text chunks
+      - Timeline sorting and deduplication
+      - Character entity linking
+      - Error handling for malformed LLM responses
+      - Confidence score calculation
+    - file: packages/ml/src/services/__tests__/event-classifier.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Event type classification accuracy
+      - Temporal marker extraction
+      - Character mention detection
+    integration_tests:
+    - file: packages/api/src/__tests__/integration/timeline-extraction.test.ts
+      scenarios:
+      - Full book upload to timeline extraction flow
+      - Progress tracking via WebSocket
+      - Timeline API CRUD operations
+      - Large file processing with chunking
+    manual_testing:
+    - step: Upload 'Pride and Prejudice' via API and trigger timeline extraction
+      expected: 'Timeline extracted with key events: Elizabeth meets Darcy, Wickham
+        scandal, proposal scenes, etc.'
+    - step: Monitor extraction progress for 50k word novel
+      expected: WebSocket updates show 10%, 20%, 30%... completion with ETA estimates
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.65
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create TypeScript interfaces and types for timeline events, characters,
+        and metadata structures'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate database migration scripts for timeline and event tables
+        with proper indexes'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design LLM prompt engineering strategy for event extraction with
+        context preservation'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement text chunking service with overlap handling and chapter
+        boundary detection'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build event classification service with LLM API integration and
+        response parsing'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Develop timeline reconstruction logic with conflict resolution
+        and narrative understanding'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Create character tracking service with entity recognition and linking
+        algorithms'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement REST API endpoints for timeline operations with validation
+        and error handling'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate comprehensive unit tests for all service components with
+        mock LLM responses'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Performance optimization and prompt tuning based on test results
+        with various book genres'
+      done: false
+      ai_friendly: false
+- key: T58
+  title: SDXL LoRA Training
+  type: Task
+  milestone: M2 - ML Training & Development
+  iteration: I4
+  priority: p1
+  effort: 8
+  area: ml
+  dependsOn:
+  - T52
+  agent_notes:
+    research_findings: '**Context:**
+
+      SDXL LoRA training enables fine-tuning Stable Diffusion XL models with Low-Rank
+      Adaptation for Morpheus-specific comic generation. This allows creating custom
+      artistic styles, character consistency, and comic-specific visual elements without
+      full model retraining. Critical for generating cohesive comic panels that match
+      user preferences and maintain visual consistency across chapters.
+
+
+      **Technical Approach:**
+
+      Implement LoRA training pipeline using Diffusers library with PEFT (Parameter
+      Efficient Fine Tuning). Create training jobs that run on RunPod infrastructure,
+      with dataset preparation, training monitoring, and model artifact storage. Integrate
+      with existing Supabase storage for training images and metadata. Build REST
+      API endpoints for initiating training jobs and monitoring progress.
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: Training configuration generators, data preprocessing
+      utilities, API endpoint CRUD operations, validation schemas, test suites for
+      training pipeline
+
+      - Medium AI effectiveness: RunPod integration code, model loading/saving utilities,
+      training progress monitoring, error handling patterns
+
+      - Low AI effectiveness: Hyperparameter optimization strategies, training data
+      curation logic, custom loss functions, architectural decisions for distributed
+      training
+
+
+      **Dependencies:**
+
+      - External: diffusers, peft, torch, transformers, accelerate, datasets, runpod-python,
+      pillow
+
+      - Internal: Existing ML service architecture, Supabase storage service, job
+      queue system, user authentication
+
+
+      **Risks:**
+
+      - GPU resource exhaustion: Implement training job queuing and resource monitoring
+
+      - Training data copyright issues: Add data provenance tracking and usage rights
+      validation
+
+      - Model convergence failures: Create automated hyperparameter search and early
+      stopping
+
+      - Storage costs for large datasets: Implement data compression and cleanup policies
+
+
+      **Complexity Notes:**
+
+      More complex than typical ML integration due to distributed training requirements
+      and resource management. AI assistance will significantly accelerate boilerplate
+      generation and testing, but core training logic requires careful human oversight
+      for quality and convergence.
+
+
+      **Key Files:**
+
+      - packages/ml/src/services/lora-trainer.ts: Core training service
+
+      - packages/ml/src/models/training-job.ts: Job management types
+
+      - apps/backend/src/routes/training/: API endpoints
+
+      - packages/ml/src/utils/dataset-preparation.ts: Data preprocessing
+
+      - apps/backend/src/services/runpod-client.ts: GPU infrastructure client
+
+      '
+    design_decisions:
+    - decision: Use Diffusers + PEFT for LoRA implementation
+      rationale: Industry standard with excellent SDXL support, active maintenance,
+        and good documentation
+      alternatives_considered:
+      - Custom LoRA implementation
+      - Kohya SS trainer
+      - LoRA diffusion from scratch
+      ai_implementation_note: AI can generate most configuration and utility code
+        from Diffusers documentation
+    - decision: Queue-based training job management
+      rationale: Prevents GPU resource conflicts and enables cost optimization through
+        batch processing
+      alternatives_considered:
+      - Synchronous training
+      - Direct RunPod spawning
+      - Kubernetes jobs
+      ai_implementation_note: AI excellent for job queue CRUD operations and status
+        management logic
+    - decision: Supabase storage for training artifacts
+      rationale: Consistent with existing architecture, built-in CDN, and PostgreSQL
+        metadata integration
+      alternatives_considered:
+      - S3 direct
+      - RunPod storage
+      - Local filesystem
+      ai_implementation_note: AI can generate upload/download utilities and database
+        schemas
+    researched_at: '2026-02-08T18:37:52.517284'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:20:34.845711'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 5dd5ea28
+    planning_hash: c6f2456c
+  technical_notes:
+    approach: 'Create a training service that accepts user datasets, preprocesses
+      images with automated captioning, generates LoRA training configurations, and
+      submits jobs to RunPod GPU instances. Implement progress tracking via webhooks
+      and store trained models in Supabase storage. Build RESTful APIs for job management
+      and integrate with existing user authentication. Use queue-based processing
+      to manage GPU resources efficiently.
+
+      '
+    external_dependencies:
+    - name: diffusers
+      version: ^0.25.0
+      reason: SDXL model loading and LoRA training pipeline
+    - name: peft
+      version: ^0.7.0
+      reason: Parameter-efficient fine-tuning with LoRA adapters
+    - name: torch
+      version: ^2.1.0
+      reason: Core PyTorch for model training and tensor operations
+    - name: accelerate
+      version: ^0.25.0
+      reason: Distributed training and mixed precision support
+    - name: datasets
+      version: ^2.16.0
+      reason: Dataset loading and preprocessing utilities
+    - name: runpod-python
+      version: ^1.5.0
+      reason: RunPod API client for GPU instance management
+    - name: transformers
+      version: ^4.36.0
+      reason: CLIP text encoder and tokenizer utilities
+    files_to_modify:
+    - path: apps/backend/src/routes/index.ts
+      changes: Add training route imports and middleware
+    - path: packages/shared/src/types/training.ts
+      changes: Extend training job types for LoRA-specific fields
+    - path: apps/backend/src/middleware/auth.ts
+      changes: Add training endpoint authentication checks
+    new_files:
+    - path: packages/ml/src/services/lora-trainer.ts
+      purpose: Core LoRA training orchestration service
+    - path: packages/ml/src/models/training-job.ts
+      purpose: Training job data models and validation schemas
+    - path: packages/ml/src/utils/dataset-preparation.ts
+      purpose: Image preprocessing, validation, and captioning utilities
+    - path: apps/backend/src/routes/training/lora.ts
+      purpose: LoRA training REST API endpoints
+    - path: apps/backend/src/services/runpod-client.ts
+      purpose: RunPod GPU infrastructure integration client
+    - path: packages/ml/src/config/training-presets.ts
+      purpose: Default LoRA training configurations and hyperparameters
+    - path: apps/backend/src/services/training-queue.ts
+      purpose: Job queue management for GPU resource allocation
+    - path: packages/ml/src/utils/model-storage.ts
+      purpose: Supabase storage utilities for model artifacts
+  acceptance_criteria:
+  - criterion: LoRA training jobs can be initiated via REST API with dataset upload
+    verification: POST /api/training/lora with multipart form data returns job ID
+      and queues training
+  - criterion: Training progress is tracked and accessible via webhooks and polling
+      endpoints
+    verification: GET /api/training/jobs/{id}/status returns progress percentage and
+      training metrics
+  - criterion: Trained LoRA models are stored in Supabase and downloadable via authenticated
+      endpoints
+    verification: Successful training job produces downloadable .safetensors file
+      at /api/training/jobs/{id}/download
+  - criterion: Training jobs handle GPU resource constraints with queuing system
+    verification: Multiple concurrent training requests are queued when GPU capacity
+      is exceeded
+  - criterion: Dataset preprocessing includes automated captioning and validation
+    verification: Uploaded images are processed with BLIP2 captions and invalid files
+      are rejected with clear error messages
+  testing:
+    unit_tests:
+    - file: packages/ml/src/services/__tests__/lora-trainer.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Training configuration generation
+      - Dataset validation and preprocessing
+      - Error handling for invalid inputs
+      - Progress tracking updates
+    - file: packages/ml/src/utils/__tests__/dataset-preparation.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Image validation and resizing
+      - Caption generation mocking
+      - File format conversion
+    - file: apps/backend/src/services/__tests__/runpod-client.test.ts
+      coverage_target: 80%
+      scenarios:
+      - Job submission to RunPod
+      - Status polling and webhooks
+      - GPU resource availability checks
+    integration_tests:
+    - file: apps/backend/src/__tests__/integration/lora-training.test.ts
+      scenarios:
+      - Complete training job lifecycle
+      - Job queue management
+      - Model storage and retrieval
+      - Authentication and authorization
+    manual_testing:
+    - step: Upload 10-20 character images via training API
+      expected: Job queued successfully, preprocessing begins
+    - step: Monitor training progress via status endpoint
+      expected: Progress updates from 0-100% with loss metrics
+    - step: Download trained model after completion
+      expected: LoRA weights file downloads successfully
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.65
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create training job data models and TypeScript interfaces'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement dataset preprocessing utilities with image validation'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Define LoRA training hyperparameters and optimization strategy'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Build RunPod client service with job submission and monitoring'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create REST API endpoints for training job CRUD operations'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Implement training queue logic with GPU resource management'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Add Supabase integration for model storage and retrieval'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate comprehensive unit test suites for all services'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create integration tests for end-to-end training workflow'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Manual testing with real datasets and GPU resources'
+      done: false
+      ai_friendly: false

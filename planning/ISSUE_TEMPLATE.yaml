@@ -1,0 +1,184 @@
+# Template for issue definition
+# This structure should be followed by research/planning agents
+
+# Metadata
+key: T1                           # Unique task identifier
+title: 'Task Title'               # Short descriptive title
+type: Task                        # Task | Feature | Bug
+milestone: M0 - Infrastructure & Setup
+iteration: I1                     # I1-I7
+priority: p0                      # p0 (critical) | p1 (high) | p2 (medium) | p3 (low)
+effort: 5                         # Story points (1-13)
+area: setup                       # setup | backend | ml | ingestion | image-gen | comic | distribution | ecommerce | release
+
+# Dependencies
+dependsOn: []                     # List of task keys: [T1, T2]
+blockedBy: []                     # External blockers (optional)
+
+# GitHub Integration
+github_issue: 1                   # GitHub issue number (will be assigned after sync)
+assignees: []                     # GitHub usernames
+labels:                           # Additional labels beyond area/priority
+  - technical-debt
+
+# Detailed Description
+description: |
+  **Context:**
+  Provide background and context for this task. Why is it needed?
+  
+  **Goal:**
+  What is the primary objective? What problem does it solve?
+  
+  **Scope:**
+  What is included and what is explicitly out of scope?
+  
+  **Business Value:**
+  How does this contribute to project goals?
+
+# Acceptance Criteria
+acceptance_criteria:
+  - criterion: "System can do X"
+    verification: "Run test Y and verify output Z"
+  - criterion: "Performance meets SLA"
+    verification: "Load test shows <100ms response time"
+  - criterion: "Documentation is complete"
+    verification: "README.md updated with usage examples"
+
+# Technical Implementation
+technical_notes:
+  approach: |
+    High-level approach to implementation.
+    Technologies, patterns, architecture decisions.
+  
+  files_to_modify:
+    - path: apps/backend/src/services/example.ts
+      changes: "Add new method for X"
+    - path: apps/backend/src/routes/example.ts
+      changes: "Register new endpoint"
+  
+  new_files:
+    - path: apps/backend/src/services/new-service.ts
+      purpose: "Handle business logic for feature X"
+  
+  external_dependencies:
+    - name: "some-npm-package"
+      version: "^1.0.0"
+      reason: "Provides functionality for X"
+  
+  configuration:
+    env_vars:
+      - name: FEATURE_FLAG_X
+        value: "true"
+        description: "Enable feature X"
+
+# Testing Strategy
+testing:
+  unit_tests:
+    - file: apps/backend/src/services/__tests__/example.test.ts
+      coverage_target: 90%
+      scenarios:
+        - "Happy path"
+        - "Error handling"
+        - "Edge cases"
+  
+  integration_tests:
+    - file: apps/backend/src/routes/__tests__/example.integration.test.ts
+      scenarios:
+        - "End-to-end flow"
+        - "Database interactions"
+  
+  e2e_tests:
+    - file: apps/dashboard/e2e/example.spec.ts
+      scenarios:
+        - "User can complete workflow"
+  
+  manual_testing:
+    - step: "Navigate to /dashboard"
+      expected: "Page loads without errors"
+    - step: "Click on X button"
+      expected: "Modal opens with Y content"
+
+# Documentation
+documentation:
+  updates_needed:
+    - file: README.md
+      section: "Usage"
+      content: "Add documentation for new feature"
+    - file: docs/API.md
+      section: "Endpoints"
+      content: "Document new API endpoint"
+  
+  new_docs:
+    - file: docs/features/new-feature.md
+      content: "Complete guide for feature X"
+
+# Risks & Mitigations
+risks:
+  - risk: "Database migration may cause downtime"
+    probability: medium
+    impact: high
+    mitigation: "Run migration during maintenance window, test on staging first"
+  
+  - risk: "Third-party API may have rate limits"
+    probability: high
+    impact: medium
+    mitigation: "Implement retry logic with exponential backoff, monitor rate limit headers"
+
+# Time Estimates
+estimates:
+  development: 3d          # Development time
+  code_review: 0.5d        # Review and feedback cycles
+  testing: 1d              # QA and testing
+  documentation: 0.5d      # Writing docs
+  total: 5d                # Total calendar days
+
+# Progress Tracking
+progress:
+  status: not-started      # not-started | in-progress | in-review | blocked | done
+  started_at: null         # ISO 8601 timestamp
+  completed_at: null       # ISO 8601 timestamp
+  blocked_reason: null     # If status=blocked, explain why
+  
+  checklist:
+    - task: "Set up development environment"
+      done: false
+    - task: "Write unit tests"
+      done: false
+    - task: "Implement feature"
+      done: false
+    - task: "Update documentation"
+      done: false
+    - task: "Code review"
+      done: false
+    - task: "Merge to main"
+      done: false
+
+# Notes from Planning/Research Agents
+agent_notes:
+  research_findings: |
+    Key findings from research phase:
+    - Technology X is best suited for this use case
+    - Similar implementation found in open-source project Y
+    - Estimated complexity: Medium
+  
+  design_decisions:
+    - decision: "Use PostgreSQL over MongoDB"
+      rationale: "ACID compliance required for this feature"
+      alternatives_considered: ["MongoDB", "DynamoDB"]
+  
+  open_questions:
+    - question: "Should we support real-time updates?"
+      status: pending
+      assigned_to: "product-team"
+    
+    - question: "What's the expected data volume?"
+      status: answered
+      answer: "~100K records per day"
+
+# Related Links
+links:
+  design_docs: []
+  figma: null
+  slack_thread: null
+  related_issues: []
+  prs: []

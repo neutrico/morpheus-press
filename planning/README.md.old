@@ -1,0 +1,113 @@
+# PI Planning System - Quick Start
+
+> **Deterministic planning system with zero hallucination**
+
+## What This Is
+
+A complete workflow for planning development work using:
+
+- **YAML** as single source of truth
+- **Copilot Agents** for research & planning (controlled)
+- **CLI tools** for validation & GitHub publishing
+- **Zero hallucination** - LLMs only generate `.md` files, not issues
+
+## TL;DR
+
+```bash
+# 1. Validate your plan
+pnpm pi:validate
+
+# 2. Generate planning docs
+pnpm pi:plan
+
+# 3. Create artifact templates
+pnpm pi:artifacts
+
+# 4. Use Copilot agents to fill templates
+@workspace Using task-researcher.agent.md, research task T1
+@workspace Using task-planner.agent.md, plan task T1
+
+# 5. Review & approve (human gate)
+# Check .copilot-tracking/ files
+
+# 6. Publish to GitHub
+export GITHUB_TOKEN="ghp_..."
+pnpm pi:publish
+```
+
+## Key Files
+
+- [`planning/pi.yaml`](planning/pi.yaml) - **Edit this** - Epic/Feature/Task
+  definitions
+- [`docs/PI_PLANNING_SYSTEM.md`](docs/PI_PLANNING_SYSTEM.md) - **Read this** -
+  Complete guide
+- [`.github/agents/`](.github/agents/) - Copilot agent profiles
+
+## Quick Example
+
+### 1. Define a task in `planning/pi.yaml`:
+
+```yaml
+tasks:
+    - key: T1
+      title: "TASK: Implement book CRUD service"
+      area: library
+      priority: p0
+      effort: 3
+      dependsOn: []
+      qa:
+          unit: required
+          integration: required
+          coverage:
+              statements: 95
+              branches: 90
+```
+
+### 2. Generate & fill artifacts:
+
+```bash
+pnpm pi:artifacts  # Creates templates
+```
+
+Then use Copilot to research and plan:
+
+```
+@workspace Research T1 and fill .copilot-tracking/research/...
+@workspace Plan T1 based on research
+```
+
+### 3. Publish to GitHub:
+
+```bash
+export GITHUB_TOKEN="ghp_your_token"
+pnpm pi:publish
+```
+
+Creates:
+
+- Epic issue (#123)
+- Feature issue (#124, parent: #123)
+- Task issue (#125, parent: #124)
+- Sets Priority, Effort, Iteration in Project board
+
+## Why This Approach?
+
+| Traditional                                      | This System                                                         |
+| ------------------------------------------------ | ------------------------------------------------------------------- |
+| Copilot creates issues directly → hallucinations | Copilot creates `.md` files → human reviews → deterministic publish |
+| Vague task descriptions                          | QA-first (unit/integration/e2e mandatory)                           |
+| No dependencies → chaos                          | Dependency graph → topological order                                |
+| Manual effort tracking                           | YAML → auto-schedule with capacity                                  |
+| Lost context                                     | Full traceability: Issue → Plan → Research                          |
+
+## Next Steps
+
+1. **Read full guide**: [docs/PI_PLANNING_SYSTEM.md](docs/PI_PLANNING_SYSTEM.md)
+2. **Configure your PI**: Edit [`planning/pi.yaml`](planning/pi.yaml)
+3. **Run validation**: `pnpm pi:validate`
+4. **Try one Epic**: Test workflow on a small Epic first
+
+---
+
+**For detailed documentation, troubleshooting, and advanced usage:**\
+👉 [Complete Guide](docs/PI_PLANNING_SYSTEM.md)

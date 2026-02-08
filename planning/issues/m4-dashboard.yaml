@@ -1,0 +1,582 @@
+milestone: M4 - Dashboard & UI
+task_count: 2
+issues:
+- key: T70
+  title: Quality Control Dashboard
+  type: Feature
+  milestone: M4 - Dashboard & UI
+  iteration: I5
+  priority: p1
+  effort: 3
+  area: comic
+  dependsOn:
+  - T64
+  agent_notes:
+    research_findings: '**Context:**
+
+      Quality Control Dashboard addresses the critical need for content moderation
+      and quality assurance in the Morpheus comic generation pipeline. As an AI-driven
+      platform transforming novels to comics, Morpheus generates large volumes of
+      visual and textual content that requires human oversight for brand safety, content
+      appropriateness, artistic quality, and narrative coherence. This dashboard enables
+      content moderators, editors, and quality assurance teams to efficiently review,
+      approve, reject, and provide feedback on generated comics before publication.
+
+
+      **Technical Approach:**
+
+      - **Dashboard Architecture**: Next.js 16 server components with React 19 for
+      optimal performance
+
+      - **Real-time Updates**: Supabase real-time subscriptions for live queue updates
+
+      - **Image Processing**: Sharp for thumbnail generation and optimization
+
+      - **State Management**: Zustand for complex filter/queue state management
+
+      - **UI Components**: Radix UI primitives with Tailwind CSS for consistent design
+
+      - **Data Fetching**: React Query (TanStack Query) for caching and optimistic
+      updates
+
+      - **Bulk Operations**: Background job processing via BullMQ for batch approvals/rejections
+
+      - **Analytics**: Integration with existing analytics service for QA metrics
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: CRUD operations for QA records, basic UI components
+      (tables, forms, buttons), database queries and mutations, TypeScript interfaces
+      for QA data models, unit tests for utility functions
+
+      - Medium AI effectiveness: Complex filtering logic implementation, image gallery
+      components, bulk operation workflows, API route handlers, integration with existing
+      auth system
+
+      - Low AI effectiveness: UX/UI design decisions for optimal reviewer workflow,
+      quality scoring algorithms and criteria definition, dashboard layout and information
+      hierarchy, business logic for escalation workflows
+
+
+      **Dependencies:**
+
+      - External: @tanstack/react-query, @radix-ui/react-*, sharp, react-hotkeys-hook,
+      react-window (virtualization)
+
+      - Internal: Existing auth middleware, comic generation service APIs, notification
+      service, user management components, shared UI component library
+
+
+      **Risks:**
+
+      - **Performance with large datasets**: Implement virtualization and pagination
+      early; use React.memo and useMemo strategically
+
+      - **Real-time update overhead**: Throttle Supabase subscriptions and batch updates
+      to prevent UI thrashing
+
+      - **Image loading performance**: Implement progressive loading, WebP conversion,
+      and CDN integration
+
+      - **Complex filter state**: Use URL state synchronization to prevent lost filter
+      contexts
+
+      - **Concurrent review conflicts**: Implement optimistic locking to prevent multiple
+      reviewers editing same content
+
+
+      **Complexity Notes:**
+
+      Initially appears straightforward as a CRUD dashboard, but complexity increases
+      significantly due to:
+
+      - Real-time collaboration requirements between multiple reviewers
+
+      - Complex filtering/sorting needs for large comic queues
+
+      - Image-heavy interface requiring performance optimization
+
+      - Integration with existing comic generation pipeline
+
+      AI can handle 60-70% of implementation (data layer, basic components), but UX
+      design and performance optimization require human expertise.
+
+
+      **Key Files:**
+
+      - apps/dashboard/src/app/quality-control/page.tsx: Main dashboard page
+
+      - apps/dashboard/src/components/quality-control/: QC-specific components
+
+      - packages/database/src/types/quality-control.ts: Type definitions
+
+      - apps/api/src/routes/quality-control/: API endpoints
+
+      - packages/ui/src/components/: Shared UI components for review interface
+
+      '
+    design_decisions:
+    - decision: Use Supabase real-time subscriptions for live queue updates
+      rationale: Enables collaborative review workflow where multiple QA reviewers
+        can see real-time status changes without manual refresh
+      alternatives_considered:
+      - Server-sent events
+      - WebSocket implementation
+      - Polling-based updates
+      ai_implementation_note: AI can generate subscription setup, connection management,
+        and error handling boilerplate
+    - decision: Implement virtualized scrolling for large comic queues
+      rationale: QA queues may contain thousands of items; virtualization prevents
+        DOM bloat and maintains smooth scrolling performance
+      alternatives_considered:
+      - Traditional pagination
+      - Infinite scroll without virtualization
+      - Server-side pagination only
+      ai_implementation_note: AI can implement react-window integration and calculate
+        item heights, but performance tuning requires human optimization
+    - decision: Use optimistic locking for concurrent review prevention
+      rationale: Prevents conflicts when multiple reviewers attempt to moderate the
+        same comic simultaneously
+      alternatives_considered:
+      - Pessimistic locking
+      - Last-writer-wins
+      - Queue assignment system
+      ai_implementation_note: AI can generate lock acquisition/release logic and conflict
+        detection, but business rules for conflict resolution need human design
+    researched_at: '2026-02-08T18:43:50.084389'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:26:47.282336'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: a9fb66cd
+    planning_hash: 7aa02408
+  technical_notes:
+    approach: 'Build a responsive dashboard using Next.js 16 server components for
+      initial page load, then hydrate with interactive React components for real-time
+      updates. Implement a three-panel layout: filterable queue on left, detailed
+      comic preview in center, and review controls on right. Use Supabase real-time
+      subscriptions for collaborative updates and React Query for optimistic mutations.
+      Implement virtualized scrolling for performance and progressive image loading
+      for smooth user experience.
+
+      '
+    external_dependencies:
+    - name: '@tanstack/react-query'
+      version: ^5.0.0
+      reason: Caching, optimistic updates, and background refetching for QA data
+    - name: '@radix-ui/react-dialog'
+      version: ^1.0.5
+      reason: Accessible modal components for detailed comic review
+    - name: react-window
+      version: ^1.8.8
+      reason: Virtualized scrolling for large comic queues
+    - name: react-hotkeys-hook
+      version: ^4.4.1
+      reason: Keyboard shortcuts for efficient reviewer workflow
+    - name: sharp
+      version: ^0.33.0
+      reason: Server-side image processing for thumbnails and optimization
+    files_to_modify:
+    - path: apps/dashboard/src/app/layout.tsx
+      changes: Add quality-control route to navigation menu
+    - path: packages/database/src/schema/comics.sql
+      changes: Add quality_control_status, reviewed_by, reviewed_at columns
+    - path: apps/api/src/middleware/auth.ts
+      changes: Add QA_REVIEWER role check for quality-control endpoints
+    new_files:
+    - path: apps/dashboard/src/app/quality-control/page.tsx
+      purpose: Main dashboard page with server-side data fetching
+    - path: apps/dashboard/src/components/quality-control/QualityControlTable.tsx
+      purpose: Virtualized table component for comic queue
+    - path: apps/dashboard/src/components/quality-control/ComicPreviewPanel.tsx
+      purpose: Image gallery with zoom, navigation, metadata display
+    - path: apps/dashboard/src/components/quality-control/ReviewControls.tsx
+      purpose: Approve/reject buttons, comment form, bulk operations
+    - path: apps/dashboard/src/components/quality-control/FilterPanel.tsx
+      purpose: Search, status filter, date range picker components
+    - path: packages/database/src/types/quality-control.ts
+      purpose: TypeScript interfaces for QC data models
+    - path: apps/api/src/routes/quality-control/index.ts
+      purpose: CRUD endpoints for comic review operations
+    - path: packages/shared/src/hooks/useQualityControl.ts
+      purpose: React Query hooks for QC data fetching and mutations
+    - path: apps/dashboard/src/stores/qualityControlStore.ts
+      purpose: Zustand store for complex filter and selection state
+  acceptance_criteria:
+  - criterion: Quality Control dashboard displays paginated queue of comics pending
+      review with filtering by status, priority, creator, and date range
+    verification: Navigate to /quality-control, verify initial load shows comics with
+      status='pending', test filters update URL params and refresh data correctly
+  - criterion: Reviewers can approve/reject comics with mandatory feedback comments
+      and see real-time updates from other reviewers
+    verification: Open dashboard in two browser tabs, perform review action in one
+      tab, verify other tab updates within 2 seconds via Supabase real-time
+  - criterion: Comic preview panel displays all pages with zoom controls, metadata
+      overlay, and navigation between pages
+    verification: Click comic in queue, verify all pages render, zoom in/out functions
+      work, metadata shows creator/timestamp/status correctly
+  - criterion: Dashboard handles 1000+ comics in queue with smooth scrolling performance
+      under 100ms per interaction
+    verification: Load test data with 1000+ records, verify virtual scrolling works,
+      measure scroll performance with Chrome DevTools
+  - criterion: Bulk operations allow selecting multiple comics and batch approve/reject
+      with progress indication
+    verification: Select 10+ comics using checkboxes, click bulk approve, verify progress
+      modal shows, all selected items update status atomically
+  testing:
+    unit_tests:
+    - file: apps/dashboard/src/components/quality-control/__tests__/QualityControlTable.test.tsx
+      coverage_target: 85%
+      scenarios:
+      - Renders comic queue with correct columns
+      - Handles empty state gracefully
+      - Filter changes trigger correct API calls
+      - Selection state management works
+    - file: packages/database/src/__tests__/quality-control-queries.test.ts
+      coverage_target: 90%
+      scenarios:
+      - GetComicsForReview returns paginated results
+      - UpdateComicStatus with valid/invalid inputs
+      - Bulk operations handle partial failures
+    integration_tests:
+    - file: apps/api/src/__tests__/integration/quality-control.test.ts
+      scenarios:
+      - 'Full review workflow: fetch → approve → real-time update'
+      - Concurrent reviewer conflict resolution
+      - Bulk operation job processing
+    e2e_tests:
+    - file: apps/dashboard/src/__tests__/e2e/quality-control.spec.ts
+      scenarios:
+      - Complete review workflow from login to approval
+      - Multi-user real-time collaboration
+      - Performance with large dataset
+    manual_testing:
+    - step: Load dashboard with 500+ comics, scroll rapidly up/down
+      expected: Smooth scrolling, no frame drops, images load progressively
+    - step: Open comic preview, navigate through all pages, test zoom controls
+      expected: All images render correctly, zoom maintains aspect ratio, navigation
+        is responsive
+  estimates:
+    development: 4.5
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7.5
+    ai_acceleration_factor: 0.65
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create TypeScript interfaces and database schema for quality control
+        data models'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement API endpoints for CRUD operations on comic reviews with
+        proper validation'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build QualityControlTable component with virtualization and basic
+        filtering'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design optimal UX flow for reviewer workflow and information
+        hierarchy'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement ComicPreviewPanel with image gallery and navigation controls'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create ReviewControls component with approve/reject actions and
+        comment forms'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Set up Supabase real-time subscriptions for collaborative updates'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Optimize performance for large datasets and implement progressive
+        image loading'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement bulk operations with BullMQ job processing'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Write comprehensive unit tests for all components and utilities'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Conduct performance testing and UX review with stakeholders'
+      done: false
+      ai_friendly: false
+- key: T72
+  title: Comic Preview
+  type: Feature
+  milestone: M4 - Dashboard & UI
+  iteration: I5
+  priority: p1
+  effort: 3
+  area: comic
+  dependsOn:
+  - T64
+  agent_notes:
+    research_findings: '**Context:**
+
+      Comic Preview is a critical user experience feature that allows users to visualize
+      their novel-to-comic transformation results before finalizing. This solves the
+      problem of users being unable to assess quality, layout, and visual coherence
+      of generated comic panels without going through the full processing pipeline.
+      It provides immediate feedback on AI-generated panels, character consistency,
+      and narrative flow, enabling users to make adjustments before committing to
+      expensive full comic generation.
+
+
+      **Technical Approach:**
+
+      Implement a responsive comic viewer component with panel-by-panel navigation,
+      zoom controls, and layout options (single panel, page view, continuous scroll).
+      Use Next.js Image optimization for panel rendering, React Query for caching
+      panel data, and Framer Motion for smooth transitions. Backend should provide
+      paginated comic data with metadata (panel dimensions, character names, scene
+      descriptions) and support different preview quality levels to balance load times
+      vs visual fidelity.
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: React component boilerplate, CSS modules, API route
+      handlers, database queries, unit tests for preview logic, TypeScript interfaces
+      for comic data
+
+      - Medium AI effectiveness: Image optimization logic, responsive layout calculations,
+      state management integration, API error handling patterns
+
+      - Low AI effectiveness: UX/UI design decisions, preview performance optimization
+      strategies, comic panel layout algorithms, user interaction patterns
+
+
+      **Dependencies:**
+
+      - External: @tanstack/react-query@5.x (data fetching), framer-motion@11.x (animations),
+      react-zoom-pan-pinch@3.x (zoom controls), react-window@1.8.x (virtualization
+      for large comics)
+
+      - Internal: Supabase comic storage service, image processing utilities, authentication
+      middleware, existing dashboard layout components, comic generation pipeline
+      integration
+
+
+      **Risks:**
+
+      - Large image loading performance: Implement progressive loading and WebP/AVIF
+      format support with fallbacks
+
+      - Memory leaks with many panels: Use react-window for virtualization and proper
+      cleanup of image references
+
+      - Inconsistent panel dimensions: Standardize aspect ratios in generation pipeline
+      and implement dynamic grid layouts
+
+      - Mobile responsiveness complexity: Design mobile-first with touch gestures
+      and ensure panels remain readable on small screens
+
+
+      **Complexity Notes:**
+
+      More complex than initially estimated due to image optimization requirements
+      and responsive design challenges. However, AI can significantly accelerate development
+      of component structure, styling, and basic functionality. Performance optimization
+      and mobile UX will require human architectural decisions.
+
+
+      **Key Files:**
+
+      - apps/dashboard/src/components/comic/ComicPreview.tsx: Main preview component
+
+      - apps/dashboard/src/hooks/useComicPreview.ts: Data fetching and state management
+
+      - apps/api/src/routes/comics/preview.ts: Preview API endpoints
+
+      - packages/database/src/queries/comic-preview.ts: Database queries for comic
+      data
+
+      - apps/dashboard/src/styles/comic-preview.module.css: Component-specific styling
+
+      '
+    design_decisions:
+    - decision: Use virtualized scrolling for comic panel rendering
+      rationale: Comics can contain 50+ panels, and loading all images simultaneously
+        would cause performance issues and excessive memory usage
+      alternatives_considered:
+      - Pagination with next/prev buttons
+      - Infinite scroll with intersection observer
+      - Load all panels at once
+      ai_implementation_note: AI can generate the react-window implementation and
+        optimize rendering logic, but humans should determine viewport sizing and
+        prefetch strategies
+    - decision: Implement multi-tier preview quality (thumbnail, medium, high-res)
+      rationale: Allows users to browse quickly with thumbnails and zoom into high-res
+        versions on demand, balancing performance with visual quality
+      alternatives_considered:
+      - Single high-resolution images only
+      - Progressive JPEG loading
+      - Client-side image scaling
+      ai_implementation_note: AI can create the image quality switching logic and
+        caching mechanisms, but quality thresholds and compression settings need human
+        optimization
+    - decision: Server-side comic metadata aggregation
+      rationale: Frontend needs panel dimensions, character mappings, and scene metadata
+        for proper rendering and navigation, which requires backend processing
+      alternatives_considered:
+      - Client-side metadata parsing
+      - Embed metadata in image files
+      - Separate metadata API calls per panel
+      ai_implementation_note: AI can implement the aggregation queries and API serialization,
+        but metadata schema design requires human input for extensibility
+    researched_at: '2026-02-08T18:44:19.560724'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:27:13.879046'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 370e93e6
+    planning_hash: 2f1beb29
+  technical_notes:
+    approach: 'Build a responsive comic preview system with a virtualized panel viewer
+      component that fetches comic data through React Query. Implement progressive
+      image loading with multiple quality tiers and use Framer Motion for smooth navigation
+      transitions. Create backend APIs for comic metadata aggregation and preview
+      image serving with appropriate caching headers. Design mobile-first with touch
+      gesture support and ensure accessibility compliance.
+
+      '
+    external_dependencies:
+    - name: '@tanstack/react-query'
+      version: ^5.0.0
+      reason: Efficient data fetching, caching, and synchronization for comic preview
+        data
+    - name: framer-motion
+      version: ^11.0.0
+      reason: Smooth animations for panel transitions and zoom interactions
+    - name: react-zoom-pan-pinch
+      version: ^3.4.0
+      reason: Touch and mouse zoom functionality for detailed panel viewing
+    - name: react-window
+      version: ^1.8.8
+      reason: Virtualized scrolling to handle large numbers of comic panels efficiently
+    files_to_modify:
+    - path: apps/dashboard/src/pages/dashboard/comics/[id].tsx
+      changes: Add preview route and integrate ComicPreview component
+    - path: apps/dashboard/src/components/layout/DashboardLayout.tsx
+      changes: Add navigation breadcrumbs for comic preview
+    - path: packages/database/src/schema/comics.ts
+      changes: Add preview metadata fields if needed
+    new_files:
+    - path: apps/dashboard/src/components/comic/ComicPreview.tsx
+      purpose: Main preview component with panel display and navigation
+    - path: apps/dashboard/src/components/comic/ComicPanel.tsx
+      purpose: Individual panel component with progressive image loading
+    - path: apps/dashboard/src/components/comic/PreviewControls.tsx
+      purpose: Navigation, zoom, and layout control components
+    - path: apps/dashboard/src/hooks/useComicPreview.ts
+      purpose: Custom hook for comic data fetching and state management
+    - path: apps/dashboard/src/styles/comic-preview.module.css
+      purpose: Component-specific styling with responsive breakpoints
+    - path: apps/api/src/routes/comics/[id]/preview.ts
+      purpose: API endpoint for comic preview metadata and pagination
+    - path: packages/database/src/queries/comic-preview.ts
+      purpose: Database queries for comic panels and metadata
+    - path: apps/dashboard/src/utils/image-optimization.ts
+      purpose: Helper functions for progressive loading and format detection
+  acceptance_criteria:
+  - criterion: Comic preview displays panels with navigation controls (previous/next,
+      zoom in/out, layout toggle)
+    verification: Manual testing - load comic with 5+ panels, verify all navigation
+      controls work, test zoom to 200% and 50%
+  - criterion: Preview loads within 2 seconds for comics up to 20 panels with progressive
+      loading indicators
+    verification: Performance test - network throttling to 3G, measure time to first
+      panel render and full comic load
+  - criterion: Mobile responsive design maintains panel readability on screens down
+      to 375px width
+    verification: Device testing on iPhone SE, Android 375px viewport, verify panels
+      remain readable without horizontal scroll
+  - criterion: Virtualization handles large comics (100+ panels) without memory leaks
+      or performance degradation
+    verification: Load test with 100 panel comic, monitor memory usage over 5 minutes
+      of scrolling, ensure < 500MB RAM
+  - criterion: Error states display user-friendly messages for failed image loads
+      and network issues
+    verification: Simulate network failures and corrupted images, verify graceful
+      error handling with retry options
+  testing:
+    unit_tests:
+    - file: apps/dashboard/src/components/comic/__tests__/ComicPreview.test.tsx
+      coverage_target: 90%
+      scenarios:
+      - Panel navigation (next/prev buttons)
+      - Zoom controls functionality
+      - Layout mode switching
+      - Loading state rendering
+      - Error state handling
+      - Keyboard navigation
+    - file: apps/dashboard/src/hooks/__tests__/useComicPreview.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Data fetching success
+      - Pagination handling
+      - Cache invalidation
+      - Error retry logic
+    integration_tests:
+    - file: apps/dashboard/src/__tests__/integration/comic-preview.test.tsx
+      scenarios:
+      - Full preview workflow from dashboard to comic view
+      - Image loading with different quality levels
+      - Preview API integration
+    - file: apps/api/src/__tests__/integration/comic-preview-api.test.ts
+      scenarios:
+      - Preview metadata retrieval
+      - Image serving with proper headers
+      - Pagination edge cases
+    manual_testing:
+    - step: Load comic preview on desktop and mobile devices
+      expected: Responsive layout adapts to screen size, touch gestures work on mobile
+    - step: Test with slow network connection
+      expected: Progressive loading shows placeholders, images load incrementally
+    - step: Navigate through 20+ panel comic using all controls
+      expected: Smooth transitions, no flickering, consistent performance
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.65
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create TypeScript interfaces for comic preview data structures'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design mobile-first responsive layout strategy and breakpoints'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement ComicPanel component with progressive image loading'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build PreviewControls component with navigation and zoom functionality'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create useComicPreview hook with React Query integration'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement API endpoints for comic preview data'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Optimize virtualization strategy for large comics and memory
+        management'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Add Framer Motion animations for panel transitions'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Write comprehensive unit tests for all components'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Performance testing and mobile UX validation'
+      done: false
+      ai_friendly: false

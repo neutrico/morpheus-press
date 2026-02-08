@@ -1,0 +1,2409 @@
+milestone: M5 - Product Assembly
+task_count: 9
+issues:
+- key: T63
+  title: Comic Layout & Composition
+  type: Feature
+  milestone: M5 - Product Assembly
+  iteration: I5
+  priority: p0
+  effort: 5
+  area: comic
+  dependsOn: []
+  agent_notes:
+    research_findings: '**Context:**
+
+      Comic Layout & Composition is the core engine that transforms narrative content
+      into visually structured comic pages. This system must intelligently arrange
+      panels, determine panel sizes/shapes, manage visual flow, and optimize readability
+      while maintaining artistic coherence. It''s critical for M5 Product Assembly
+      as it bridges the gap between generated story content and final comic output.
+      Without this, Morpheus can generate individual panels but cannot create cohesive,
+      professionally-laid-out comic pages.
+
+
+      **Technical Approach:**
+
+      Recommended approach combines algorithmic layout engines with ML-assisted composition:
+
+      - Canvas-based rendering using Fabric.js or Konva.js for interactive layout
+      editing
+
+      - Constraint-based layout system using CSS Grid/Flexbox principles adapted for
+      comic panels
+
+      - Template library with preset layouts (splash pages, 4-panel grids, dynamic
+      compositions)
+
+      - Real-time preview system integrated with Next.js frontend
+
+      - Layout persistence in PostgreSQL with JSON schema for flexible panel arrangements
+
+      - Integration with existing story segmentation and image generation pipelines
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: Layout algorithm implementations, CSS/styling generation,
+      test suites for layout validation, CRUD operations for saving/loading layouts,
+      utility functions for panel positioning
+
+      - Medium AI effectiveness: Canvas manipulation code, responsive layout adaptations,
+      integration with existing story/image services, API endpoint implementations
+
+      - Low AI effectiveness: Layout aesthetic decisions, constraint-solving algorithm
+      design, user experience flow for layout editor, visual composition rules and
+      artistic principles
+
+
+      **Dependencies:**
+
+      - External: fabric.js (canvas manipulation), golden-layout or react-grid-layout
+      (panel arrangement), pdf-lib (export functionality), sharp (image processing)
+
+      - Internal: Story service (panel content), Image generation service (panel assets),
+      User management (layout ownership), File storage (layout persistence)
+
+
+      **Risks:**
+
+      - Performance degradation with complex layouts: implement virtualization and
+      progressive loading
+
+      - Cross-browser canvas rendering inconsistencies: establish comprehensive testing
+      matrix with Playwright
+
+      - Layout constraint conflicts: build robust validation and fallback systems
+
+      - Mobile responsiveness complexity: design mobile-first with simplified editing
+      interface
+
+
+      **Complexity Notes:**
+
+      More complex than initially estimated due to real-time editing requirements
+      and constraint satisfaction. However, AI can significantly accelerate implementation
+      of layout algorithms and utility functions, potentially offsetting 40-50% of
+      development time. The visual/interactive components require more human oversight.
+
+
+      **Key Files:**
+
+      - apps/dashboard/src/components/ComicEditor/LayoutEngine.tsx: Main layout component
+
+      - packages/comic-engine/src/layout/: Core layout algorithms
+
+      - apps/api/src/routes/comics/layout.ts: Layout persistence API
+
+      - packages/database/src/schema/comic-layouts.sql: Layout storage schema
+
+      '
+    design_decisions:
+    - decision: Use constraint-based layout system with CSS Grid principles
+      rationale: Provides flexible, responsive layouts while maintaining consistent
+        spacing and alignment rules
+      alternatives_considered:
+      - Absolute positioning system
+      - Fixed template approach
+      - Physics-based layout
+      ai_implementation_note: AI can generate constraint validation functions and
+        grid calculation utilities
+    - decision: Implement canvas-based editor with Fabric.js
+      rationale: Enables real-time manipulation, precise positioning, and export capabilities
+        needed for professional comic layout
+      alternatives_considered:
+      - SVG-based editor
+      - HTML/CSS preview only
+      - Server-side layout generation
+      ai_implementation_note: AI excellent for implementing Fabric.js event handlers
+        and canvas utility functions
+    - decision: Store layouts as JSON schema in PostgreSQL
+      rationale: Provides flexibility for evolving layout structures while maintaining
+        relational integrity with comics and panels
+      alternatives_considered:
+      - Dedicated document database
+      - File-based storage
+      - Hardcoded layout templates
+      ai_implementation_note: AI can generate schema validation, migration scripts,
+        and CRUD operations
+    researched_at: '2026-02-08T18:44:47.009599'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:27:46.400273'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 02d677b0
+    planning_hash: a4aabd74
+  technical_notes:
+    approach: 'Build a multi-layered layout system with a constraint-based engine
+      for automatic panel arrangement, a canvas-based editor for manual adjustments,
+      and a template library for quick starts. Integrate with existing story and image
+      generation services through a unified layout API. Implement real-time preview
+      with export capabilities to multiple formats (PDF, PNG, web-optimized). Use
+      event-driven architecture to update layouts as story content changes.
+
+      '
+    external_dependencies:
+    - name: fabric
+      version: ^5.3.0
+      reason: Canvas manipulation and interactive editing capabilities
+    - name: react-grid-layout
+      version: ^1.4.4
+      reason: Responsive grid system for panel arrangement
+    - name: pdf-lib
+      version: ^1.17.1
+      reason: PDF export functionality for print-ready comics
+    - name: sharp
+      version: ^0.32.6
+      reason: Image processing for layout optimization and export
+    files_to_modify:
+    - path: packages/database/src/schema/comics.sql
+      changes: Add comic_layouts table with JSON schema column for flexible layout
+        storage
+    - path: apps/api/src/types/comic.ts
+      changes: Add LayoutConfig, PanelPosition, and LayoutConstraints interfaces
+    - path: packages/shared/src/types/index.ts
+      changes: Export layout-related types for cross-package use
+    new_files:
+    - path: packages/comic-engine/src/layout/LayoutEngine.ts
+      purpose: Core constraint-based layout algorithm implementation
+    - path: packages/comic-engine/src/layout/CanvasRenderer.ts
+      purpose: Fabric.js-based canvas manipulation and rendering
+    - path: packages/comic-engine/src/layout/LayoutTemplates.ts
+      purpose: Predefined layout templates (splash, grid, dynamic compositions)
+    - path: packages/comic-engine/src/layout/ConstraintSolver.ts
+      purpose: Panel positioning constraint satisfaction engine
+    - path: packages/comic-engine/src/export/PdfExporter.ts
+      purpose: High-quality PDF generation using pdf-lib
+    - path: packages/comic-engine/src/export/ImageExporter.ts
+      purpose: PNG/JPEG export with Sharp image processing
+    - path: apps/dashboard/src/components/ComicEditor/LayoutEditor.tsx
+      purpose: Main React component for interactive layout editing
+    - path: apps/dashboard/src/components/ComicEditor/PanelPropertiesPanel.tsx
+      purpose: Side panel for editing individual panel properties
+    - path: apps/dashboard/src/components/ComicEditor/LayoutToolbar.tsx
+      purpose: Toolbar with layout tools, templates, and export options
+    - path: apps/api/src/routes/comics/layout.ts
+      purpose: REST API endpoints for layout CRUD operations
+    - path: apps/api/src/middleware/layout-validation.ts
+      purpose: Request validation for layout data
+  acceptance_criteria:
+  - criterion: Layout engine generates valid comic page layouts with 1-9 panels in
+      grid, freeform, and template-based arrangements
+    verification: Unit tests in packages/comic-engine/src/layout/__tests__/layout-engine.test.ts
+      pass with 90% coverage
+  - criterion: Canvas editor allows drag-and-drop panel repositioning with real-time
+      constraint validation
+    verification: 'E2E test: Create layout, drag panel, verify position updates and
+      constraints maintained'
+  - criterion: Layout persistence saves/loads complex layouts with panel metadata
+      intact
+    verification: 'Integration test: Save layout with 6 panels, reload, verify all
+      panel properties match'
+  - criterion: Export system generates PDF and PNG outputs with 300 DPI quality for
+      print
+    verification: Export test layout to PDF, verify dimensions 8.5x11 inches at 300
+      DPI using ImageMagick identify command
+  - criterion: Performance maintains <100ms layout recalculation for layouts up to
+      12 panels
+    verification: Benchmark test with 12-panel layout, measure constraint solving
+      time using performance.now()
+  testing:
+    unit_tests:
+    - file: packages/comic-engine/src/layout/__tests__/layout-engine.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Grid layout generation (2x2, 3x3, 2x3 variations)
+      - Constraint validation (overlap detection, margin requirements)
+      - Panel sizing algorithms (equal, weighted, content-aware)
+      - Layout serialization/deserialization
+    - file: packages/comic-engine/src/layout/__tests__/canvas-renderer.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Canvas initialization and panel rendering
+      - Drag and drop calculations
+      - Zoom and pan transformations
+    - file: apps/api/src/routes/comics/__tests__/layout.test.ts
+      coverage_target: 85%
+      scenarios:
+      - CRUD operations for layout persistence
+      - Layout validation middleware
+      - User authorization for layout access
+    integration_tests:
+    - file: apps/dashboard/src/components/ComicEditor/__tests__/layout-integration.test.ts
+      scenarios:
+      - End-to-end layout creation with story integration
+      - Real-time preview updates when story content changes
+      - Export pipeline from layout to PDF/PNG
+    e2e_tests:
+    - file: apps/dashboard/e2e/comic-layout.spec.ts
+      scenarios:
+      - User creates comic, uses layout editor, exports final product
+      - Layout template selection and customization
+      - Mobile responsive layout editing
+    manual_testing:
+    - step: Create 6-panel layout, populate with story content, export as PDF
+      expected: PDF opens correctly with proper panel arrangement and high-quality
+        images
+    - step: Test layout editor on mobile device (iPad/tablet)
+      expected: Touch interactions work smoothly, UI remains usable
+  estimates:
+    development: 6
+    code_review: 1.0
+    testing: 1.5
+    documentation: 0.5
+    total: 9
+    ai_acceleration_factor: 0.55
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Setup comic-engine package structure and install dependencies (fabric.js,
+        pdf-lib, sharp)'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design layout constraint system architecture and panel positioning
+        rules'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement core LayoutEngine class with grid-based layout algorithms'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create ConstraintSolver for panel overlap detection and spacing
+        validation'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build LayoutTemplates with 8-10 predefined comic layouts'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement CanvasRenderer with Fabric.js integration for interactive
+        editing'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design user experience flow for layout editor interface'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Create React components for LayoutEditor with drag-and-drop functionality'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement PDF and image export services with high-quality output'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build layout persistence API with PostgreSQL JSON storage'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create comprehensive unit test suites for all layout algorithms'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement integration tests for layout-story-image pipeline'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Performance optimization and mobile responsiveness review'
+      done: false
+      ai_friendly: false
+    - task: '[HUMAN] User acceptance testing with layout editor workflow'
+      done: false
+      ai_friendly: false
+- key: T64
+  title: Panel Generation
+  type: Feature
+  milestone: M5 - Product Assembly
+  iteration: I5
+  priority: p0
+  effort: 5
+  area: comic
+  dependsOn:
+  - T62
+  - T63
+  agent_notes:
+    research_findings: '**Context:**
+
+      Panel Generation is the core comic creation feature that transforms narrative
+      text into individual comic panels with appropriate visual layouts, speech bubbles,
+      and panel compositions. This solves the fundamental challenge of breaking down
+      a story into visual sequences that work in comic format. It''s essential for
+      the novel-to-comic transformation pipeline and directly impacts user satisfaction
+      with the final product quality.
+
+
+      **Technical Approach:**
+
+      Implement a multi-stage panel generation system:
+
+      1. **Text Analysis Service**: Use LLMs to parse narrative and identify panel
+      boundaries, dialogue, action sequences
+
+      2. **Layout Engine**: Calculate optimal panel sizes, arrangements, and grid
+      layouts based on content type
+
+      3. **Visual Composition**: Generate image prompts for Stable Diffusion with
+      precise panel specifications
+
+      4. **Speech Bubble Engine**: Position and style dialogue bubbles using canvas/SVG
+      rendering
+
+      5. **Panel Assembly**: Combine generated images, text overlays, and effects
+      into final panel output
+
+
+      Use event-driven architecture with Redis queues for processing pipeline, and
+      implement real-time progress tracking via WebSockets.
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: Text parsing utilities, speech bubble positioning algorithms,
+      panel layout calculations, API route handlers, database schemas, test suites,
+      type definitions
+
+      - Medium AI effectiveness: Image generation prompt engineering, canvas rendering
+      logic, WebSocket event handlers, queue processing workers
+
+      - Low AI effectiveness: Panel composition algorithms, visual design decisions,
+      optimal layout heuristics, artistic style consistency logic
+
+
+      **Dependencies:**
+
+      - External: fabric.js (canvas manipulation), bull/bullmq (job queues), sharp
+      (image processing), @anthropic-ai/sdk, openai SDK
+
+      - Internal: Authentication service, user management, project management system,
+      image generation service, database models
+
+
+      **Risks:**
+
+      - Performance bottleneck: Mitigate with horizontal scaling of RunPod instances
+      and efficient caching
+
+      - Memory usage from image processing: Implement streaming and chunked processing
+
+      - LLM API rate limits: Add retry logic, fallback models, and request batching
+
+      - Inconsistent visual style: Create style templates and validation pipelines
+
+
+      **Complexity Notes:**
+
+      Higher complexity than initially estimated due to real-time processing requirements
+      and multi-modal AI coordination. However, AI pair programming can accelerate
+      development of data processing pipelines and API layers by ~40%. The visual
+      composition algorithms will require significant human design input.
+
+
+      **Key Files:**
+
+      - apps/api/src/services/panel-generation.ts: Core service logic
+
+      - apps/api/src/routes/panels/: REST endpoints
+
+      - apps/dashboard/src/components/PanelEditor/: React components
+
+      - packages/shared/src/types/panel.ts: Type definitions
+
+      - apps/api/src/workers/panel-processor.ts: Background job processing
+
+      '
+    design_decisions:
+    - decision: Use fabric.js for client-side panel editing with server-side Sharp
+        for final rendering
+      rationale: Provides rich interactive editing capabilities while maintaining
+        high-quality server output
+      alternatives_considered:
+      - Pure SVG
+      - Canvas API only
+      - Konva.js
+      ai_implementation_note: AI can generate fabric.js object manipulation code and
+        Sharp processing pipelines
+    - decision: Implement staged processing pipeline with Redis queues
+      rationale: Allows for better error handling, progress tracking, and horizontal
+        scaling of compute-intensive operations
+      alternatives_considered:
+      - Synchronous processing
+      - Database-only queues
+      - Message brokers like RabbitMQ
+      ai_implementation_note: AI excels at generating queue workers, job processors,
+        and error handling logic
+    - decision: Use hybrid LLM approach (GPT-4 for analysis, Claude for creative prompts)
+      rationale: Leverages each model's strengths - GPT-4 for structured analysis,
+        Claude for creative visual descriptions
+      alternatives_considered:
+      - Single model approach
+      - Open source models only
+      - Anthropic only
+      ai_implementation_note: AI can implement API switching logic and prompt template
+        management
+    researched_at: '2026-02-08T18:45:15.051774'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:28:18.018379'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 0038d73e
+    planning_hash: 7ac746ba
+  technical_notes:
+    approach: 'Build a microservice-style panel generation system within the Fastify
+      backend that processes text input through LLM analysis, generates visual layouts
+      using algorithmic composition, creates image prompts for Stable Diffusion, and
+      assembles final panels with speech bubbles and effects. Use Redis for job queuing,
+      WebSockets for real-time progress, and implement both REST APIs for CRUD operations
+      and streaming endpoints for live preview functionality.
+
+      '
+    external_dependencies:
+    - name: fabric
+      version: ^5.3.0
+      reason: Client-side canvas manipulation for interactive panel editing
+    - name: sharp
+      version: ^0.32.0
+      reason: High-performance server-side image processing and composition
+    - name: bullmq
+      version: ^4.15.0
+      reason: Redis-based job queue for background panel processing
+    - name: ioredis
+      version: ^5.3.0
+      reason: Redis client for caching and pub/sub functionality
+    - name: canvas
+      version: ^2.11.0
+      reason: Server-side canvas API for text rendering and measurements
+    files_to_modify:
+    - path: apps/api/src/routes/index.ts
+      changes: Register panel routes with /api/panels prefix
+    - path: apps/api/src/lib/websocket.ts
+      changes: Add panel generation progress event handlers
+    - path: packages/shared/src/types/index.ts
+      changes: Export panel-related types for cross-app usage
+    - path: apps/dashboard/src/lib/api.ts
+      changes: Add panel generation API client methods
+    new_files:
+    - path: apps/api/src/services/panel-generation.ts
+      purpose: Core panel generation orchestration service
+    - path: apps/api/src/services/text-analysis.ts
+      purpose: LLM-powered narrative text parsing and analysis
+    - path: apps/api/src/services/layout-engine.ts
+      purpose: Panel layout calculation and grid positioning algorithms
+    - path: apps/api/src/services/speech-bubble-engine.ts
+      purpose: Dialogue bubble positioning and styling logic
+    - path: apps/api/src/routes/panels/index.ts
+      purpose: Panel CRUD and generation REST endpoints
+    - path: apps/api/src/routes/panels/generate.ts
+      purpose: Panel generation endpoint with streaming support
+    - path: apps/api/src/workers/panel-processor.ts
+      purpose: Background job processor for panel generation pipeline
+    - path: packages/shared/src/types/panel.ts
+      purpose: TypeScript definitions for panel data structures
+    - path: apps/dashboard/src/components/PanelEditor/PanelEditor.tsx
+      purpose: Main panel editing interface component
+    - path: apps/dashboard/src/components/PanelEditor/PanelCanvas.tsx
+      purpose: Canvas component for panel manipulation
+    - path: apps/dashboard/src/components/PanelEditor/SpeechBubbleEditor.tsx
+      purpose: Interactive speech bubble editing component
+    - path: apps/api/src/lib/image-processing.ts
+      purpose: Utilities for image manipulation and composition
+    - path: apps/api/src/config/panel-styles.ts
+      purpose: Style templates and artistic configuration
+  acceptance_criteria:
+  - criterion: System successfully parses narrative text and generates 1-6 comic panels
+      with appropriate layout distribution
+    verification: POST /api/panels/generate with story text returns panel array with
+      valid dimensions and grid layout
+  - criterion: Speech bubbles are positioned correctly within panel boundaries without
+      overlapping key visual elements
+    verification: Visual regression tests verify bubble placement and automated bounds
+      checking passes
+  - criterion: Panel generation completes within 30 seconds for stories up to 1000
+      words with real-time progress updates
+    verification: Performance test suite measures end-to-end timing and WebSocket
+      progress events fire every 2-3 seconds
+  - criterion: Generated panels maintain visual consistency in art style and character
+      appearance across sequences
+    verification: Style validation pipeline checks character embeddings and art style
+      metrics stay within 15% variance
+  - criterion: System gracefully handles failures with retry logic and provides meaningful
+      error messages to users
+    verification: Integration tests simulate API failures, rate limits, and verify
+      error responses contain actionable feedback
+  testing:
+    unit_tests:
+    - file: apps/api/src/__tests__/services/panel-generation.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Text parsing extracts dialogue and action sequences
+      - Layout engine calculates grid positions correctly
+      - Speech bubble positioning avoids overlaps
+      - Error handling for malformed input
+      - Style template validation
+    - file: apps/api/src/__tests__/services/text-analysis.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Panel boundary detection in narrative text
+      - Dialogue extraction and speaker identification
+      - Action sequence classification
+      - LLM API error handling and fallbacks
+    - file: apps/api/src/__tests__/workers/panel-processor.test.ts
+      coverage_target: 80%
+      scenarios:
+      - Job queue processing workflow
+      - Image generation coordination
+      - Progress tracking and WebSocket events
+      - Retry logic for failed operations
+    integration_tests:
+    - file: apps/api/src/__tests__/integration/panel-generation-flow.test.ts
+      scenarios:
+      - Complete text-to-panel generation pipeline
+      - Real-time progress updates via WebSocket
+      - Panel editing and regeneration workflow
+      - Multi-user concurrent generation handling
+    - file: apps/dashboard/src/__tests__/integration/panel-editor.test.ts
+      scenarios:
+      - Panel editor component interaction with API
+      - Real-time preview updates during generation
+      - Panel arrangement drag-and-drop functionality
+    manual_testing:
+    - step: Upload 500-word story and trigger panel generation
+      expected: 6 panels generated with appropriate scene transitions and speech bubbles
+        positioned correctly
+    - step: Monitor WebSocket progress events during generation
+      expected: Progress updates every 2-3 seconds with meaningful status messages
+    - step: Test panel regeneration with style adjustments
+      expected: Visual consistency maintained while incorporating new style parameters
+  estimates:
+    development: 4.5
+    code_review: 1
+    testing: 1.2
+    documentation: 0.3
+    total: 7
+    ai_acceleration_factor: 0.65
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create TypeScript type definitions for panel data structures, layouts,
+        and API contracts'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement text analysis service with LLM integration for dialogue
+        and scene extraction'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design panel layout algorithms and visual composition heuristics'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Build layout engine service with grid calculation and positioning
+        logic'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create speech bubble positioning service with collision detection'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement REST API routes for panel CRUD operations and generation
+        endpoints'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build Redis job queue worker for background panel processing'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Add WebSocket handlers for real-time progress tracking'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Create visual style templates and artistic consistency validation'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement React panel editor components with canvas manipulation'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate comprehensive unit and integration test suites'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Performance optimization and visual quality validation'
+      done: false
+      ai_friendly: false
+    - task: '[HUMAN] Code review and architectural assessment'
+      done: false
+      ai_friendly: false
+- key: T65
+  title: Comic Metadata
+  type: Task
+  milestone: M5 - Product Assembly
+  iteration: I5
+  priority: p0
+  effort: 2
+  area: comic
+  dependsOn: []
+  agent_notes:
+    research_findings: '**Context:**
+
+      Comic metadata is essential for managing, organizing, and presenting comics
+      in the Morpheus platform. This includes technical metadata (dimensions, file
+      formats, page count), content metadata (title, description, genre, characters),
+      and business metadata (pricing, publication status, ratings). Without proper
+      metadata management, comics cannot be effectively searched, displayed, or distributed
+      through the storefront. This task likely involves designing database schemas,
+      API endpoints, and UI components for metadata CRUD operations.
+
+
+      **Technical Approach:**
+
+      - Database: Extend Supabase schema with comprehensive comic_metadata table and
+      related lookup tables (genres, tags, characters)
+
+      - Backend: Create Fastify routes with Zod validation schemas for metadata CRUD
+      operations
+
+      - Frontend: Build metadata management forms in Dashboard with react-hook-form
+      and validation
+
+      - Storage: Leverage Supabase''s metadata capabilities for file attachments (covers,
+      thumbnails)
+
+      - Search: Implement full-text search on metadata fields using PostgreSQL''s
+      built-in search
+
+      - Validation: Use JSON Schema or Zod for metadata validation at multiple layers
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: Database migration scripts, CRUD API endpoints, form
+      components, validation schemas, test suites, TypeScript interfaces
+
+      - Medium AI effectiveness: Search implementation, metadata extraction from files,
+      data transformation utilities
+
+      - Low AI effectiveness: Metadata schema design decisions, business rule definitions,
+      UX flow for metadata management
+
+
+      **Dependencies:**
+
+      - External: zod (validation), react-hook-form (forms), fuse.js or similar (client-side
+      search), date-fns (date handling)
+
+      - Internal: Existing comic service, authentication middleware, database connection
+      utilities, shared UI components
+
+
+      **Risks:**
+
+      - Schema evolution: metadata requirements may change frequently - mitigate with
+      flexible JSONB fields and versioned schemas
+
+      - Performance: complex metadata queries could slow search - mitigate with proper
+      indexing and caching
+
+      - Data consistency: metadata and comic files could become out of sync - mitigate
+      with database constraints and validation
+
+      - Migration complexity: existing comics may need metadata backfill - plan migration
+      scripts carefully
+
+
+      **Complexity Notes:**
+
+      This is medium complexity - more involved than basic CRUD due to relationships
+      and search requirements, but less complex than core transformation logic. AI
+      will significantly accelerate boilerplate generation (forms, APIs, tests) allowing
+      humans to focus on schema design and business logic. Expect 60-70% AI assistance
+      ratio.
+
+
+      **Key Files:**
+
+      - packages/database/migrations/: Add comic metadata schema
+
+      - apps/api/src/routes/comics/: Metadata CRUD endpoints
+
+      - apps/dashboard/src/components/comics/: Metadata management UI
+
+      - packages/shared/src/types/: Comic metadata TypeScript types
+
+      - packages/shared/src/schemas/: Zod validation schemas
+
+      '
+    design_decisions:
+    - decision: Use hybrid approach with structured fields + JSONB for extensibility
+      rationale: Balance between queryable structured data and flexibility for future
+        metadata types
+      alternatives_considered:
+      - Pure JSONB approach
+      - Fully normalized relational design
+      - External metadata service
+      ai_implementation_note: AI can generate migration scripts and API endpoints
+        once schema is defined
+    - decision: Implement metadata at comic level with panel-level extensions
+      rationale: Most metadata applies to entire comic, but allow granular panel metadata
+        for advanced features
+      alternatives_considered:
+      - Page-level metadata
+      - Scene-level metadata
+      - Comic-only metadata
+      ai_implementation_note: AI can generate hierarchical CRUD operations and validation
+        logic
+    researched_at: '2026-02-08T18:45:39.951603'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:28:41.591890'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 7495f185
+    planning_hash: cb9ed939
+  technical_notes:
+    approach: 'Create a flexible metadata system with core structured fields (title,
+      description, genre, status) stored in relational columns for efficient querying,
+      plus a JSONB field for extensible custom metadata. Implement full CRUD operations
+      through Fastapi routes with comprehensive validation. Build metadata management
+      UI in the dashboard with form validation and real-time preview. Add search capabilities
+      using PostgreSQL full-text search with proper indexing for performance.
+
+      '
+    external_dependencies:
+    - name: zod
+      version: ^3.22.0
+      reason: Runtime validation and TypeScript inference for metadata schemas
+    - name: react-hook-form
+      version: ^7.48.0
+      reason: Efficient form handling for metadata management UI
+    - name: '@hookform/resolvers'
+      version: ^3.3.0
+      reason: Zod integration with react-hook-form
+    - name: fuse.js
+      version: ^7.0.0
+      reason: Client-side fuzzy search for metadata filtering
+    files_to_modify:
+    - path: packages/database/supabase/migrations/20240115000000_comic_metadata.sql
+      changes: Add comic_metadata table, genres/tags lookup tables, indexes
+    - path: apps/api/src/routes/comics/index.ts
+      changes: Add metadata CRUD routes, search endpoint
+    - path: apps/dashboard/src/pages/comics/[id]/index.tsx
+      changes: Add metadata tab/section to comic details page
+    new_files:
+    - path: packages/shared/src/types/comic-metadata.ts
+      purpose: TypeScript interfaces for comic metadata
+    - path: packages/shared/src/schemas/comic-metadata.ts
+      purpose: Zod schemas for metadata validation
+    - path: apps/api/src/services/comic-metadata.service.ts
+      purpose: Business logic for metadata operations
+    - path: apps/api/src/routes/comics/metadata.ts
+      purpose: Metadata-specific API endpoints
+    - path: apps/dashboard/src/components/comics/MetadataForm.tsx
+      purpose: Metadata editing form component
+    - path: apps/dashboard/src/components/comics/MetadataDisplay.tsx
+      purpose: Read-only metadata display component
+    - path: apps/api/src/utils/metadata-extractor.ts
+      purpose: Extract metadata from comic files
+    - path: apps/api/src/routes/comics/search.ts
+      purpose: Comic search functionality
+  acceptance_criteria:
+  - criterion: Comic metadata CRUD operations work through API endpoints with proper
+      validation
+    verification: curl tests for POST/GET/PUT/DELETE /api/comics/{id}/metadata return
+      correct status codes and data
+  - criterion: Metadata management UI allows editing all core fields with validation
+      feedback
+    verification: 'Manual test: Navigate to dashboard/comics/{id}/metadata, edit fields,
+      submit form, verify persistence'
+  - criterion: Full-text search returns relevant comics based on metadata fields
+    verification: 'API test: GET /api/comics/search?q=superhero returns comics with
+      ''superhero'' in title/description/genre'
+  - criterion: Database schema supports both structured and flexible metadata storage
+    verification: 'Check migration applied correctly: SELECT * FROM comic_metadata
+      shows core columns + custom_fields JSONB'
+  - criterion: TypeScript types and validation schemas prevent invalid metadata
+    verification: Unit tests pass for schema validation with valid/invalid metadata
+      payloads
+  testing:
+    unit_tests:
+    - file: apps/api/src/routes/comics/__tests__/metadata.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Valid metadata creation/update
+      - Invalid metadata rejection
+      - Missing required fields handling
+      - JSONB custom fields storage
+    - file: packages/shared/src/schemas/__tests__/comic-metadata.test.ts
+      coverage_target: 95%
+      scenarios:
+      - Schema validation success/failure cases
+      - Type inference correctness
+      - Custom field validation
+    - file: apps/dashboard/src/components/comics/__tests__/MetadataForm.test.tsx
+      coverage_target: 85%
+      scenarios:
+      - Form submission with valid data
+      - Validation error display
+      - Loading states
+      - Field interactions
+    integration_tests:
+    - file: apps/api/src/__tests__/integration/comic-metadata.test.ts
+      scenarios:
+      - End-to-end metadata CRUD workflow
+      - Search functionality with metadata
+      - File upload with metadata extraction
+      - Database constraint enforcement
+    manual_testing:
+    - step: Create new comic and add metadata through dashboard
+      expected: Form saves successfully, data persists, shows in comic details
+    - step: Search for comics using various metadata terms
+      expected: Search returns relevant results ranked by relevance
+    - step: Edit existing comic metadata
+      expected: Changes save without affecting other comics
+  estimates:
+    development: 2.5
+    code_review: 0.5
+    testing: 0.8
+    documentation: 0.3
+    total: 4.1
+    ai_acceleration_factor: 0.65
+  progress:
+    status: not-started
+    checklist:
+    - task: '[HUMAN] Design metadata schema and relationships'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Generate database migration script'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create TypeScript types and Zod schemas'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement metadata service with CRUD operations'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build API routes with validation middleware'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create metadata management form component'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement search functionality'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate comprehensive unit tests'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Write integration tests for API endpoints'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Review schema design and business logic'
+      done: false
+      ai_friendly: false
+    - task: '[HUMAN] Manual testing and UX validation'
+      done: false
+      ai_friendly: false
+- key: T66
+  title: PDF Generation
+  type: Feature
+  milestone: M5 - Product Assembly
+  iteration: I5
+  priority: p0
+  effort: 5
+  area: comic
+  dependsOn:
+  - T64
+  - T65
+  agent_notes:
+    research_findings: '**Context:**
+
+      PDF generation is critical for the comic transformation platform as it provides
+      users with a downloadable, printable format of their completed comics. This
+      solves the key business need of delivering a final product that users can share,
+      print, or distribute offline. Without PDF export, the platform would be limited
+      to web-only viewing, significantly reducing user value and potential monetization
+      through print-on-demand services.
+
+
+      **Technical Approach:**
+
+      For a TypeScript/Node.js stack, the recommended approach is using Puppeteer
+      for HTML-to-PDF conversion rather than direct PDF libraries. This leverages
+      existing web rendering capabilities and allows reusing comic display components.
+      The architecture should include:
+
+      - Server-side PDF generation endpoint in Fastify backend
+
+      - HTML template rendering using the same React components as web display
+
+      - Queue system for handling heavy PDF generation workloads
+
+      - Cloud storage integration (Supabase Storage) for temporary PDF hosting
+
+      - Frontend download/preview functionality
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: PDF generation service boilerplate, API endpoint creation,
+      HTML template structure, error handling middleware, unit tests for PDF utilities
+
+      - Medium AI effectiveness: Puppeteer configuration optimization, queue integration,
+      frontend download UI components
+
+      - Low AI effectiveness: PDF layout design decisions, performance optimization
+      strategies, complex styling for print media
+
+
+      **Dependencies:**
+
+      - External: puppeteer, html-pdf-node, bull/bullmq for queuing, multer for file
+      handling
+
+      - Internal: Comic display components, image processing service, authentication
+      middleware, Supabase storage integration
+
+
+      **Risks:**
+
+      - Memory/CPU intensive operations: Implement queue system with worker processes
+      and resource limits
+
+      - Large file sizes: Optimize images and implement compression settings
+
+      - Timeout issues: Set appropriate timeouts and implement chunked processing
+      for multi-page comics
+
+      - Concurrent generation limits: Use queue system to prevent server overload
+
+
+      **Complexity Notes:**
+
+      This task is moderately complex due to the need for robust error handling and
+      performance optimization. However, AI can significantly accelerate development
+      of the boilerplate service code, API endpoints, and basic HTML templating. The
+      main complexity lies in optimizing for production scale and handling edge cases
+      in comic layouts.
+
+
+      **Key Files:**
+
+      - apps/api/src/services/pdf-generator.ts: Core PDF generation service
+
+      - apps/api/src/routes/comics/export.ts: PDF export API endpoint
+
+      - apps/dashboard/src/components/comic/ExportButton.tsx: Frontend export UI
+
+      - apps/api/src/templates/comic-pdf.html: HTML template for PDF rendering
+
+      '
+    design_decisions:
+    - decision: Use Puppeteer with HTML templates instead of direct PDF libraries
+      rationale: Allows reuse of existing React comic components, better styling control,
+        and easier maintenance compared to low-level PDF generation
+      alternatives_considered:
+      - jsPDF with manual layout
+      - PDFKit with programmatic generation
+      - wkhtmltopdf
+      ai_implementation_note: AI can generate most of the Puppeteer service code and
+        HTML template structure
+    - decision: Implement async queue system for PDF generation
+      rationale: PDF generation is CPU/memory intensive and should not block API responses,
+        especially for multi-page comics
+      alternatives_considered:
+      - Synchronous generation
+      - Background jobs without queue
+      - External PDF service
+      ai_implementation_note: AI can scaffold the queue worker implementation and
+        job status tracking
+    - decision: Store generated PDFs temporarily in Supabase Storage
+      rationale: Provides secure, time-limited access to generated files without permanent
+        storage overhead
+      alternatives_considered:
+      - Direct download without storage
+      - Local filesystem storage
+      - AWS S3
+      ai_implementation_note: AI can handle the storage integration and cleanup logic
+    researched_at: '2026-02-08T18:46:06.446266'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:29:07.582708'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: ea897148
+    planning_hash: a48011e8
+  technical_notes:
+    approach: 'Implement a PDF generation microservice within the Fastify backend
+      that accepts comic IDs and generates PDFs using Puppeteer with HTML templates.
+      Use a Redis-backed queue system to handle generation requests asynchronously,
+      storing completed PDFs temporarily in Supabase Storage with signed URLs for
+      secure download. Frontend components will trigger generation, poll for completion
+      status, and provide download links when ready.
+
+      '
+    external_dependencies:
+    - name: puppeteer
+      version: ^21.0.0
+      reason: HTML-to-PDF conversion with full Chrome rendering capabilities
+    - name: bullmq
+      version: ^4.0.0
+      reason: Robust queue system for async PDF generation jobs
+    - name: ioredis
+      version: ^5.3.0
+      reason: Redis client for queue backend and job status caching
+    - name: handlebars
+      version: ^4.7.8
+      reason: HTML template rendering for PDF generation
+    files_to_modify:
+    - path: apps/api/src/app.ts
+      changes: Register PDF export routes and queue initialization
+    - path: apps/api/package.json
+      changes: Add puppeteer, bullmq, html-pdf dependencies
+    - path: apps/dashboard/src/components/comic/ComicViewer.tsx
+      changes: Add ExportButton component integration
+    new_files:
+    - path: apps/api/src/services/pdf-generator.ts
+      purpose: Core PDF generation service using Puppeteer
+    - path: apps/api/src/services/pdf-queue.ts
+      purpose: Queue management for async PDF processing
+    - path: apps/api/src/routes/comics/export.ts
+      purpose: API endpoints for PDF export and job status
+    - path: apps/api/src/templates/comic-pdf.hbs
+      purpose: Handlebars template for PDF HTML structure
+    - path: apps/api/src/types/pdf.ts
+      purpose: TypeScript interfaces for PDF generation
+    - path: apps/dashboard/src/components/comic/ExportButton.tsx
+      purpose: Frontend PDF export UI component
+    - path: apps/dashboard/src/hooks/useComicExport.ts
+      purpose: React hook for managing export state and API calls
+    - path: apps/api/src/middleware/rate-limit.ts
+      purpose: Rate limiting for PDF generation endpoints
+  acceptance_criteria:
+  - criterion: API endpoint accepts comic ID and generates PDF containing all comic
+      panels in correct order
+    verification: POST /api/comics/{id}/export returns 202 with job ID, GET /api/jobs/{jobId}
+      shows completion status
+  - criterion: Generated PDFs maintain comic layout quality with proper page sizing
+      and panel arrangement
+    verification: Manual verification of PDF output shows readable text, clear images,
+      proper spacing
+  - criterion: System handles concurrent PDF generation requests without server overload
+    verification: Load test with 10 simultaneous requests completes within 30s, server
+      remains responsive
+  - criterion: Frontend provides intuitive export experience with progress feedback
+      and download
+    verification: Export button shows loading state, progress updates, and triggers
+      download when complete
+  - criterion: Failed PDF generation provides clear error messages and cleanup
+    verification: Invalid comic ID returns 404, processing errors return 500 with
+      helpful message, temp files cleaned up
+  testing:
+    unit_tests:
+    - file: apps/api/src/services/__tests__/pdf-generator.test.ts
+      coverage_target: 90%
+      scenarios:
+      - generateComicPDF with valid comic data
+      - HTML template rendering with comic panels
+      - Error handling for missing assets
+      - PDF configuration options
+      - Memory cleanup after generation
+    - file: apps/api/src/routes/comics/__tests__/export.test.ts
+      coverage_target: 85%
+      scenarios:
+      - POST /export with valid comic ID
+      - GET /export/{jobId} status polling
+      - Authentication required
+      - Invalid comic ID handling
+      - Job not found scenarios
+    integration_tests:
+    - file: apps/api/src/__tests__/integration/pdf-export.test.ts
+      scenarios:
+      - End-to-end PDF generation flow
+      - Queue processing with Redis
+      - Supabase Storage upload/download
+      - Puppeteer HTML rendering
+    manual_testing:
+    - step: Create comic with 4+ panels, click Export PDF button
+      expected: Loading state shows, progress updates appear, PDF downloads automatically
+    - step: Open generated PDF in viewer
+      expected: All panels visible, text readable, layout matches web version
+    - step: Export same comic twice rapidly
+      expected: Both requests process successfully without conflicts
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.65
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Install and configure Puppeteer, BullMQ dependencies in API package.json'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create PDF generator service with Puppeteer HTML-to-PDF conversion'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement queue service for async PDF processing with Redis backend'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create API endpoints for PDF export trigger and job status polling'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build HTML template for comic PDF layout using Handlebars'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design PDF layout and styling for optimal print quality'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement frontend ExportButton component with loading states'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create React hook for managing export flow and progress polling'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Add Supabase Storage integration for temporary PDF hosting'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Write comprehensive unit tests for PDF services and API endpoints'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Performance testing and Puppeteer optimization for production'
+      done: false
+      ai_friendly: false
+    - task: '[HUMAN] Security review of PDF generation and file handling'
+      done: false
+      ai_friendly: false
+- key: T67
+  title: Download Manager
+  type: Feature
+  milestone: M5 - Product Assembly
+  iteration: I5
+  priority: p0
+  effort: 3
+  area: comic
+  dependsOn:
+  - T66
+  agent_notes:
+    research_findings: '**Context:**
+
+      Download Manager is a critical feature for the comic area that enables users
+      to download their generated comics in various formats (PDF, CBZ, individual
+      images). This solves the user need to access their content offline, share comics
+      externally, and maintain local copies. Given Morpheus transforms novels to comics,
+      users will want high-quality downloads of their final products. This is essential
+      for M5 Product Assembly as it completes the user journey from novel input to
+      deliverable comic output.
+
+
+      **Technical Approach:**
+
+      - Server-side download generation using Fastify streams and file system APIs
+
+      - Queue-based processing with Bull/BullMQ for large comic compilations
+
+      - Progressive download with chunked responses for better UX
+
+      - Format conversion pipeline: PNG sequences → PDF (using PDFKit) and CBZ (ZIP
+      archive)
+
+      - Pre-signed S3/Supabase Storage URLs for secure direct downloads
+
+      - Download history and retry mechanisms in PostgreSQL
+
+      - Frontend progress tracking with WebSockets or Server-Sent Events
+
+      - Caching layer for frequently requested download formats
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: CRUD operations for download history, file streaming
+      boilerplate, format conversion utilities, API route handlers, database schema/migrations,
+      unit tests for file operations
+
+      - Medium AI effectiveness: Queue job processors, WebSocket integration, error
+      handling middleware, frontend download UI components
+
+      - Low AI effectiveness: Download strategy architecture decisions, performance
+      optimization choices, security model for file access, storage cost optimization
+      strategies
+
+
+      **Dependencies:**
+
+      - External: archiver (ZIP/CBZ), pdfkit (PDF generation), bull/bullmq (job queue),
+      mime-types (file type detection), node-stream-zip (CBZ handling)
+
+      - Internal: Supabase storage service, authentication middleware, comic rendering
+      pipeline, user management system
+
+
+      **Risks:**
+
+      - Memory exhaustion: Large comics could consume server RAM → Use streaming and
+      chunked processing
+
+      - Storage costs: Multiple format storage → Implement on-demand generation with
+      short-term caching
+
+      - Concurrent downloads: Server overload → Rate limiting and queue-based processing
+
+      - File corruption: Network interruptions → Implement resumable downloads and
+      checksums
+
+      - Security: Unauthorized access → Pre-signed URLs with expiration and user validation
+
+
+      **Complexity Notes:**
+
+      Initially seems straightforward but complexity increases with format variety,
+      concurrent users, and file sizes. AI will significantly accelerate the CRUD
+      and boilerplate portions (~60% of work), but architectural decisions around
+      queuing, caching, and streaming require human design. Estimate 40% faster delivery
+      with AI assistance.
+
+
+      **Key Files:**
+
+      - apps/api/src/routes/downloads.ts: Main download API endpoints
+
+      - apps/api/src/services/download-manager.ts: Core download logic
+
+      - apps/api/src/queues/download-queue.ts: Background job processing
+
+      - packages/database/src/schema/downloads.sql: Download tracking schema
+
+      - apps/dashboard/src/components/DownloadModal.tsx: Frontend download UI
+
+      - apps/api/src/utils/format-converters.ts: PDF/CBZ conversion utilities
+
+      '
+    design_decisions:
+    - decision: Queue-based processing with on-demand generation
+      rationale: Prevents server overload, enables background processing, reduces
+        storage costs vs pre-generating all formats
+      alternatives_considered:
+      - Pre-generate all formats
+      - Synchronous generation
+      - Client-side generation
+      ai_implementation_note: AI can generate complete Bull queue job processors and
+        handlers with proper error handling
+    - decision: Streaming downloads with pre-signed URLs
+      rationale: Reduces server load, improves download speeds, enables resumable
+        downloads, better security
+      alternatives_considered:
+      - Direct server proxy
+      - Client-side S3 access
+      - Base64 embedded downloads
+      ai_implementation_note: AI excellent at generating Fastify streaming routes
+        and Supabase Storage integration boilerplate
+    - decision: Multi-format support (PDF, CBZ, ZIP of PNGs)
+      rationale: 'Covers different use cases: reading apps (CBZ), printing (PDF),
+        editing (individual images)'
+      alternatives_considered:
+      - PDF only
+      - Images only
+      - Single universal format
+      ai_implementation_note: AI can generate format conversion pipelines using PDFKit
+        and archiver libraries
+    researched_at: '2026-02-08T18:46:36.124087'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:29:35.598891'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: e39ba2c4
+    planning_hash: 021a1059
+  technical_notes:
+    approach: 'Implement a queue-based download system where user requests trigger
+      background jobs that compile comic pages into requested formats. Use Fastify
+      streaming responses with pre-signed Supabase Storage URLs for efficient delivery.
+      Frontend shows real-time progress via WebSockets and maintains download history.
+      Cache generated files temporarily and clean up expired downloads automatically.
+
+      '
+    external_dependencies:
+    - name: bullmq
+      version: ^5.0.0
+      reason: Redis-based job queue for background download processing
+    - name: pdfkit
+      version: ^0.14.0
+      reason: Server-side PDF generation from comic images
+    - name: archiver
+      version: ^6.0.0
+      reason: Create CBZ (ZIP) archives of comic pages
+    - name: mime-types
+      version: ^2.1.35
+      reason: Proper MIME type detection for downloads
+    - name: node-cron
+      version: ^3.0.3
+      reason: Cleanup expired download files automatically
+    files_to_modify:
+    - path: packages/database/src/schema.sql
+      changes: Add downloads table with user_id, comic_id, format, status, file_url,
+        expires_at columns
+    - path: apps/api/src/lib/supabase.ts
+      changes: Add downloadsBucket configuration and pre-signed URL generation
+    - path: apps/dashboard/src/lib/api.ts
+      changes: Add download endpoints and WebSocket connection helpers
+    new_files:
+    - path: apps/api/src/routes/downloads.ts
+      purpose: REST endpoints for initiating downloads, checking status, retrieving
+        history
+    - path: apps/api/src/services/download-manager.ts
+      purpose: Core service orchestrating file generation, storage, and cleanup
+    - path: apps/api/src/queues/download-queue.ts
+      purpose: Bull queue configuration and job processors for background generation
+    - path: apps/api/src/utils/format-converters.ts
+      purpose: Utilities for PNG→PDF and PNG→CBZ conversion with streaming
+    - path: apps/api/src/middleware/download-auth.ts
+      purpose: Authentication middleware ensuring users only access their downloads
+    - path: apps/dashboard/src/components/DownloadModal.tsx
+      purpose: Modal UI with format selection, progress tracking, and download history
+    - path: apps/dashboard/src/hooks/useDownloadProgress.ts
+      purpose: WebSocket hook for real-time progress updates
+    - path: packages/database/src/migrations/20240101_create_downloads_table.sql
+      purpose: Database migration for downloads tracking table
+  acceptance_criteria:
+  - criterion: Users can download comics in PDF, CBZ, and individual PNG formats with
+      progress tracking
+    verification: Test download endpoints return correct MIME types and file structures;
+      WebSocket events show 0-100% progress
+  - criterion: System handles concurrent downloads without memory exhaustion or server
+      crashes
+    verification: Load test with 50 concurrent downloads of large comics (>100MB);
+      monitor memory usage stays under 2GB
+  - criterion: Download history is persisted and users can re-download previously
+      generated files
+    verification: Check downloads table has entries; verify pre-signed URLs work for
+      cached files within 24h expiration
+  - criterion: Queue system processes download jobs with retry logic and failure handling
+    verification: Simulate Redis failures and network errors; verify jobs retry 3
+      times before marking failed
+  - criterion: Security prevents unauthorized access to other users' downloads
+    verification: Attempt to access download URLs without authentication or with different
+      user tokens; should return 403/401
+  testing:
+    unit_tests:
+    - file: apps/api/src/services/__tests__/download-manager.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Format conversion (PNG→PDF, PNG→CBZ)
+      - File streaming and chunking
+      - Error handling for corrupted files
+      - Cleanup of expired downloads
+    - file: apps/api/src/utils/__tests__/format-converters.test.ts
+      coverage_target: 85%
+      scenarios:
+      - PDF generation with proper metadata
+      - CBZ archive structure validation
+      - Memory-efficient streaming
+    integration_tests:
+    - file: apps/api/src/__tests__/integration/downloads.test.ts
+      scenarios:
+      - 'Full download flow: request → queue → generation → delivery'
+      - WebSocket progress updates during processing
+      - Supabase Storage integration with pre-signed URLs
+      - Queue job processing and retry mechanisms
+    manual_testing:
+    - step: Download 50+ page comic as PDF through UI
+      expected: Progress bar shows incremental updates; PDF opens correctly with all
+        pages
+    - step: Download same comic again within 24h
+      expected: Returns cached version immediately without re-processing
+    - step: Interrupt download mid-process
+      expected: Job continues in background; user can check status and retrieve when
+        complete
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.65
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create database schema and migration for downloads table'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design queue architecture and job retry strategy'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement format converter utilities (PDF/CBZ generation)'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build download manager service with file operations'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create REST API endpoints with Fastify streaming'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement Bull queue job processors'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Configure WebSocket events and security middleware'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Build React download modal with progress tracking'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate comprehensive unit and integration tests'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Performance optimization and security audit'
+      done: false
+      ai_friendly: false
+    - task: '[HUMAN] Load testing and memory usage validation'
+      done: false
+      ai_friendly: false
+- key: T68
+  title: Archive Creation
+  type: Feature
+  milestone: M5 - Product Assembly
+  iteration: I5
+  priority: p0
+  effort: 2
+  area: comic
+  dependsOn:
+  - T64
+  agent_notes:
+    research_findings: "**Context:**\nArchive Creation enables users to package completed\
+      \ comics into distributable formats (PDF, CBZ/CBR, EPUB) for offline reading,\
+      \ sharing, and monetization. This is essential for the storefront's value proposition\
+      \ - users need to actually obtain their generated comics in standard formats.\
+      \ Without archives, comics remain trapped in the web platform, limiting their\
+      \ utility and reducing user satisfaction.\n\n**Technical Approach:**\n- PDF\
+      \ generation using Puppeteer or jsPDF for high-quality output with proper page\
+      \ layouts\n- CBZ/CBR creation using JSZip to bundle images with metadata\n-\
+      \ EPUB generation using epub-gen for e-reader compatibility\n- Background job\
+      \ processing with BullMQ for large comic compilation\n- S3-compatible storage\
+      \ (Supabase Storage) for archive hosting\n- Download links with expiration/access\
+      \ control\n- Progress tracking via WebSocket for real-time user feedback\n-\
+      \ Archive metadata storage in PostgreSQL (format, size, creation date, download\
+      \ count)\n\n**AI Suitability Analysis:**\n- High AI effectiveness: Archive model/schema\
+      \ creation, CRUD endpoints, file format conversion utilities, test suites, validation\
+      \ schemas, download API routes\n- Medium AI effectiveness: Background job queue\
+      \ setup, storage integration, progress tracking WebSocket handlers, PDF layout\
+      \ optimization\n- Low AI effectiveness: Format-specific optimization decisions,\
+      \ storage strategy architecture, user experience flow design, performance tuning\
+      \ for large comics\n\n**Dependencies:**\n- External: puppeteer, jszip, epub-gen,\
+      \ bullmq, ioredis, file-type, mime-types\n- Internal: Comic service, Panel service,\
+      \ User authentication, Storage service, WebSocket handler, Job queue infrastructure\n\
+      \n**Risks:**\n- Memory exhaustion: Large comics could crash Node.js processes\
+      \ during PDF generation\n  Mitigation: Stream processing, memory limits on job\
+      \ workers, comic size restrictions\n- Storage costs: Archives could consume\
+      \ significant storage space\n  Mitigation: Cleanup policies, user storage quotas,\
+      \ compression optimization\n- Generation timeouts: Complex comics might take\
+      \ too long to process\n  Mitigation: Background processing, user notifications,\
+      \ progress indicators\n- Format compatibility: Generated files might not work\
+      \ across all readers\n  Mitigation: Format validation, multiple format options,\
+      \ user testing\n\n**Complexity Notes:**\nInitially appears straightforward but\
+      \ becomes complex due to format diversity and performance requirements. AI will\
+      \ significantly accelerate boilerplate and integration code, but format-specific\
+      \ optimizations require human expertise. Memory management and streaming are\
+      \ critical considerations often missed in initial estimates.\n\n**Key Files:**\n\
+      - packages/backend/src/services/archive.service.ts: Core archive creation logic\n\
+      - packages/backend/src/routes/archives.ts: API endpoints for creation/download\n\
+      - packages/backend/src/jobs/archive-generation.job.ts: Background processing\n\
+      - packages/backend/src/utils/pdf-generator.ts: PDF creation utilities\n- packages/shared/types/archive.types.ts:\
+      \ Type definitions\n- packages/dashboard/src/components/ArchiveManager.tsx:\
+      \ UI for archive creation\n- supabase/migrations/: Archive table schema\n"
+    design_decisions:
+    - decision: Use background job processing for archive generation
+      rationale: Archive creation can take 30+ seconds for large comics, blocking
+        HTTP requests is poor UX. Background jobs allow async processing with progress
+        updates.
+      alternatives_considered:
+      - Synchronous generation
+      - Streaming response
+      - Client-side generation
+      ai_implementation_note: AI can generate BullMQ job definitions, progress tracking,
+        and WebSocket event handlers efficiently
+    - decision: Support multiple archive formats (PDF, CBZ, EPUB)
+      rationale: Different users have different preferences - PDF for sharing, CBZ
+        for comic readers, EPUB for e-readers. Multiple formats increase platform
+        value.
+      alternatives_considered:
+      - PDF only
+      - CBZ only
+      - User-selectable single format
+      ai_implementation_note: AI excellent for implementing format-specific converters
+        and factory pattern for format selection
+    - decision: Store archives temporarily with cleanup policy
+      rationale: Permanent storage is expensive and unnecessary since comics can be
+        regenerated. 30-day cleanup balances user convenience with cost control.
+      alternatives_considered:
+      - Permanent storage
+      - Generate on-demand
+      - User-managed cleanup
+      ai_implementation_note: AI can implement cleanup jobs, expiration logic, and
+        storage management efficiently
+    researched_at: '2026-02-08T18:47:05.654205'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:30:01.791388'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 255eeab3
+    planning_hash: 798f40b0
+  technical_notes:
+    approach: 'Implement archive creation as an async job system where users request
+      archive generation via REST API, triggering background jobs that compile comic
+      panels into chosen formats using specialized libraries. Store generated archives
+      in Supabase Storage with metadata in PostgreSQL, providing download URLs with
+      access control. Use WebSocket connections to provide real-time progress updates
+      during generation, and implement cleanup policies to manage storage costs.
+
+      '
+    external_dependencies:
+    - name: puppeteer
+      version: ^21.0.0
+      reason: PDF generation with proper page layouts and print optimization
+    - name: jszip
+      version: ^3.10.0
+      reason: CBZ/CBR archive creation by bundling images
+    - name: epub-gen
+      version: ^0.1.0
+      reason: EPUB format generation for e-reader compatibility
+    - name: bullmq
+      version: ^4.0.0
+      reason: Background job processing for async archive generation
+    - name: file-type
+      version: ^18.0.0
+      reason: Validate generated file formats and MIME types
+    files_to_modify:
+    - path: packages/backend/src/app.ts
+      changes: Add BullMQ queue initialization and archive routes
+    - path: packages/backend/src/middleware/websocket.ts
+      changes: Add archive progress event handlers
+    - path: packages/dashboard/src/pages/ComicDetail.tsx
+      changes: Add archive creation button and progress display
+    new_files:
+    - path: packages/backend/src/services/archive.service.ts
+      purpose: Core archive creation orchestration and format handling
+    - path: packages/backend/src/routes/archives.ts
+      purpose: REST API endpoints for archive CRUD operations
+    - path: packages/backend/src/jobs/archive-generation.job.ts
+      purpose: Background job processor for archive generation
+    - path: packages/backend/src/utils/pdf-generator.ts
+      purpose: PDF creation using Puppeteer with comic-optimized layouts
+    - path: packages/backend/src/utils/cbz-generator.ts
+      purpose: CBZ/CBR archive creation with metadata
+    - path: packages/backend/src/utils/epub-generator.ts
+      purpose: EPUB generation for e-reader compatibility
+    - path: packages/shared/types/archive.types.ts
+      purpose: TypeScript definitions for archive models and DTOs
+    - path: packages/dashboard/src/components/ArchiveManager.tsx
+      purpose: UI component for archive creation and management
+    - path: packages/dashboard/src/hooks/useArchiveProgress.ts
+      purpose: React hook for WebSocket progress tracking
+    - path: supabase/migrations/20231201000000_create_archives_table.sql
+      purpose: Database schema for archive metadata storage
+  acceptance_criteria:
+  - criterion: Users can request archive creation in PDF, CBZ, and EPUB formats via
+      API
+    verification: POST /api/archives with format parameter returns job ID and 202
+      status
+  - criterion: Archive generation processes comics with 10+ panels within 60 seconds
+    verification: Monitor job completion time via WebSocket progress events
+  - criterion: Generated archives are downloadable with expiring signed URLs
+    verification: GET /api/archives/{id}/download returns valid download URL, file
+      downloads successfully
+  - criterion: Archive creation progress is tracked in real-time via WebSocket
+    verification: WebSocket connection receives progress updates from 0% to 100% during
+      generation
+  - criterion: System handles archive generation failures gracefully with user notification
+    verification: Failed jobs update status to 'failed' and send error notification
+      via WebSocket
+  testing:
+    unit_tests:
+    - file: packages/backend/src/services/__tests__/archive.service.test.ts
+      coverage_target: 90%
+      scenarios:
+      - PDF generation with valid comic data
+      - CBZ creation with image compression
+      - EPUB metadata generation
+      - Error handling for missing panels
+      - Memory limit validation
+    - file: packages/backend/src/utils/__tests__/pdf-generator.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Panel-to-page layout conversion
+      - Font embedding and text rendering
+      - Image optimization and compression
+    - file: packages/backend/src/jobs/__tests__/archive-generation.job.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Job queue processing
+      - Progress tracking updates
+      - Cleanup on job failure
+    integration_tests:
+    - file: packages/backend/src/__tests__/integration/archive-workflow.test.ts
+      scenarios:
+      - End-to-end archive creation and download
+      - WebSocket progress notifications
+      - Storage cleanup policies
+      - Authentication and authorization
+    manual_testing:
+    - step: Create archive via dashboard UI for 15-panel comic
+      expected: Progress bar shows completion, download link appears
+    - step: Download generated PDF and verify in Adobe Reader
+      expected: PDF opens correctly with proper page layout and navigation
+    - step: Test CBZ file in ComicRack or similar reader
+      expected: Comic displays correctly with proper page order
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.65
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create archive database schema and migration'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate TypeScript types and validation schemas'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design archive storage strategy and cleanup policies'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement archive service with CRUD operations'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create PDF generator utility using Puppeteer'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement CBZ/EPUB generation utilities'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Setup BullMQ job queue and archive generation job'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create REST API endpoints for archive operations'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Optimize memory usage and streaming for large comics'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement WebSocket progress tracking integration'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build React components for archive management UI'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate comprehensive test suites'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Performance testing and optimization'
+      done: false
+      ai_friendly: false
+    - task: '[HUMAN] Security review and access control validation'
+      done: false
+      ai_friendly: false
+- key: T69
+  title: Print-Ready Output
+  type: Feature
+  milestone: M5 - Product Assembly
+  iteration: I5
+  priority: p0
+  effort: 3
+  area: comic
+  dependsOn:
+  - T66
+  agent_notes:
+    research_findings: "**Context:**\nPrint-Ready Output addresses the critical need\
+      \ for comic creators to produce publication-quality files for physical printing.\
+      \ This feature bridges the gap between digital comic creation and physical distribution,\
+      \ enabling users to output comics in industry-standard formats (PDF/X-1a, CMYK\
+      \ color space, proper bleeds, trim marks) suitable for professional printing\
+      \ services. This is essential for Morpheus's business model as it unlocks revenue\
+      \ from physical product sales and licensing deals with publishers.\n\n**Technical\
+      \ Approach:**\nImplement a print preparation service using PDFKit for PDF generation\
+      \ with print-specific features (bleeds, crop marks, color profiles). Create\
+      \ a pipeline that processes comic panels through color space conversion (RGB\
+      \ to CMYK), resolution enhancement for print DPI (300+ DPI), and applies print-specific\
+      \ layouts with proper margins and gutters. Use Sharp for image processing and\
+      \ color profile management. Build a queue-based system for heavy processing\
+      \ using BullMQ, as print preparation is computationally expensive and should\
+      \ be asynchronous.\n\n**AI Suitability Analysis:**\n- High AI effectiveness:\
+      \ PDF generation boilerplate, image processing utilities, CRUD operations for\
+      \ print job management, test suite creation, API endpoint scaffolding, validation\
+      \ schemas\n- Medium AI effectiveness: Integration with existing comic data models,\
+      \ queue job handlers, file upload/download workflows, print template generation\n\
+      - Low AI effectiveness: Print industry standards implementation, color profile\
+      \ management decisions, bleed/trim calculations, print quality optimization\
+      \ algorithms, printer compatibility requirements\n\n**Dependencies:**\n- External:\
+      \ PDFKit, Sharp, color-convert, ICC color profiles, BullMQ, file-type validation\n\
+      - Internal: Comic assembly service, panel management system, file storage (Supabase),\
+      \ user authentication, payment processing (for premium print features)\n\n**Risks:**\n\
+      - Color accuracy issues: Implement ICC profile validation and color proofing\
+      \ workflows\n- File size explosion: Use progressive processing and temporary\
+      \ file cleanup strategies  \n- Print compatibility: Extensive testing with actual\
+      \ print services and PDF validators\n- Performance bottlenecks: Queue-based\
+      \ processing with progress tracking and resource limits\n\n**Complexity Notes:**\n\
+      Higher complexity than initially estimated due to print industry standards compliance.\
+      \ However, AI can accelerate the ~60% of work that involves standard PDF manipulation\
+      \ and file processing. The color management and print specification aspects\
+      \ require domain expertise that AI cannot fully provide.\n\n**Key Files:**\n\
+      - apps/backend/src/services/print/: Print preparation service logic\n- apps/backend/src/queues/print-jobs.ts:\
+      \ Background processing queue\n- packages/shared/types/print.ts: Print job and\
+      \ specification types\n- apps/dashboard/src/components/print/: Print configuration\
+      \ UI components\n- apps/backend/src/routes/print.ts: Print job API endpoints\n"
+    design_decisions:
+    - decision: Use PDFKit with Sharp for print-ready PDF generation
+      rationale: PDFKit provides precise control over PDF structure needed for print
+        standards, while Sharp handles high-quality image processing and color space
+        conversion efficiently
+      alternatives_considered:
+      - Puppeteer PDF generation
+      - jsPDF library
+      - External print API services
+      ai_implementation_note: AI can generate most PDFKit boilerplate and Sharp image
+        processing pipelines from specifications
+    - decision: Implement asynchronous queue-based processing with BullMQ
+      rationale: Print preparation is CPU/memory intensive and can take minutes for
+        full comics. Queue system provides progress tracking, retry logic, and prevents
+        API timeouts
+      alternatives_considered:
+      - Synchronous processing
+      - Lambda/serverless functions
+      - Background threads
+      ai_implementation_note: AI excels at generating queue job handlers, progress
+        tracking, and retry logic patterns
+    - decision: Store ICC color profiles and print templates as static assets
+      rationale: Print standards are stable, and local storage provides fast access
+        without external dependencies. Templates can be version-controlled and cached
+      alternatives_considered:
+      - Database storage
+      - CDN-hosted profiles
+      - Dynamic profile generation
+      ai_implementation_note: AI can help generate profile loading utilities and template
+        management code
+    researched_at: '2026-02-08T18:47:36.075872'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:30:30.877959'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: '15375014'
+    planning_hash: daef7f05
+  technical_notes:
+    approach: 'Create a print service that accepts comic IDs and print specifications,
+      then processes panels through color conversion and resolution enhancement before
+      assembling into print-ready PDFs. Implement a job queue system for background
+      processing with real-time progress updates via WebSocket. Build a dashboard
+      interface for print configuration with live preview capabilities. Store print
+      jobs with downloadable outputs and integrate with payment processing for premium
+      print features.
+
+      '
+    external_dependencies:
+    - name: pdfkit
+      version: ^0.15.0
+      reason: Industry-standard PDF generation with print-specific features support
+    - name: sharp
+      version: ^0.33.0
+      reason: High-performance image processing for color space conversion and DPI
+        enhancement
+    - name: bullmq
+      version: ^5.0.0
+      reason: Robust queue system for background print job processing
+    - name: color-convert
+      version: ^2.0.1
+      reason: Accurate color space conversion algorithms for RGB to CMYK
+    - name: file-type
+      version: ^19.0.0
+      reason: Validate uploaded files and ensure proper format handling
+    files_to_modify:
+    - path: apps/backend/src/routes/index.ts
+      changes: Add print routes import and registration
+    - path: apps/backend/src/queues/index.ts
+      changes: Register print job queue with BullMQ
+    - path: apps/dashboard/src/pages/comics/[id]/index.tsx
+      changes: Add print button and status integration
+    - path: packages/shared/types/index.ts
+      changes: Export print-related types
+    new_files:
+    - path: apps/backend/src/services/print/print-processor.ts
+      purpose: Core print preparation logic and PDF generation
+    - path: apps/backend/src/services/print/color-manager.ts
+      purpose: CMYK conversion and ICC profile management
+    - path: apps/backend/src/services/print/layout-engine.ts
+      purpose: Print layout calculation with bleeds and trim marks
+    - path: apps/backend/src/queues/print-jobs.ts
+      purpose: Background job processing for print preparation
+    - path: apps/backend/src/routes/print.ts
+      purpose: REST API endpoints for print job management
+    - path: packages/shared/types/print.ts
+      purpose: Print job, specification, and status type definitions
+    - path: apps/dashboard/src/components/print/PrintConfigPanel.tsx
+      purpose: Print settings configuration interface
+    - path: apps/dashboard/src/components/print/PrintPreview.tsx
+      purpose: Live preview of print layout with bleeds
+    - path: apps/dashboard/src/components/print/PrintJobStatus.tsx
+      purpose: Real-time print job progress tracking
+    - path: apps/backend/src/utils/pdf-validator.ts
+      purpose: PDF/X-1a compliance validation utilities
+    - path: apps/backend/src/middleware/print-auth.ts
+      purpose: Authentication and payment verification for print features
+  acceptance_criteria:
+  - criterion: System generates print-ready PDF with CMYK color space, 300 DPI resolution,
+      and proper bleeds (0.125 inch) for A4 and US Letter formats
+    verification: Upload test comic, request print PDF, verify output with PDF validator
+      and color profile inspector
+  - criterion: Print job queue processes requests asynchronously with real-time progress
+      updates (0-100%) via WebSocket
+    verification: Submit multiple print jobs, verify queue ordering and progress notifications
+      in dashboard
+  - criterion: Generated PDFs comply with PDF/X-1a standard and pass commercial printer
+      validation
+    verification: Test output files with Adobe Acrobat Preflight and online PDF/X
+      validators
+  - criterion: Dashboard provides live preview of print layout with bleed areas and
+      trim marks visible
+    verification: Configure print settings in UI, verify preview matches final PDF
+      output
+  - criterion: System handles large comic files (50+ pages, 500MB+) without memory
+      overflow or timeouts
+    verification: Process stress test comic, monitor memory usage and completion within
+      10 minutes
+  testing:
+    unit_tests:
+    - file: apps/backend/src/services/print/__tests__/print-processor.test.ts
+      coverage_target: 90%
+      scenarios:
+      - CMYK color conversion accuracy
+      - DPI upscaling quality
+      - Bleed area calculation
+      - PDF generation with metadata
+      - Error handling for corrupt images
+    - file: apps/backend/src/services/print/__tests__/color-manager.test.ts
+      coverage_target: 85%
+      scenarios:
+      - ICC profile application
+      - RGB to CMYK conversion
+      - Color space validation
+      - Profile fallback handling
+    - file: apps/backend/src/queues/__tests__/print-jobs.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Job queuing and priority
+      - Progress tracking updates
+      - Error handling and retry logic
+      - Resource cleanup on completion
+    integration_tests:
+    - file: apps/backend/src/__tests__/integration/print-workflow.test.ts
+      scenarios:
+      - Complete comic-to-PDF pipeline
+      - WebSocket progress notifications
+      - File storage and cleanup
+      - Authentication and payment integration
+    - file: apps/backend/src/__tests__/integration/print-api.test.ts
+      scenarios:
+      - REST API endpoints for print jobs
+      - File upload and download flows
+      - Print specification validation
+    manual_testing:
+    - step: Upload 20-page comic and generate print PDF with bleeds
+      expected: PDF downloads with proper trim marks and bleed areas visible
+    - step: Test print output with local commercial printer
+      expected: Physical prints match digital preview with accurate colors
+    - step: Submit multiple print jobs simultaneously
+      expected: All jobs process in queue order with accurate progress tracking
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.55
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Setup print service dependencies (PDFKit, Sharp, color-convert,
+        BullMQ)'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create print-related TypeScript types and interfaces'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design ICC color profile strategy and CMYK conversion approach'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement basic PDF generation service with PDFKit'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create image processing utilities with Sharp for DPI enhancement'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Implement print industry standards (bleed calculations, PDF/X-1a
+        compliance)'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Build job queue system with BullMQ and progress tracking'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create REST API endpoints for print job management'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build React components for print configuration and preview'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement WebSocket integration for real-time progress updates'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Write comprehensive test suites (unit and integration)'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Manual testing with actual print services and quality validation'
+      done: false
+      ai_friendly: false
+    - task: '[HUMAN] Performance optimization and memory management tuning'
+      done: false
+      ai_friendly: false
+- key: T71
+  title: M4 Integration Testing
+  type: Task
+  milestone: M5 - Product Assembly
+  iteration: I5
+  priority: p0
+  effort: 5
+  area: comic
+  dependsOn:
+  - T67
+  - T68
+  - T69
+  agent_notes:
+    research_findings: "**Context:**\nM4 Integration Testing is needed for the Product\
+      \ Assembly milestone to ensure all system components work together seamlessly.\
+      \ This involves testing the complete novel-to-comic transformation pipeline:\
+      \ user uploads novel → AI processing (chapter segmentation, scene extraction)\
+      \ → image generation → comic panel assembly → final delivery. Integration tests\
+      \ validate data flow between Fastify backend, Supabase database, external AI\
+      \ services (OpenAI/Anthropic, RunPod), and Next.js frontends.\n\n**Technical\
+      \ Approach:**\nImplement end-to-end integration tests using Playwright for full\
+      \ user journey testing, plus API integration tests with Vitest for service-to-service\
+      \ communication. Use test containers for isolated database testing, mock external\
+      \ AI services with deterministic responses, and implement contract testing between\
+      \ backend/frontend. Follow testing pyramid: heavy integration layer since this\
+      \ is core product flow.\n\n**AI Suitability Analysis:**\n- High AI effectiveness:\
+      \ Test case generation, mock data creation, boilerplate test setup, assertion\
+      \ writing, database seed scripts\n- Medium AI effectiveness: Test orchestration\
+      \ logic, API client setup, test utilities, cleanup procedures\n- Low AI effectiveness:\
+      \ Test strategy decisions, flaky test debugging, performance threshold determination,\
+      \ CI/CD integration architecture\n\n**Dependencies:**\n- External: @playwright/test,\
+      \ @testcontainers/postgresql, msw (API mocking), vitest, supertest\n- Internal:\
+      \ Backend API endpoints, database schemas, AI service interfaces, authentication\
+      \ middleware, file upload handling\n\n**Risks:**\n- Flaky external API tests:\
+      \ Use comprehensive mocking and circuit breakers\n- Long-running tests impacting\
+      \ CI: Implement parallel execution and selective test running  \n- Test data\
+      \ management complexity: Standardize factories and cleanup procedures\n- Cross-service\
+      \ timing issues: Implement proper async handling and timeouts\n\n**Complexity\
+      \ Notes:**\nMore complex than typical integration testing due to AI service\
+      \ dependencies and multi-step async workflows. However, AI agents excel at generating\
+      \ comprehensive test scenarios and mock implementations, potentially accelerating\
+      \ development by 60-70%.\n\n**Key Files:**\n- apps/backend/tests/integration/:\
+      \ Integration test suites\n- apps/dashboard/tests/e2e/: End-to-end user flows\n\
+      - packages/shared/test-utils/: Common testing utilities\n- apps/backend/src/services/:\
+      \ Service layer interfaces for mocking\n"
+    design_decisions:
+    - decision: Use Playwright for E2E + Vitest for API integration
+      rationale: Playwright provides robust browser automation for complete user journeys,
+        while Vitest offers fast API testing with excellent TypeScript support
+      alternatives_considered:
+      - Cypress only
+      - Jest + Puppeteer
+      - Pure API testing
+      ai_implementation_note: AI can generate comprehensive test scenarios and page
+        object models based on existing component structures
+    - decision: Mock external AI services with MSW
+      rationale: MSW provides reliable, fast mocking without network dependencies,
+        enabling consistent test results and faster CI runs
+      alternatives_considered:
+      - Real API calls with test keys
+      - Custom mock servers
+      - Dependency injection
+      ai_implementation_note: AI can generate realistic mock responses based on actual
+        API documentation and schemas
+    - decision: Implement contract testing between services
+      rationale: Ensures API compatibility between backend and frontend without full
+        E2E overhead for every change
+      alternatives_considered:
+      - Only E2E testing
+      - Manual API validation
+      - Schema validation only
+      ai_implementation_note: AI can automatically generate contract tests from OpenAPI
+        specs and TypeScript interfaces
+    researched_at: '2026-02-08T18:48:01.991497'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:30:58.377834'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 7a195f59
+    planning_hash: a4d2d8c7
+  technical_notes:
+    approach: 'Implement a three-tier integration testing strategy: (1) Service integration
+      tests using Vitest to validate backend API endpoints, database operations, and
+      mocked AI service interactions, (2) Contract tests ensuring API compatibility
+      between services, and (3) End-to-end tests with Playwright covering complete
+      user workflows from novel upload to comic generation. Use test containers for
+      database isolation, MSW for external API mocking, and parallel test execution
+      for CI efficiency.
+
+      '
+    external_dependencies:
+    - name: '@playwright/test'
+      version: ^1.40.0
+      reason: End-to-end testing framework with excellent TypeScript support and parallel
+        execution
+    - name: '@testcontainers/postgresql'
+      version: ^10.0.0
+      reason: Isolated PostgreSQL instances for integration testing without shared
+        state
+    - name: msw
+      version: ^2.0.0
+      reason: Mock Service Worker for intercepting and mocking external API calls
+    - name: supertest
+      version: ^6.3.0
+      reason: HTTP assertion library for testing Fastify API endpoints
+    - name: '@faker-js/faker'
+      version: ^8.3.0
+      reason: Generate realistic test data for novels, user accounts, and comic metadata
+    files_to_modify:
+    - path: apps/backend/package.json
+      changes: Add integration test scripts and testcontainers dependencies
+    - path: apps/backend/src/config/test.ts
+      changes: Add test environment configuration for external services
+    - path: .github/workflows/ci.yml
+      changes: Add integration test job with service dependencies
+    new_files:
+    - path: packages/shared/test-utils/src/factories/novel-factory.ts
+      purpose: Generate test novel data with various formats and sizes
+    - path: packages/shared/test-utils/src/factories/comic-factory.ts
+      purpose: Create mock comic data and panel structures
+    - path: packages/shared/test-utils/src/mocks/ai-services.ts
+      purpose: Mock OpenAI/Anthropic and RunPod API responses
+    - path: apps/backend/tests/integration/setup/test-containers.ts
+      purpose: Configure PostgreSQL and Redis test containers
+    - path: apps/backend/tests/integration/setup/mock-server.ts
+      purpose: MSW server configuration for external API mocking
+    - path: apps/backend/tests/integration/novel-processing.test.ts
+      purpose: Test complete novel processing pipeline integration
+    - path: apps/backend/tests/integration/comic-generation.test.ts
+      purpose: Test image generation and comic assembly workflows
+    - path: apps/backend/tests/integration/auth-middleware.test.ts
+      purpose: Test authentication and authorization integration
+    - path: apps/dashboard/tests/integration/api-contracts.test.ts
+      purpose: Validate API contracts between frontend and backend
+    - path: apps/dashboard/tests/e2e/novel-upload-journey.spec.ts
+      purpose: End-to-end user journey testing for dashboard
+    - path: apps/reader/tests/e2e/comic-viewing.spec.ts
+      purpose: End-to-end comic reader functionality testing
+    - path: apps/backend/tests/integration/utils/test-helpers.ts
+      purpose: Integration test utility functions and cleanup procedures
+    - path: docs/testing/integration-testing.md
+      purpose: Integration testing strategy and debugging guide
+  acceptance_criteria:
+  - criterion: Complete novel-to-comic pipeline integration test passes covering upload
+      → processing → generation → delivery
+    verification: Run `npm run test:integration -- pipeline.test.ts` with 100% success
+      rate
+  - criterion: Service-to-service contract tests validate API compatibility between
+      backend, AI services, and database
+    verification: Execute `npm run test:contracts` with all contract validations passing
+  - criterion: End-to-end user journey tests cover critical paths in both dashboard
+      and reader applications
+    verification: Run `npm run test:e2e` covering novel upload, processing status,
+      and comic viewing flows
+  - criterion: Integration test suite completes within 10 minutes in CI environment
+      with parallel execution
+    verification: CI pipeline execution time measurement and test parallelization
+      metrics
+  - criterion: Test coverage documentation and runbooks are available for debugging
+      failing integration tests
+    verification: Check `docs/testing/integration-testing.md` contains troubleshooting
+      guides and test architecture
+  testing:
+    unit_tests:
+    - file: packages/shared/test-utils/src/factories.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Test data factory generation
+      - Mock service responses
+      - Database seed utilities
+    integration_tests:
+    - file: apps/backend/tests/integration/novel-processing.test.ts
+      scenarios:
+      - Novel upload and chapter segmentation flow
+      - AI service communication and error handling
+      - Database state transitions during processing
+    - file: apps/backend/tests/integration/comic-generation.test.ts
+      scenarios:
+      - Scene extraction to image generation pipeline
+      - Panel assembly and layout generation
+      - File storage and delivery workflows
+    - file: apps/backend/tests/integration/auth-middleware.test.ts
+      scenarios:
+      - Authentication flow with Supabase integration
+      - Authorization for file uploads and comic access
+    - file: apps/dashboard/tests/integration/api-contracts.test.ts
+      scenarios:
+      - Frontend-backend API contract validation
+      - GraphQL schema compatibility testing
+    e2e_tests:
+    - file: apps/dashboard/tests/e2e/novel-upload-journey.spec.ts
+      scenarios:
+      - Complete user journey from upload to comic generation
+      - Error handling and retry mechanisms
+      - Progress tracking and notifications
+    - file: apps/reader/tests/e2e/comic-viewing.spec.ts
+      scenarios:
+      - Comic reader functionality and navigation
+      - Chapter progression and bookmarking
+    manual_testing:
+    - step: Upload large novel file (>50MB) and monitor memory usage
+      expected: Processing completes without memory leaks or timeouts
+    - step: Simulate external AI service downtime during processing
+      expected: Graceful error handling and user notification
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.65
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Setup test infrastructure dependencies and configuration files'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create test data factories and mock service implementations'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Define integration test strategy and service boundaries'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement test container setup and database seeding utilities'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate service integration tests for novel processing pipeline'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create API contract tests between frontend and backend services'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build end-to-end test suites for critical user journeys'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement test cleanup procedures and parallel execution setup'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Configure CI/CD integration and performance thresholds'
+      done: false
+      ai_friendly: false
+    - task: '[HUMAN] Review test coverage and identify gaps requiring manual testing'
+      done: false
+      ai_friendly: false
+- key: T73
+  title: Variant Generation
+  type: Feature
+  milestone: M5 - Product Assembly
+  iteration: I5
+  priority: p2
+  effort: 3
+  area: comic
+  dependsOn:
+  - T64
+  agent_notes:
+    research_findings: "**Context:**\nVariant Generation enables creating multiple\
+      \ visual interpretations of the same comic panel/scene, allowing users to explore\
+      \ different artistic styles, character appearances, compositions, or visual\
+      \ approaches. This is crucial for comic creation as it provides creative flexibility\
+      \ and helps users iterate toward their desired aesthetic. In the context of\
+      \ Morpheus's novel-to-comic transformation, this feature would allow users to\
+      \ generate multiple versions of a panel and select the best one, or create alternate\
+      \ versions for different artistic directions.\n\n**Technical Approach:**\n-\
+      \ Leverage existing Stable Diffusion pipeline on RunPod with parameter variation\n\
+      - Implement seed management system for reproducible variations\n- Create variant\
+      \ queue system using existing job processing infrastructure\n- Use prompt engineering\
+      \ techniques: style tokens, negative prompts, CFG scale variation\n- Implement\
+      \ variant comparison UI with side-by-side preview\n- Store variants as related\
+      \ entities in PostgreSQL with reference to original panel\n- Cache variant metadata\
+      \ and thumbnails for performance\n\n**AI Suitability Analysis:**\n- High AI\
+      \ effectiveness: CRUD operations for variant storage, API endpoints, database\
+      \ schema, test cases, UI components for variant display, prompt variation logic\n\
+      - Medium AI effectiveness: Integration with existing RunPod service, variant\
+      \ queue management, thumbnail generation pipeline\n- Low AI effectiveness: Prompt\
+      \ engineering strategies, variant quality scoring algorithms, UX decisions for\
+      \ variant selection interface\n\n**Dependencies:**\n- External: sharp (image\
+      \ processing), uuid (variant IDs), ioredis (caching)\n- Internal: existing RunPod\
+      \ integration service, job queue system, panel management components, image\
+      \ storage service\n\n**Risks:**\n- Storage bloat: Multiple variants per panel\
+      \ could exponentially increase storage costs\n  Mitigation: Implement automatic\
+      \ cleanup of old variants, thumbnail-only storage for non-selected variants\n\
+      - Generation queue congestion: Multiple variant requests could overwhelm RunPod\
+      \ capacity\n  Mitigation: Implement rate limiting, priority queues, batch processing\n\
+      - Prompt drift: Variants may deviate too far from original intent\n  Mitigation:\
+      \ Implement similarity scoring, constrain variation parameters\n\n**Complexity\
+      \ Notes:**\nInitially appears straightforward but complexity increases with\
+      \ scale. The challenge lies in balancing variation diversity with consistency.\
+      \ AI agents will be highly effective for the CRUD and infrastructure portions\
+      \ (~70% of work), but prompt engineering and UX decisions require human expertise.\
+      \ Overall complexity: Medium-High due to integration complexity.\n\n**Key Files:**\n\
+      - apps/api/src/services/variant-generation.ts: Core variant generation logic\n\
+      - apps/api/src/routes/variants/: API endpoints for variant CRUD\n- packages/database/src/schema/variants.ts:\
+      \ Variant storage schema\n- apps/dashboard/src/components/VariantSelector/:\
+      \ Variant selection UI\n- apps/api/src/services/runpod-integration.ts: Extend\
+      \ existing integration\n"
+    design_decisions:
+    - decision: Store variants as separate entities with foreign key to original panel
+      rationale: Maintains data integrity, enables efficient querying, supports variant
+        metadata
+      alternatives_considered:
+      - JSON array in panel table
+      - Separate variant service/database
+      ai_implementation_note: AI can generate complete database schema, migrations,
+        and TypeScript types
+    - decision: Generate variants by modifying Stable Diffusion parameters rather
+        than prompt rewriting
+      rationale: More predictable results, easier to control variation degree, leverages
+        existing prompt quality
+      alternatives_considered:
+      - LLM-based prompt rewriting
+      - Style transfer post-processing
+      ai_implementation_note: AI can implement parameter variation algorithms and
+        validation logic
+    - decision: Implement lazy loading with thumbnail previews for variant selection
+      rationale: Reduces initial load time, improves UX, manages bandwidth for multiple
+        high-res images
+      alternatives_considered:
+      - Full resolution immediate loading
+      - Progressive image loading
+      ai_implementation_note: AI excellent for implementing thumbnail generation pipeline
+        and lazy loading components
+    researched_at: '2026-02-08T18:48:29.203873'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:31:24.583190'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 504b566a
+    planning_hash: efc53a69
+  technical_notes:
+    approach: 'Extend the existing RunPod Stable Diffusion integration to support
+      parameter variations (seed, CFG scale, sampling steps). Create a variant entity
+      system that stores multiple generated images per panel with metadata. Implement
+      a queue-based generation system that can process multiple variant requests efficiently.
+      Build a React component for variant selection with thumbnail previews and comparison
+      tools. Use existing caching infrastructure to optimize variant loading and implement
+      cleanup policies to manage storage costs.
+
+      '
+    external_dependencies:
+    - name: sharp
+      version: ^0.33.0
+      reason: High-performance image processing for thumbnail generation and optimization
+    - name: uuid
+      version: ^9.0.0
+      reason: Generate unique identifiers for variant tracking and file naming
+    - name: ioredis
+      version: ^5.3.0
+      reason: Caching variant metadata and managing generation queues
+    files_to_modify:
+    - path: apps/api/src/services/runpod-integration.ts
+      changes: Add generateVariants method with parameter variation logic
+    - path: packages/database/src/schema/panels.ts
+      changes: Add variant relationship to Panel model
+    - path: apps/api/src/routes/panels.ts
+      changes: Add GET /:id/variants endpoint
+    new_files:
+    - path: packages/database/src/schema/variants.ts
+      purpose: Variant entity with panel_id, generation_params, urls, metadata
+    - path: apps/api/src/services/variant-generation.ts
+      purpose: Core variant generation orchestration and parameter management
+    - path: apps/api/src/routes/variants/index.ts
+      purpose: CRUD endpoints for variant management
+    - path: apps/api/src/routes/variants/generate.ts
+      purpose: POST endpoint for variant generation requests
+    - path: apps/api/src/jobs/variant-cleanup.ts
+      purpose: Background job for cleaning up old variants
+    - path: apps/dashboard/src/components/VariantSelector/VariantSelector.tsx
+      purpose: Main variant selection component with thumbnail grid
+    - path: apps/dashboard/src/components/VariantSelector/VariantPreview.tsx
+      purpose: Full-size variant preview modal component
+    - path: apps/dashboard/src/hooks/useVariants.ts
+      purpose: React hook for variant data fetching and state management
+  acceptance_criteria:
+  - criterion: Users can generate 3-5 visual variants of any comic panel with different
+      artistic parameters
+    verification: POST /api/variants/generate with panel_id returns array of variant
+      URLs, verify distinct visual differences
+  - criterion: Variant generation completes within 45 seconds for standard requests
+    verification: Monitor generation timestamps, 95% of requests complete under 45s
+      threshold
+  - criterion: Variants are stored with proper metadata and can be retrieved via API
+    verification: GET /api/panels/{id}/variants returns variants with metadata (seed,
+      cfg_scale, created_at, thumbnail_url)
+  - criterion: Variant selection UI allows side-by-side comparison and selection
+    verification: 'Manual testing: Open variant selector, verify thumbnail grid, click
+      variants for full preview, select preferred variant'
+  - criterion: Storage cleanup prevents unlimited variant accumulation
+    verification: Verify old variants beyond retention limit (7 days, 10 variants
+      per panel) are automatically purged
+  testing:
+    unit_tests:
+    - file: apps/api/src/services/__tests__/variant-generation.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Generate variants with different parameters
+      - Handle RunPod service failures gracefully
+      - Validate variant parameter ranges
+      - Cleanup expired variants
+    - file: packages/database/src/__tests__/variant-schema.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Create variant with valid data
+      - Enforce foreign key constraints
+      - Handle duplicate variant scenarios
+    - file: apps/dashboard/src/components/VariantSelector/__tests__/VariantSelector.test.tsx
+      coverage_target: 85%
+      scenarios:
+      - Render variant thumbnails correctly
+      - Handle loading and error states
+      - Emit selection events properly
+    integration_tests:
+    - file: apps/api/src/__tests__/integration/variant-workflow.test.ts
+      scenarios:
+      - End-to-end variant generation and retrieval flow
+      - Concurrent variant requests handling
+      - Storage cleanup integration with job queue
+    manual_testing:
+    - step: Generate variants for existing panel via dashboard
+      expected: See 3-5 variant thumbnails appear within 45 seconds
+    - step: Select different variants and verify full-size preview
+      expected: Large preview updates, selection state persists
+    - step: Test with slow network connection
+      expected: Graceful loading states, no broken images
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.65
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create variant database schema with proper relationships and indexes'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement basic CRUD operations for variant entity'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design parameter variation strategy (seed ranges, CFG scales,
+        sampling steps)'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Extend RunPod integration service with variant generation method'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create variant generation API endpoints with validation'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build React variant selector component with thumbnail grid'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Implement variant quality scoring and selection recommendations'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Create background cleanup job with configurable retention policies'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Write comprehensive unit and integration tests'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] UX testing and parameter tuning for optimal variant diversity'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Add caching layer for variant thumbnails and metadata'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Performance testing and storage optimization review'
+      done: false
+      ai_friendly: false

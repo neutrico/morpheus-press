@@ -1,0 +1,32 @@
+milestones:
+- name: M0 - Infrastructure & Setup
+  description: Dev environment, CI/CD, testing framework, monitoring, security, deployment
+    pipelines
+  state: open
+- name: M1 - Backend Services
+  description: API layer, database, authentication, book management, ingestion pipeline,
+    semantic search
+  state: open
+- name: M2 - ML Training & Development
+  description: Dataset preparation, model training (dialogue, NER, scenes), evaluation,
+    W&B integration, active learning
+  state: open
+- name: M3 - Content Generation Pipeline
+  description: Prompt engineering, SDXL image generation, quality assessment, ComfyUI
+    integration, batch processing
+  state: open
+- name: M4 - Dashboard & UI
+  description: Web interface for book/comic management, preview components, quality
+    control dashboard
+  state: open
+- name: M5 - Product Assembly
+  description: Comic layout engine, panel generation, PDF export, archive creation,
+    print-ready output
+  state: open
+- name: M6 - Commerce & Distribution
+  description: E-commerce (Stripe, storefront, checkout), distribution (Discord, Reddit,
+    browser extension, WordPress)
+  state: open
+- name: M7 - Launch & Release
+  description: Final integration testing, production deployment, launch procedures
+  state: open

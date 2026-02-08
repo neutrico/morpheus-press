@@ -1,0 +1,43 @@
+# Morpheus Project - PI 2026 Q1
+# Main metadata file - references modular components
+
+project:
+  owner: neutrico
+  repo: morpheus
+  projectV2Number: 1
+
+safe:
+  pi:
+    name: PI-2026-Q1
+    start: '2026-02-10'
+    iterationLengthDays: 14
+    iterations:
+    - I1
+    - I2
+    - I3
+    - I4
+    - I5
+    - I6
+    - I7
+    capacity:
+      pointsPerIteration: 30
+
+# Modular structure references
+components:
+  milestones: planning/milestones.yaml
+  labels: planning/labels.yaml
+  issues:
+    - planning/issues/m0-infrastructure.yaml
+    - planning/issues/m1-backend.yaml
+    - planning/issues/m2-ml-training.yaml
+    - planning/issues/m3-content-generation.yaml
+    - planning/issues/m4-dashboard.yaml
+    - planning/issues/m5-product-assembly.yaml
+    - planning/issues/m6-commerce-distribution.yaml
+    - planning/issues/m7-launch.yaml
+
+# Build configuration
+build:
+  output: planning/pi.yaml        # Compiled output for sync tools
+  include_comments: true          # Include section headers
+  validate: true                  # Run validation before build

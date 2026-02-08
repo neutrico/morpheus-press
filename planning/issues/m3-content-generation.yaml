@@ -1,0 +1,3232 @@
+milestone: M3 - Content Generation Pipeline
+task_count: 12
+issues:
+- key: T50
+  title: Prompt Engineering Service
+  type: Feature
+  milestone: M3 - Content Generation Pipeline
+  iteration: I4
+  priority: p0
+  effort: 5
+  area: image-gen
+  dependsOn:
+  - T41
+  - T42
+  agent_notes:
+    research_findings: '**Context:**
+
+      This service addresses a critical need for consistent, high-quality prompt generation
+      across Morpheus''s image generation pipeline. Currently, the system likely uses
+      basic prompts for Stable Diffusion, but optimal comic generation requires sophisticated
+      prompting strategies including style consistency, character appearance maintenance,
+      scene composition, and narrative coherence. This service will centralize prompt
+      engineering logic, enable A/B testing of prompts, and provide a foundation for
+      dynamic prompt optimization based on generation results.
+
+
+      **Technical Approach:**
+
+      Build a dedicated prompt engineering service as a Fastify microservice with
+      a modular template system. Use template engines (Handlebars/Mustache) for dynamic
+      prompt construction, implement prompt versioning for A/B testing, and create
+      specialized prompt builders for different comic elements (characters, backgrounds,
+      panels, styles). Include prompt validation, token counting for model limits,
+      and integration with the existing image generation pipeline. Store prompt templates
+      and performance metrics in Supabase for data-driven optimization.
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: CRUD operations for prompt templates, API route boilerplate,
+      database schema generation, unit tests for prompt builders, TypeScript interfaces
+      for prompt data structures
+
+      - Medium AI effectiveness: Template engine integration, prompt validation logic,
+      performance metrics collection, API integration with existing image-gen service
+
+      - Low AI effectiveness: Prompt strategy design, artistic style prompt crafting,
+      narrative coherence algorithms, performance optimization heuristics
+
+
+      **Dependencies:**
+
+      - External: handlebars (^4.7.8), tiktoken (^1.0.10), zod (^3.22.0), p-queue
+      (^8.0.0)
+
+      - Internal: Existing image-gen service, Supabase client, shared TypeScript types,
+      authentication middleware
+
+
+      **Risks:**
+
+      - Prompt bloat leading to token limit exceeded: implement token counting and
+      truncation strategies
+
+      - Performance bottleneck in prompt generation: use caching and pre-computed
+      templates
+
+      - Inconsistent character appearance across panels: develop character embedding/reference
+      system
+
+      - Prompt injection vulnerabilities: implement strict input validation and sanitization
+
+
+      **Complexity Notes:**
+
+      More complex than initial estimate due to need for sophisticated template system
+      and performance optimization. However, AI assistance will significantly accelerate
+      the boilerplate-heavy aspects (CRUD, API routes, tests). The core prompt engineering
+      logic requires human expertise in both ML prompting and comic art principles.
+
+
+      **Key Files:**
+
+      - apps/api/src/services/prompt-engineering/: new service directory
+
+      - apps/api/src/routes/prompts/: API endpoints for prompt management
+
+      - packages/shared/src/types/prompts.ts: shared type definitions
+
+      - apps/api/src/services/image-gen/: integration points with existing service
+
+      - supabase/migrations/: new tables for prompt templates and metrics
+
+      '
+    design_decisions:
+    - decision: Use template-based prompt generation with Handlebars
+      rationale: Provides flexibility for dynamic content while maintaining consistency.
+        Allows non-developers to modify prompt templates through admin interface.
+      alternatives_considered:
+      - String interpolation
+      - Custom DSL
+      - Rule-based system
+      ai_implementation_note: AI can generate template structures and helper functions,
+        but prompt content requires human art direction
+    - decision: Implement prompt versioning and A/B testing framework
+      rationale: Essential for iterative improvement of generation quality. Enables
+        data-driven optimization of prompts based on user feedback and success metrics.
+      alternatives_considered:
+      - Single prompt per use case
+      - Manual prompt switching
+      ai_implementation_note: AI excellent for implementing versioning CRUD operations
+        and statistical comparison logic
+    - decision: Create specialized prompt builders for comic elements (character,
+        scene, style, panel)
+      rationale: Comics require different prompting strategies for different visual
+        elements. Modular approach enables fine-tuning each aspect independently.
+      alternatives_considered:
+      - Monolithic prompt builder
+      - External prompt management tool
+      ai_implementation_note: AI can generate builder class structures and common
+        methods, human expertise needed for comic-specific prompt strategies
+    researched_at: '2026-02-08T18:38:18.635568'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:21:01.591944'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 7f3124d7
+    planning_hash: '28347913'
+  technical_notes:
+    approach: 'Create a Fastify microservice with modular prompt builders for different
+      comic elements (characters, scenes, panels). Implement a template-based system
+      using Handlebars for dynamic prompt generation with character consistency tracking.
+      Build a versioning system for A/B testing prompts with performance metrics collection.
+      Integrate with existing image-gen service through event-driven architecture
+      and provide admin APIs for prompt template management.
+
+      '
+    external_dependencies:
+    - name: handlebars
+      version: ^4.7.8
+      reason: Template engine for dynamic prompt generation with conditional logic
+    - name: tiktoken
+      version: ^1.0.10
+      reason: Token counting to ensure prompts don't exceed model limits
+    - name: zod
+      version: ^3.22.4
+      reason: Runtime validation of prompt templates and parameters
+    - name: p-queue
+      version: ^8.0.1
+      reason: Rate limiting and queuing for prompt generation requests
+    files_to_modify:
+    - path: apps/api/src/services/image-gen/image-generation.service.ts
+      changes: Add optional prompt enhancement via new prompt service
+    - path: apps/api/src/main.ts
+      changes: Register prompt engineering routes and middleware
+    - path: packages/shared/src/types/index.ts
+      changes: Export new prompt-related types
+    new_files:
+    - path: apps/api/src/services/prompt-engineering/prompt-builder.service.ts
+      purpose: Core prompt generation logic with template rendering
+    - path: apps/api/src/services/prompt-engineering/template-manager.service.ts
+      purpose: Manage prompt templates, versions, and performance metrics
+    - path: apps/api/src/services/prompt-engineering/character-tracker.service.ts
+      purpose: Maintain character consistency across prompt generations
+    - path: apps/api/src/routes/prompts/index.ts
+      purpose: API endpoints for prompt generation and template management
+    - path: apps/api/src/routes/prompts/admin.ts
+      purpose: Admin endpoints for template CRUD and analytics
+    - path: packages/shared/src/types/prompts.ts
+      purpose: TypeScript interfaces for prompt data structures
+    - path: supabase/migrations/20241201_prompt_engineering.sql
+      purpose: Database schema for prompt templates and metrics
+    - path: apps/api/src/services/prompt-engineering/validators/prompt.validator.ts
+      purpose: Input validation and sanitization for prompt data
+    - path: apps/api/src/services/prompt-engineering/utils/token-counter.ts
+      purpose: Token counting and truncation utilities
+  acceptance_criteria:
+  - criterion: Service generates contextually appropriate prompts for different comic
+      elements (characters, backgrounds, panels) using template system
+    verification: POST /api/prompts/generate with character/scene data returns valid
+      Stable Diffusion prompt with style consistency tags
+  - criterion: Prompt template versioning and A/B testing system tracks performance
+      metrics
+    verification: Database contains prompt_templates and prompt_metrics tables, API
+      returns template performance data via GET /api/prompts/analytics
+  - criterion: Character appearance consistency maintained across panels through reference
+      system
+    verification: Generate 3 prompts for same character in different scenes, verify
+      consistent character descriptor tags present
+  - criterion: Token counting prevents model limit exceeded errors with graceful truncation
+    verification: Generate prompt with excessive detail, verify output stays under
+      77 token limit with priority-based truncation
+  - criterion: Service integrates with existing image-gen pipeline without breaking
+      changes
+    verification: Existing image generation requests continue working, new enhanced
+      prompts available via feature flag
+  testing:
+    unit_tests:
+    - file: apps/api/src/services/prompt-engineering/__tests__/prompt-builder.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Character prompt generation with consistency tags
+      - Scene prompt generation with composition rules
+      - Token counting and truncation logic
+      - Template rendering with missing variables
+      - Prompt validation and sanitization
+    - file: apps/api/src/services/prompt-engineering/__tests__/template-manager.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Template CRUD operations
+      - Version management and rollbacks
+      - Performance metrics aggregation
+    integration_tests:
+    - file: apps/api/src/services/prompt-engineering/__tests__/integration/prompt-api.test.ts
+      scenarios:
+      - End-to-end prompt generation flow
+      - Integration with image-gen service
+      - Database persistence of templates and metrics
+    manual_testing:
+    - step: Generate prompts for comic character 'Maya' in 3 different scenes
+      expected: Consistent character descriptors maintained across all prompts
+    - step: Create A/B test with two prompt templates for backgrounds
+      expected: Analytics dashboard shows performance comparison
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1
+    documentation: 0.5
+    total: 6.5
+    ai_acceleration_factor: 0.4
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create database migration for prompt_templates, prompt_metrics,
+        and character_references tables'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate TypeScript interfaces in packages/shared/src/types/prompts.ts
+        for all prompt-related data structures'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design prompt template strategy and character consistency algorithm'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement PromptBuilder service with Handlebars template rendering
+        and token counting'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create TemplateManager service with CRUD operations and performance
+        metrics collection'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build CharacterTracker service for maintaining appearance consistency'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement Fastify routes for prompt generation and admin management
+        APIs'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate comprehensive unit tests for all service classes and utilities'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create integration tests for API endpoints and database operations'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Integration with existing image-gen service and feature flag
+        implementation'
+      done: false
+      ai_friendly: false
+    - task: '[HUMAN] Code review focusing on prompt injection security and performance
+        optimization'
+      done: false
+      ai_friendly: false
+- key: T51
+  title: Character Description Service
+  type: Feature
+  milestone: M3 - Content Generation Pipeline
+  iteration: I4
+  priority: p0
+  effort: 3
+  area: image-gen
+  dependsOn:
+  - T42
+  agent_notes:
+    research_findings: '**Context:**
+
+      The Character Description Service is a critical component for generating consistent
+      visual representations of characters across comic panels. When transforming
+      a novel to comic, characters need detailed, structured descriptions that can
+      be fed to image generation models (Stable Diffusion) to ensure visual consistency.
+      Without this service, character appearance would vary wildly between panels,
+      breaking immersion. This service extracts character descriptions from novel
+      text, standardizes them into structured formats, and maintains character consistency
+      throughout the comic generation pipeline.
+
+
+      **Technical Approach:**
+
+      Implement a dedicated microservice within the Fastify backend that uses LLMs
+      (OpenAI/Anthropic) to extract and structure character descriptions from novel
+      text. The service should maintain a character registry with versioned descriptions,
+      support batch processing for multiple characters, and provide APIs for CRUD
+      operations on character profiles. Use a structured schema (JSON Schema) for
+      character attributes (physical appearance, clothing, distinctive features) and
+      implement caching with Redis for frequently accessed characters. Integration
+      with the image generation pipeline should use standardized prompt templates.
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: CRUD API endpoints, database schemas, test suites,
+      OpenAI/Anthropic integration boilerplate, JSON Schema definitions, validation
+      middleware
+
+      - Medium AI effectiveness: Character extraction logic refinement, prompt template
+      optimization, caching layer implementation, API documentation
+
+      - Low AI effectiveness: Character consistency algorithm design, prompt engineering
+      strategy, error handling for edge cases, performance optimization decisions
+
+
+      **Dependencies:**
+
+      - External: @anthropic-ai/sdk, openai, zod (validation), ioredis (caching),
+      @fastify/swagger (API docs)
+
+      - Internal: Existing LLM service abstractions, image generation pipeline, novel
+      parsing service, database connection pool
+
+
+      **Risks:**
+
+      - LLM hallucination creating inconsistent character descriptions: Implement
+      validation rules and human review workflows
+
+      - Performance bottlenecks with large novels: Use streaming processing and batch
+      optimization
+
+      - Character attribute drift over time: Version character descriptions and implement
+      diff tracking
+
+      - Cost explosion from repeated LLM calls: Implement aggressive caching and result
+      reuse
+
+
+      **Complexity Notes:**
+
+      Initially appears straightforward but complexity increases significantly due
+      to natural language ambiguity and consistency requirements. AI agents will accelerate
+      boilerplate creation (~70% faster) but human oversight needed for prompt engineering
+      and consistency logic. Estimated 2-3 weeks with heavy AI assistance vs 4-5 weeks
+      traditional development.
+
+
+      **Key Files:**
+
+      - packages/api/src/services/character-description.service.ts: Core service implementation
+
+      - packages/api/src/routes/characters.ts: REST API endpoints
+
+      - packages/database/migrations/: Character tables and indexes
+
+      - packages/shared/src/schemas/character.schema.ts: Validation schemas
+
+      - packages/api/src/integrations/llm-character-extractor.ts: LLM integration
+      layer
+
+      '
+    design_decisions:
+    - decision: Use structured JSON Schema for character descriptions instead of free-form
+        text
+      rationale: Enables consistent image generation prompts, validates data integrity,
+        and supports future feature additions like character comparison or search
+      alternatives_considered:
+      - Free-form text descriptions
+      - Custom DSL for characters
+      - Image-based character profiles
+      ai_implementation_note: AI can generate comprehensive JSON Schema definitions
+        and validation logic with minimal human input
+    - decision: Implement character versioning with immutable snapshots
+      rationale: Allows tracking character evolution throughout story, enables rollback
+        for consistency issues, and supports A/B testing different character interpretations
+      alternatives_considered:
+      - Mutable character updates
+      - Git-like branching
+      - Event sourcing pattern
+      ai_implementation_note: AI excels at generating versioning boilerplate, migration
+        scripts, and CRUD operations for versioned entities
+    - decision: Cache character descriptions at multiple layers (Redis + in-memory)
+      rationale: Character descriptions are read-heavy and expensive to generate,
+        multi-tier caching reduces LLM API costs and improves response times
+      alternatives_considered:
+      - Database-only storage
+      - Single Redis cache
+      - CDN-based caching
+      ai_implementation_note: AI can implement cache-aside patterns, TTL management,
+        and cache invalidation strategies effectively
+    researched_at: '2026-02-08T18:38:47.123607'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:21:30.015738'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 0be1286f
+    planning_hash: 4b96c8c5
+  technical_notes:
+    approach: 'Build a Fastify service with dedicated character management endpoints
+      that integrates with existing LLM services to extract and structure character
+      data from novel text. Implement a PostgreSQL schema with character profiles,
+      attributes, and versioning tables. Use Redis for multi-tier caching and Zod
+      for runtime validation. Create standardized prompt templates for image generation
+      integration and implement batch processing for performance optimization.
+
+      '
+    external_dependencies:
+    - name: zod
+      version: ^3.22.4
+      reason: Runtime schema validation for character attributes and API payloads
+    - name: ioredis
+      version: ^5.3.2
+      reason: Redis client for character description caching and session management
+    - name: '@fastify/swagger'
+      version: ^8.14.0
+      reason: Auto-generate API documentation for character management endpoints
+    - name: natural
+      version: ^6.0.0
+      reason: Text processing utilities for character name extraction and similarity
+        matching
+    files_to_modify:
+    - path: packages/api/src/app.ts
+      changes: Register character routes and middleware
+    - path: packages/api/src/lib/redis.ts
+      changes: Add character-specific caching methods and TTL configs
+    - path: packages/database/src/schema.ts
+      changes: Export character table types for service layer
+    new_files:
+    - path: packages/api/src/services/character-description.service.ts
+      purpose: Core character extraction, storage, and retrieval logic
+    - path: packages/api/src/routes/characters.ts
+      purpose: REST API endpoints for character management
+    - path: packages/api/src/integrations/llm-character-extractor.ts
+      purpose: LLM service integration for character extraction
+    - path: packages/shared/src/schemas/character.schema.ts
+      purpose: Zod schemas for character data validation
+    - path: packages/database/migrations/20240315_create_characters_tables.sql
+      purpose: Database schema for characters, attributes, and versions
+    - path: packages/api/src/lib/character-prompts.ts
+      purpose: Template engine for image generation prompts
+    - path: packages/api/src/middleware/character-validation.ts
+      purpose: Request validation middleware using character schemas
+  acceptance_criteria:
+  - criterion: Service extracts character descriptions from novel text and stores
+      them with structured attributes (name, physical_appearance, clothing, distinctive_features)
+    verification: POST /api/characters/extract with novel text returns structured
+      character data matching character.schema.ts
+  - criterion: Character descriptions maintain consistency across versions with diff
+      tracking and retrievability by character ID
+    verification: GET /api/characters/:id/versions shows version history and PATCH
+      updates create new versions preserving old ones
+  - criterion: Service generates image generation prompts from character data with
+      standardized templates
+    verification: GET /api/characters/:id/prompt returns prompt text suitable for
+      Stable Diffusion integration
+  - criterion: Performance handles batch processing of 50+ characters with Redis caching
+      achieving <200ms response times
+    verification: POST /api/characters/batch-extract processes 50 characters in <10s
+      total, subsequent identical requests return in <200ms
+  - criterion: API documentation is complete with OpenAPI spec and integration examples
+    verification: Swagger UI at /documentation shows all endpoints with request/response
+      schemas and curl examples
+  testing:
+    unit_tests:
+    - file: packages/api/src/services/__tests__/character-description.service.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Character extraction from text passages
+      - Character data validation and sanitization
+      - Version management and diff generation
+      - Prompt template generation
+      - Error handling for malformed input
+    - file: packages/api/src/integrations/__tests__/llm-character-extractor.test.ts
+      coverage_target: 85%
+      scenarios:
+      - LLM API integration with mocked responses
+      - Retry logic and rate limiting
+      - Response parsing and validation
+    - file: packages/shared/src/schemas/__tests__/character.schema.test.ts
+      coverage_target: 95%
+      scenarios:
+      - Valid character data validation
+      - Invalid data rejection with clear errors
+      - Schema evolution compatibility
+    integration_tests:
+    - file: packages/api/src/__tests__/integration/characters.test.ts
+      scenarios:
+      - Full character extraction pipeline with real database
+      - Redis caching behavior with TTL
+      - Batch processing with concurrent requests
+      - API rate limiting and authentication
+    manual_testing:
+    - step: Extract characters from sample novel chapter using Swagger UI
+      expected: Returns array of characters with complete attribute data
+    - step: Verify Redis caching by monitoring cache hit rates during repeated requests
+      expected: Cache hit rate >80% after initial extraction
+    - step: Test image generation prompt quality with sample character
+      expected: Generated prompts produce consistent character images in test pipeline
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.2
+    documentation: 0.3
+    total: 6.5
+    ai_acceleration_factor: 0.65
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create database migration files for character tables with proper
+        indexes'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate Zod schemas for character data validation with comprehensive
+        types'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design character consistency algorithm and versioning strategy'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement LLM integration service with OpenAI/Anthropic SDK boilerplate'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Engineer and optimize character extraction prompts for consistency'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Build core character service with CRUD operations and caching'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create Fastify route handlers with OpenAPI documentation'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate comprehensive unit test suites for all service methods'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement batch processing endpoints with concurrency controls'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Performance optimization and error handling refinement'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Create integration tests with database and Redis mocking'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Code review focusing on consistency logic and prompt quality'
+      done: false
+      ai_friendly: false
+- key: T52
+  title: Batch Image Generation
+  type: Feature
+  milestone: M3 - Content Generation Pipeline
+  iteration: I4
+  priority: p0
+  effort: 5
+  area: image-gen
+  dependsOn:
+  - T50
+  agent_notes:
+    research_findings: "**Context:**\nBatch image generation is critical for the comic\
+      \ creation pipeline where users need to generate multiple panels/scenes efficiently.\
+      \ Instead of generating images one-by-one (slow, expensive, poor UX), this enables\
+      \ batching multiple prompts to RunPod Stable Diffusion endpoints. This reduces\
+      \ API overhead, enables better queue management, progress tracking, and cost\
+      \ optimization through batched requests. Essential for M3 as comics typically\
+      \ require 4-12 panels per page.\n\n**Technical Approach:**\n- Queue-based architecture\
+      \ using Redis/Bull for job management\n- Batch API wrapper around existing RunPod\
+      \ integration\n- WebSocket connections for real-time progress updates to frontend\n\
+      - Database schema for batch jobs, individual image requests, and status tracking\n\
+      - Retry logic with exponential backoff for failed generations\n- Rate limiting\
+      \ and cost controls per user/batch\n- Image storage optimization (S3/Supabase\
+      \ storage with CDN)\n\n**AI Suitability Analysis:**\n- High AI effectiveness:\
+      \ Queue job schemas, database migrations, API route boilerplate, WebSocket event\
+      \ handlers, retry logic implementation, test suites, progress tracking utilities\n\
+      - Medium AI effectiveness: RunPod batch API integration, error handling patterns,\
+      \ database query optimization, frontend progress components\n- Low AI effectiveness:\
+      \ Queue architecture design, batch size optimization algorithms, cost calculation\
+      \ strategies, WebSocket connection management patterns\n\n**Dependencies:**\n\
+      - External: bull, ioredis, ws, @runpod/sdk-js, sharp (image processing)\n- Internal:\
+      \ Existing RunPod service, user auth middleware, image storage service, Supabase\
+      \ client, WebSocket server setup\n\n**Risks:**\n- Memory exhaustion: Large batches\
+      \ could overwhelm server memory\n  Mitigation: Implement batch size limits (10-20\
+      \ images), stream processing\n- RunPod rate limits: Batch requests might hit\
+      \ API limits faster\n  Mitigation: Implement intelligent batching with rate\
+      \ limit awareness\n- WebSocket connection drops: Users lose progress visibility\n\
+      \  Mitigation: Fallback to polling, persistent job status in DB\n- Cost explosion:\
+      \ Users could abuse batch generation\n  Mitigation: Per-user quotas, cost estimation\
+      \ before batch start\n\n**Complexity Notes:**\nMore complex than initially estimated\
+      \ due to distributed system concerns. However, AI can significantly accelerate\
+      \ implementation of queue management boilerplate and testing. The WebSocket\
+      \ real-time updates add complexity but are essential for UX. Expect 40% faster\
+      \ development with AI assistance on CRUD/boilerplate portions.\n\n**Key Files:**\n\
+      - apps/backend/src/services/batch-image-gen.ts: Core batch orchestration service\n\
+      - apps/backend/src/routes/batch-images.ts: API endpoints for batch operations\n\
+      - apps/backend/src/workers/image-gen-worker.ts: Bull queue worker\n- apps/backend/src/lib/websocket.ts:\
+      \ Real-time progress updates\n- packages/database/migrations/: Batch job tables\n\
+      - apps/dashboard/src/components/BatchProgress.tsx: Progress UI component\n"
+    design_decisions:
+    - decision: Use Bull + Redis for queue management instead of simple Promise.all
+      rationale: Provides persistence, retry logic, job prioritization, and prevents
+        memory issues with large batches
+      alternatives_considered:
+      - Promise.all with chunking
+      - Custom queue implementation
+      - Database-only queue
+      ai_implementation_note: AI can generate comprehensive Bull job definitions,
+        worker implementations, and retry configurations
+    - decision: WebSocket-based progress updates with polling fallback
+      rationale: Real-time feedback essential for batch operations that take 30s-5min,
+        polling ensures reliability
+      alternatives_considered:
+      - Polling only
+      - Server-sent events
+      - WebSocket only
+      ai_implementation_note: AI excellent for generating WebSocket event schemas
+        and React progress components
+    - decision: Batch size limit of 15 images per batch
+      rationale: Balances efficiency gains vs memory usage and user wait times, prevents
+        abuse
+      alternatives_considered:
+      - No limits
+      - Dynamic sizing based on user tier
+      - Fixed 10 or 25 limit
+      ai_implementation_note: AI can implement validation logic and user-friendly
+        error messages
+    researched_at: '2026-02-08T18:39:17.542396'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:21:57.473589'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: af2745f0
+    planning_hash: 1d0faec8
+  technical_notes:
+    approach: 'Implement a Redis-backed job queue using Bull where batch requests
+      are decomposed into individual image generation tasks. Each batch gets a unique
+      ID tracked in PostgreSQL with real-time status updates via WebSocket. The existing
+      RunPod service is extended to handle batch operations while maintaining individual
+      image retry logic. Frontend displays a progress interface showing per-image
+      status within the batch.
+
+      '
+    external_dependencies:
+    - name: bull
+      version: ^4.12.0
+      reason: Robust Redis-based job queue with retry logic and job persistence
+    - name: ioredis
+      version: ^5.3.2
+      reason: High-performance Redis client for Bull queue backend
+    - name: ws
+      version: ^8.16.0
+      reason: WebSocket server for real-time batch progress updates
+    - name: '@runpod/sdk-js'
+      version: ^1.3.0
+      reason: Official RunPod SDK for batch API integration
+    files_to_modify:
+    - path: apps/backend/src/services/runpod.ts
+      changes: Add batch processing methods, extend existing generateImage for batch
+        context
+    - path: apps/backend/src/lib/websocket.ts
+      changes: Add batch progress event handlers and room management
+    - path: apps/backend/src/middleware/auth.ts
+      changes: Add user quota checking middleware for batch endpoints
+    - path: packages/database/src/schema.ts
+      changes: Add batch_jobs and batch_images table definitions
+    new_files:
+    - path: packages/database/migrations/20241201_batch_jobs.sql
+      purpose: Create batch_jobs, batch_images tables with indexes
+    - path: apps/backend/src/services/batch-image-gen.ts
+      purpose: Core batch orchestration, job lifecycle management
+    - path: apps/backend/src/workers/image-gen-worker.ts
+      purpose: Bull queue worker for individual image generation
+    - path: apps/backend/src/routes/batch-images.ts
+      purpose: REST endpoints for batch CRUD operations
+    - path: apps/backend/src/lib/queue.ts
+      purpose: Redis/Bull queue setup and configuration
+    - path: apps/backend/src/utils/batch-validators.ts
+      purpose: Input validation and cost estimation utilities
+    - path: apps/dashboard/src/components/BatchProgress.tsx
+      purpose: Real-time progress UI with individual image status
+    - path: apps/dashboard/src/hooks/useBatchProgress.ts
+      purpose: WebSocket connection hook for progress updates
+  acceptance_criteria:
+  - criterion: Batch image generation API accepts 2-20 prompts and returns batch job
+      ID
+    verification: POST /api/batch-images with array of prompts returns 201 with job_id
+  - criterion: Real-time progress updates via WebSocket show individual image completion
+      status
+    verification: Connect to /ws/batch/{job_id} and verify progress events with per-image
+      status
+  - criterion: Batch jobs persist across server restarts and resume processing
+    verification: Start batch, restart server, verify job continues from last checkpoint
+  - criterion: Failed individual images retry up to 3 times before marking batch partial
+      success
+    verification: Mock RunPod failures, verify retry attempts logged in batch_images
+      table
+  - criterion: User quota enforcement prevents cost abuse (max 50 images/hour)
+    verification: Submit batches exceeding quota, verify 429 rate limit response
+  testing:
+    unit_tests:
+    - file: apps/backend/src/__tests__/services/batch-image-gen.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Batch creation with valid prompts
+      - Batch size validation (1-20 images)
+      - User quota enforcement
+      - Job status transitions
+      - Cost calculation accuracy
+    - file: apps/backend/src/__tests__/workers/image-gen-worker.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Individual image processing
+      - Retry logic with exponential backoff
+      - WebSocket progress emission
+      - Batch completion detection
+      - Error handling and logging
+    - file: apps/backend/src/__tests__/routes/batch-images.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Create batch endpoint validation
+      - Get batch status endpoint
+      - User authentication required
+      - Invalid batch ID handling
+    integration_tests:
+    - file: apps/backend/src/__tests__/integration/batch-workflow.test.ts
+      scenarios:
+      - Complete batch generation flow with Redis queue
+      - WebSocket connection and progress updates
+      - Database consistency after batch completion
+      - S3 image storage integration
+    manual_testing:
+    - step: Create batch with 5 comic panel prompts via dashboard
+      expected: Progress bar shows 0/5, then increments as images complete
+    - step: Disconnect/reconnect during batch processing
+      expected: Progress resumes from current state without data loss
+  estimates:
+    development: 4.5
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7.5
+    ai_acceleration_factor: 0.65
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create database migration for batch_jobs and batch_images tables'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement batch job validation utilities (size limits, cost estimation)'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design Redis queue architecture and worker scaling strategy'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Create Bull queue setup and worker registration boilerplate'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement batch-image-gen service with job lifecycle methods'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create image-gen-worker with RunPod integration and retry logic'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build REST API routes for batch operations (CRUD endpoints)'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Implement WebSocket connection management and room-based progress
+        updates'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Create comprehensive unit test suites for services and workers'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build frontend BatchProgress component with real-time updates'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement integration tests for complete batch workflow'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Performance testing and queue optimization tuning'
+      done: false
+      ai_friendly: false
+    - task: '[HUMAN] Code review focusing on error handling and resource management'
+      done: false
+      ai_friendly: false
+- key: T53
+  title: Location & Environment Service
+  type: Feature
+  milestone: M3 - Content Generation Pipeline
+  iteration: I4
+  priority: p0
+  effort: 3
+  area: image-gen
+  dependsOn:
+  - T41
+  agent_notes:
+    research_findings: '**Context:**
+
+      The Location & Environment Service is crucial for generating consistent, contextually-appropriate
+      comic panel backgrounds and settings. In novel-to-comic transformation, maintaining
+      visual consistency of locations (e.g., a character''s bedroom, a coffee shop,
+      a mystical forest) across multiple panels is essential for reader comprehension
+      and immersion. This service will manage location definitions, environmental
+      parameters, and provide structured prompts for Stable Diffusion image generation
+      while ensuring visual continuity throughout the comic.
+
+
+      **Technical Approach:**
+
+      Implement a location management system with PostgreSQL storage for location
+      definitions, caching layer for frequently accessed environments, and integration
+      with the existing image generation pipeline. Use a schema-driven approach with
+      JSON schemas for environment parameters (lighting, weather, time of day, architectural
+      style). Create a prompt templating system that combines base location descriptions
+      with dynamic environmental modifiers. Implement semantic search capabilities
+      for location matching and reuse across different scenes.
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: CRUD operations for location management, database schema
+      generation, REST API endpoints, unit tests, TypeScript interfaces, basic prompt
+      templating logic
+
+      - Medium AI effectiveness: Integration with existing image-gen service, caching
+      implementation, location matching algorithms, API documentation
+
+      - Low AI effectiveness: Prompt engineering strategy, semantic location categorization
+      system, visual consistency algorithms, environment parameter tuning
+
+
+      **Dependencies:**
+
+      - External: @supabase/supabase-js, ioredis (caching), zod (schema validation),
+      fuse.js (fuzzy search), openai (embeddings for semantic search)
+
+      - Internal: Existing image-gen service, content generation pipeline, database
+      migrations system, shared TypeScript types
+
+
+      **Risks:**
+
+      - Prompt drift: Location descriptions may generate inconsistent visuals over
+      time. Mitigation: Implement prompt versioning and A/B testing framework
+
+      - Database bloat: Storing detailed environment parameters could grow exponentially.
+      Mitigation: Implement data lifecycle policies and archiving
+
+      - Performance bottleneck: Complex location matching could slow content generation.
+      Mitigation: Implement Redis caching and background processing
+
+
+      **Complexity Notes:**
+
+      More complex than initially estimated due to the need for semantic consistency
+      and visual continuity. The challenge lies in balancing detailed environmental
+      control with generation speed. AI can significantly accelerate CRUD and integration
+      work (~70% of implementation), but the core prompt engineering and consistency
+      algorithms require careful human design. Expect 60% faster development with
+      AI assistance on boilerplate code.
+
+
+      **Key Files:**
+
+      - packages/backend/src/services/LocationService.ts: Core location management
+      logic
+
+      - packages/backend/src/routes/locations.ts: REST API endpoints
+
+      - packages/database/migrations/: New tables for locations and environments
+
+      - packages/shared/types/location.ts: Shared TypeScript interfaces
+
+      - packages/backend/src/integrations/image-gen.ts: Integration with existing
+      image generation
+
+      '
+    design_decisions:
+    - decision: Use hierarchical location storage with base templates and environmental
+        modifiers
+      rationale: Enables reusability while allowing dynamic environmental changes
+        (day/night, weather) without duplicating core location data
+      alternatives_considered:
+      - Flat location storage
+      - Purely procedural generation
+      - External location API
+      ai_implementation_note: AI can generate the hierarchical data structures, CRUD
+        operations, and template merging logic efficiently
+    - decision: Implement semantic search using OpenAI embeddings for location matching
+      rationale: Allows intelligent reuse of similar locations across different scenes,
+        improving consistency and reducing generation costs
+      alternatives_considered:
+      - Tag-based matching
+      - Rule-based categorization
+      - No matching system
+      ai_implementation_note: AI can implement the embedding generation and similarity
+        search, but human judgment needed for similarity thresholds
+    - decision: Cache generated location prompts with Redis using content-based keys
+      rationale: Reduces prompt generation latency and ensures identical environmental
+        conditions produce identical prompts
+      alternatives_considered:
+      - No caching
+      - Database-only caching
+      - In-memory caching
+      ai_implementation_note: AI excellent for implementing Redis integration patterns
+        and cache invalidation logic
+    researched_at: '2026-02-08T18:39:45.334116'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:22:28.162908'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: ff2f5800
+    planning_hash: ed711838
+  technical_notes:
+    approach: 'Create a LocationService that manages a hierarchical location database
+      with base locations (bedroom, forest, cafe) and environmental modifiers (lighting,
+      weather, time). Implement a prompt generation system that combines location
+      templates with dynamic parameters. Add semantic search capabilities using OpenAI
+      embeddings to match and reuse similar locations. Integrate with the existing
+      image generation pipeline through a standardized interface. Use Redis for caching
+      generated prompts and location queries to optimize performance.
+
+      '
+    external_dependencies:
+    - name: ioredis
+      version: ^5.3.2
+      reason: High-performance Redis client for caching location data and generated
+        prompts
+    - name: fuse.js
+      version: ^7.0.0
+      reason: Fuzzy search capabilities for location matching and discovery
+    - name: zod
+      version: ^3.22.4
+      reason: Runtime schema validation for location and environment parameters
+    - name: openai
+      version: ^4.20.1
+      reason: Generate embeddings for semantic location search and similarity matching
+    files_to_modify:
+    - path: packages/backend/src/integrations/image-gen.ts
+      changes: Add location-aware prompt generation methods, integrate with LocationService
+    - path: packages/backend/src/routes/index.ts
+      changes: Register new locations routes
+    - path: packages/shared/types/index.ts
+      changes: Export new location types
+    new_files:
+    - path: packages/backend/src/services/LocationService.ts
+      purpose: Core location CRUD operations, prompt generation, hierarchical management
+    - path: packages/backend/src/services/LocationSearchService.ts
+      purpose: Semantic search, embeddings generation, location matching algorithms
+    - path: packages/backend/src/routes/locations.ts
+      purpose: REST API endpoints for location management and search
+    - path: packages/backend/src/schemas/location.ts
+      purpose: Zod validation schemas for location data structures
+    - path: packages/shared/types/location.ts
+      purpose: TypeScript interfaces for Location, Environment, LocationQuery types
+    - path: packages/database/migrations/20241201_create_locations_tables.sql
+      purpose: Database schema for locations, environments, and location_embeddings
+        tables
+    - path: packages/backend/src/utils/promptTemplates.ts
+      purpose: Stable Diffusion prompt templates and generation utilities
+    - path: packages/backend/src/middleware/locationCache.ts
+      purpose: Redis caching middleware for location queries and generated prompts
+  acceptance_criteria:
+  - criterion: LocationService can create, read, update, and delete locations with
+      hierarchical structure (base location + environmental modifiers)
+    verification: Run unit tests for LocationService CRUD operations and verify via
+      REST API endpoints /api/locations
+  - criterion: System generates consistent Stable Diffusion prompts for the same location
+      across multiple requests
+    verification: Generate 5 prompts for same location ID, verify core elements remain
+      identical while allowing environmental variations
+  - criterion: Semantic location search returns relevant locations with >80% accuracy
+      for similar queries
+    verification: Test with 20 location queries, measure relevance score using predefined
+      test cases in integration tests
+  - criterion: Location prompt generation completes within 200ms for cached locations,
+      1000ms for new locations
+    verification: Performance tests measuring response times with Redis cache hit/miss
+      scenarios
+  - criterion: Integration with existing image-gen service maintains backward compatibility
+    verification: Existing image generation tests pass after integration, new location-aware
+      endpoints respond correctly
+  testing:
+    unit_tests:
+    - file: packages/backend/src/__tests__/services/LocationService.test.ts
+      coverage_target: 90%
+      scenarios:
+      - CRUD operations for locations and environments
+      - Prompt template generation with various modifiers
+      - Location hierarchy traversal and inheritance
+      - Error handling for invalid location data
+      - Cache hit/miss scenarios
+    - file: packages/backend/src/__tests__/services/LocationSearchService.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Semantic search with OpenAI embeddings
+      - Fuzzy search fallback when embeddings unavailable
+      - Location similarity scoring
+      - Search result ranking and filtering
+    integration_tests:
+    - file: packages/backend/src/__tests__/integration/locations.test.ts
+      scenarios:
+      - End-to-end location creation and retrieval via API
+      - Location prompt generation integrated with image-gen service
+      - Database transactions for complex location updates
+      - Redis cache invalidation on location updates
+    - file: packages/backend/src/__tests__/integration/image-gen-locations.test.ts
+      scenarios:
+      - Image generation with location-aware prompts
+      - Visual consistency verification (mock Stable Diffusion responses)
+    manual_testing:
+    - step: Create a location 'Cozy Bedroom' via POST /api/locations with lighting
+        and furniture modifiers
+      expected: Location saved to database with generated embeddings and prompt template
+    - step: Generate 3 sequential prompts for same location with different time-of-day
+        modifiers
+      expected: Core bedroom elements consistent, time-specific lighting variations
+        present
+    - step: Search for 'sleeping space' and verify 'Cozy Bedroom' appears in results
+      expected: Semantic search returns bedroom with high relevance score
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.65
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create database migration files for locations, environments, and
+        embeddings tables with proper indexes'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate TypeScript interfaces and Zod schemas for Location, Environment,
+        LocationQuery types'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design prompt templating strategy and environmental parameter
+        hierarchy for visual consistency'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement LocationService class with CRUD operations, caching integration,
+        and error handling'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create REST API endpoints with proper validation, error responses,
+        and OpenAPI documentation'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Implement semantic search algorithm with embedding similarity
+        scoring and relevance tuning'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Build LocationSearchService with OpenAI embeddings integration and
+        fuzzy search fallback'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Integrate with existing image-gen service, maintaining backward
+        compatibility'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Write comprehensive unit tests for all services and utilities with
+        mock data'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create integration tests for API endpoints and database operations'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Performance testing and prompt consistency validation with real
+        Stable Diffusion outputs'
+      done: false
+      ai_friendly: false
+    - task: '[HUMAN] Code review focusing on prompt engineering strategy and caching
+        architecture'
+      done: false
+      ai_friendly: false
+- key: T54
+  title: Image Quality Assessment
+  type: Feature
+  milestone: M3 - Content Generation Pipeline
+  iteration: I4
+  priority: p0
+  effort: 3
+  area: image-gen
+  dependsOn:
+  - T52
+  agent_notes:
+    research_findings: '**Context:**
+
+      Image Quality Assessment is critical for the Morpheus comic generation pipeline
+      to ensure generated panels meet visual standards before delivery to users. This
+      solves the problem of inconsistent AI-generated imagery by automatically scoring
+      and filtering low-quality outputs, reducing manual review overhead and improving
+      user satisfaction. Given that Stable Diffusion can produce varying quality results,
+      we need automated quality gates to maintain brand standards and reduce support
+      tickets about poor visuals.
+
+
+      **Technical Approach:**
+
+      Implement a multi-metric quality assessment system using both traditional computer
+      vision metrics (BRISQUE, NIQE for technical quality) and AI-based perceptual
+      quality models (CLIP-based aesthetic scoring). Create a scoring pipeline that
+      runs post-generation but pre-storage, with configurable thresholds per comic
+      style/genre. Use a combination of synchronous lightweight checks (resolution,
+      corruption detection) and asynchronous heavy analysis (aesthetic scoring, content
+      coherence). Store quality scores in Supabase for analytics and continuous improvement
+      of generation parameters.
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: Quality metric implementations, database schema/CRUD
+      operations, API endpoint boilerplate, unit tests for scoring functions, image
+      preprocessing utilities
+
+      - Medium AI effectiveness: Integration with existing image generation pipeline,
+      queue processing logic, configuration management, error handling flows
+
+      - Low AI effectiveness: Quality threshold tuning, metric weight balancing, architectural
+      decisions on sync vs async processing, business logic for quality gates
+
+
+      **Dependencies:**
+
+      - External: opencv-python, pillow, transformers (CLIP), scikit-image (BRISQUE/NIQE),
+      bull/bullmq for job queuing
+
+      - Internal: Existing image generation service, Supabase storage helpers, RunPod
+      integration service, notification system for quality failures
+
+
+      **Risks:**
+
+      - Performance bottleneck: Heavy CV processing could slow generation pipeline
+      - mitigate with async processing and caching
+
+      - False positives: Overly strict thresholds rejecting good images - mitigate
+      with A/B testing and gradual threshold adjustment
+
+      - Model drift: Quality standards changing over time - mitigate with periodic
+      retraining and human feedback loops
+
+      - Storage costs: Keeping multiple quality scored versions - mitigate with cleanup
+      policies and selective storage
+
+
+      **Complexity Notes:**
+
+      Initially seems straightforward but complexity lies in balancing multiple quality
+      metrics and determining optimal thresholds. AI agents will significantly accelerate
+      the implementation of individual scoring functions and API integration, but
+      human judgment crucial for metric selection and threshold tuning. Expect 2-3x
+      velocity boost from AI for boilerplate portions.
+
+
+      **Key Files:**
+
+      - packages/image-gen/src/quality/assessor.ts: Core quality assessment logic
+
+      - packages/image-gen/src/quality/metrics/: Individual metric implementations
+
+      - packages/api/src/routes/generation.ts: Integration with generation pipeline
+
+      - packages/shared/src/types/quality.ts: Quality score type definitions
+
+      - apps/dashboard/src/components/QualityMetrics.tsx: Admin quality monitoring
+      UI
+
+      '
+    design_decisions:
+    - decision: Hybrid sync/async quality assessment architecture
+      rationale: Fast checks (corruption, resolution) run synchronously to fail fast,
+        while heavy AI-based scoring runs asynchronously to avoid blocking user experience
+      alternatives_considered:
+      - Fully synchronous (too slow)
+      - Fully asynchronous (delayed quality feedback)
+      ai_implementation_note: AI can generate the queue processing boilerplate and
+        metric calculation functions, but threshold configuration requires human tuning
+    - decision: Composite quality score with weighted metrics
+      rationale: Different comic styles may prioritize different quality aspects (photorealism
+        vs artistic style), requiring flexible scoring
+      alternatives_considered:
+      - Single metric approach
+      - Binary pass/fail system
+      ai_implementation_note: AI excellent for implementing individual metric calculations
+        and score aggregation logic
+    - decision: Quality scores stored in Supabase with image metadata
+      rationale: Enables analytics, A/B testing of thresholds, and continuous improvement
+        of generation parameters
+      alternatives_considered:
+      - In-memory only
+      - Separate quality database
+      ai_implementation_note: Database schema and CRUD operations are prime AI generation
+        candidates
+    researched_at: '2026-02-08T18:40:15.156392'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:22:59.255719'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 5339ed65
+    planning_hash: 0272adcc
+  technical_notes:
+    approach: 'Build a modular quality assessment service that integrates into the
+      existing RunPod image generation pipeline. Implement lightweight synchronous
+      checks followed by asynchronous deep quality analysis using a job queue. Create
+      a scoring system that combines technical metrics (sharpness, artifacts) with
+      perceptual quality (CLIP aesthetic scores) into a weighted composite score.
+      Store results in Supabase for monitoring and continuous improvement, with admin
+      dashboard for threshold management.
+
+      '
+    external_dependencies:
+    - name: '@bull-board/api'
+      version: ^5.0.0
+      reason: Queue monitoring and management for async quality assessment jobs
+    - name: sharp
+      version: ^0.33.0
+      reason: High-performance image processing for quality metrics calculation
+    - name: '@xenova/transformers'
+      version: ^2.17.0
+      reason: Browser-compatible CLIP model for aesthetic quality scoring
+    - name: opencv4nodejs
+      version: ^5.6.0
+      reason: Advanced computer vision metrics like BRISQUE and NIQE implementation
+    files_to_modify:
+    - path: packages/api/src/routes/generation.ts
+      changes: Add quality assessment step after image generation, integrate with
+        job queue
+    - path: packages/image-gen/src/services/runpod.ts
+      changes: Add quality assessment hook in generation completion handler
+    - path: packages/shared/src/database/schema.sql
+      changes: Add image_quality_scores table and quality_config table
+    - path: apps/dashboard/src/pages/admin.tsx
+      changes: Add quality metrics section with charts and threshold controls
+    new_files:
+    - path: packages/image-gen/src/quality/assessor.ts
+      purpose: Main quality assessment orchestrator and composite scoring logic
+    - path: packages/image-gen/src/quality/metrics/technical.ts
+      purpose: 'Technical quality metrics: sharpness, artifacts, resolution validation'
+    - path: packages/image-gen/src/quality/metrics/perceptual.ts
+      purpose: AI-based perceptual quality using CLIP aesthetic scoring
+    - path: packages/image-gen/src/quality/config.ts
+      purpose: Quality threshold management and metric weight configuration
+    - path: packages/image-gen/src/quality/queue.ts
+      purpose: Async job processing for heavy quality analysis tasks
+    - path: packages/shared/src/types/quality.ts
+      purpose: TypeScript interfaces for quality scores and assessment results
+    - path: packages/api/src/services/quality-service.ts
+      purpose: API service layer for quality score CRUD operations
+    - path: apps/dashboard/src/components/QualityMetrics.tsx
+      purpose: React components for quality monitoring and threshold management
+    - path: packages/image-gen/src/quality/__tests__/fixtures/
+      purpose: Test image fixtures with known quality characteristics
+  acceptance_criteria:
+  - criterion: Quality assessment pipeline processes generated images with composite
+      scores (0-100) from technical and perceptual metrics
+    verification: Test image through pipeline, verify JSON output contains technical_score,
+      perceptual_score, and composite_score fields
+  - criterion: Low quality images (score < configurable threshold) are flagged and
+      trigger regeneration workflow
+    verification: Submit deliberately poor quality image, verify quality_status='rejected'
+      in database and regeneration job queued
+  - criterion: Quality assessment completes within 5 seconds for lightweight checks,
+      30 seconds for full analysis
+    verification: Load test with 10 concurrent images, measure p95 response times
+      using built-in metrics
+  - criterion: Admin dashboard displays quality metrics with filtering and threshold
+      adjustment controls
+    verification: Navigate to /admin/quality, verify charts show score distributions
+      and threshold sliders update database config
+  - criterion: Quality scores are stored persistently and associated with generated
+      images for analytics
+    verification: Query Supabase image_quality_scores table, verify foreign key relationships
+      and score history retention
+  testing:
+    unit_tests:
+    - file: packages/image-gen/src/__tests__/quality/assessor.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Composite score calculation with different metric weights
+      - Invalid image input handling (corrupted, wrong format)
+      - Threshold comparison logic for pass/fail decisions
+      - Metric normalization and bounds checking
+    - file: packages/image-gen/src/__tests__/quality/metrics/technical.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Sharpness detection on blurry vs sharp test images
+      - Artifact detection on compressed vs clean images
+      - Resolution validation for minimum size requirements
+    - file: packages/image-gen/src/__tests__/quality/metrics/perceptual.test.ts
+      coverage_target: 80%
+      scenarios:
+      - CLIP aesthetic scoring with known good/bad images
+      - Content coherence scoring for comic panels
+      - Model loading and inference error handling
+    integration_tests:
+    - file: packages/api/src/__tests__/integration/quality-pipeline.test.ts
+      scenarios:
+      - End-to-end image generation with quality gates
+      - Async quality job processing and result storage
+      - Quality failure triggering regeneration workflow
+      - Database transactions for quality score persistence
+    manual_testing:
+    - step: Upload test images with known quality issues (blur, artifacts, low resolution)
+      expected: Quality scores accurately reflect visual problems, appropriate images
+        rejected
+    - step: Adjust quality thresholds in admin dashboard
+      expected: New thresholds immediately affect generation pipeline decisions
+    - step: Monitor quality score distributions over 24 hours of generation
+      expected: Consistent scoring, no performance degradation, reasonable score distribution
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.55
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create database schema for quality scores and configuration tables'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement TypeScript interfaces and types for quality assessment'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Define quality metric weights and threshold defaults based on
+        comic generation requirements'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement technical quality metrics (sharpness, artifacts, resolution)'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement CLIP-based perceptual quality scoring with model loading'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create composite scoring algorithm and quality assessor orchestrator'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build async job queue processing for heavy quality analysis'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Integrate quality pipeline into existing generation workflow'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement API endpoints for quality score CRUD operations'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create admin dashboard components for quality monitoring and threshold
+        management'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate comprehensive unit tests for all quality modules'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Write integration tests for end-to-end quality pipeline'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Tune quality thresholds using sample comic generation data'
+      done: false
+      ai_friendly: false
+    - task: '[HUMAN] Performance optimization and bottleneck analysis'
+      done: false
+      ai_friendly: false
+    - task: '[HUMAN] Code review and architectural validation'
+      done: false
+      ai_friendly: false
+- key: T55
+  title: Mood & Atmosphere Service
+  type: Feature
+  milestone: M3 - Content Generation Pipeline
+  iteration: I4
+  priority: p1
+  effort: 3
+  area: image-gen
+  dependsOn:
+  - T41
+  agent_notes:
+    research_findings: '**Context:**
+
+      A Mood & Atmosphere Service is essential for generating consistent visual style
+      across comic panels. When transforming novels to comics, maintaining atmospheric
+      coherence (dark/mysterious, bright/cheerful, tense/action-packed) is crucial
+      for reader immersion. This service analyzes textual content and character emotions
+      to generate mood descriptors that influence image generation prompts, ensuring
+      visual consistency throughout the comic.
+
+
+      **Technical Approach:**
+
+      - Build a centralized service using Fastify 5 that processes text chunks and
+      returns mood/atmosphere metadata
+
+      - Leverage LLM APIs (OpenAI/Anthropic) for semantic analysis of narrative tone,
+      character emotions, and scene atmosphere
+
+      - Create a mood taxonomy/schema with standardized descriptors (lighting, color
+      palette, weather, emotional tone)
+
+      - Implement caching layer using Supabase to store mood analysis results per
+      scene/chapter
+
+      - Design RESTful API endpoints that integrate with existing image generation
+      pipeline
+
+      - Use Zod for schema validation of mood descriptors and API payloads
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: API route handlers, database CRUD operations, Zod schema
+      definitions, unit tests for mood classification, OpenAPI documentation
+
+      - Medium AI effectiveness: LLM prompt engineering for mood detection, integration
+      with existing image-gen service, error handling patterns
+
+      - Low AI effectiveness: Mood taxonomy design, determining which moods affect
+      image generation parameters, architectural decisions about caching strategy
+
+
+      **Dependencies:**
+
+      - External: @anthropic-ai/sdk, openai, zod for validation, ioredis for caching
+
+      - Internal: Existing image-gen service, text processing pipeline, Supabase database
+      schema
+
+
+      **Risks:**
+
+      - LLM inconsistency: Different API calls may return varying mood interpretations
+      for similar text. Mitigation: implement mood normalization and confidence scoring
+
+      - Performance bottleneck: Real-time mood analysis could slow comic generation.
+      Mitigation: async processing with job queues and aggressive caching
+
+      - Cost explosion: Too many LLM API calls for mood analysis. Mitigation: batch
+      processing and result caching
+
+
+      **Complexity Notes:**
+
+      Initially seems straightforward but becomes complex when ensuring consistency
+      across long narratives. AI agents will accelerate CRUD and API development but
+      human judgment needed for mood taxonomy and integration patterns. Expect 60%
+      faster development with AI assistance.
+
+
+      **Key Files:**
+
+      - apps/api/src/services/mood-atmosphere.service.ts: Core mood analysis logic
+
+      - apps/api/src/routes/mood/: API endpoints for mood operations
+
+      - packages/shared/src/types/mood.ts: Shared mood type definitions
+
+      - packages/database/supabase/migrations/: Mood metadata tables
+
+      '
+    design_decisions:
+    - decision: Use structured LLM prompts with JSON schema output for mood detection
+      rationale: Ensures consistent, parseable mood data that integrates cleanly with
+        image generation parameters
+      alternatives_considered:
+      - Rule-based sentiment analysis
+      - Fine-tuned mood classification model
+      - Hybrid ML + rule-based approach
+      ai_implementation_note: AI agent can generate comprehensive prompt templates
+        and JSON schema validation logic
+    - decision: Implement hierarchical mood caching (scene-level and chapter-level)
+      rationale: Balances performance with contextual accuracy - scenes inherit chapter
+        mood but can override with specific emotions
+      alternatives_considered:
+      - Per-paragraph mood analysis
+      - Global story mood only
+      - No caching, real-time analysis
+      ai_implementation_note: AI can implement Redis caching patterns and cache invalidation
+        strategies
+    researched_at: '2026-02-08T18:40:39.205265'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:23:23.300019'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: cef3e45c
+    planning_hash: 46110ba3
+  technical_notes:
+    approach: 'Create a Fastify microservice that accepts text content and returns
+      structured mood metadata. Integrate with existing LLM providers to analyze narrative
+      tone, character emotions, and atmospheric elements. Store results in Supabase
+      with intelligent caching to minimize API costs. Design the service to seamlessly
+      integrate with the RunPod Stable Diffusion pipeline by providing mood-based
+      prompt modifiers.
+
+      '
+    external_dependencies:
+    - name: '@anthropic-ai/sdk'
+      version: ^0.24.0
+      reason: Primary LLM for mood analysis with structured output support
+    - name: ioredis
+      version: ^5.3.2
+      reason: High-performance Redis client for mood result caching
+    - name: zod
+      version: ^3.22.4
+      reason: Runtime validation of mood schemas and LLM responses
+    - name: bullmq
+      version: ^4.15.0
+      reason: Job queue for async mood processing to prevent blocking comic generation
+    files_to_modify:
+    - path: apps/api/src/server.ts
+      changes: Register mood routes and middleware
+    - path: packages/shared/src/types/index.ts
+      changes: Export mood types for cross-package usage
+    new_files:
+    - path: packages/shared/src/types/mood.ts
+      purpose: Shared mood type definitions and Zod schemas
+    - path: packages/database/supabase/migrations/20241201000000_create_mood_analysis_tables.sql
+      purpose: Database schema for mood analysis results and caching
+    - path: apps/api/src/services/mood-atmosphere.service.ts
+      purpose: Core mood analysis service with LLM integration
+    - path: apps/api/src/routes/mood/index.ts
+      purpose: Mood API route registration
+    - path: apps/api/src/routes/mood/analyze.ts
+      purpose: Single text analysis endpoint
+    - path: apps/api/src/routes/mood/batch.ts
+      purpose: Batch text analysis endpoint
+    - path: apps/api/src/routes/mood/prompt-modifiers.ts
+      purpose: Generate image prompt modifiers from mood analysis
+    - path: apps/api/src/lib/mood-taxonomy.ts
+      purpose: Standardized mood descriptors and classification logic
+    - path: apps/api/src/lib/llm-providers/mood-analyzer.ts
+      purpose: LLM provider abstraction for mood analysis
+  acceptance_criteria:
+  - criterion: Service analyzes text content and returns structured mood metadata
+      with confidence scores
+    verification: POST /api/mood/analyze with text returns JSON with mood descriptors,
+      emotional_tone, atmosphere, lighting, color_palette fields and confidence >=
+      0.7
+  - criterion: Mood results are cached in Supabase to minimize LLM API costs
+    verification: Second identical request returns cached result within 100ms, verify
+      mood_analysis table has entry
+  - criterion: Service integrates with image-gen pipeline by providing mood-based
+      prompt modifiers
+    verification: GET /api/mood/{analysis_id}/prompt-modifiers returns array of image
+      generation prompt additions
+  - criterion: API handles batch processing for multiple text chunks efficiently
+    verification: POST /api/mood/analyze-batch with 10 text chunks completes within
+      30 seconds
+  - criterion: OpenAPI documentation is complete and accurate
+    verification: Swagger UI at /docs shows all mood endpoints with proper schemas
+      and examples
+  testing:
+    unit_tests:
+    - file: apps/api/src/services/__tests__/mood-atmosphere.service.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Text analysis returns valid mood schema
+      - Confidence scoring works correctly
+      - LLM API failures handled gracefully
+      - Mood normalization consistency
+      - Cache hit/miss scenarios
+    - file: apps/api/src/routes/mood/__tests__/mood.routes.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Valid mood analysis request/response
+      - Invalid input validation errors
+      - Rate limiting behavior
+      - Batch processing limits
+    integration_tests:
+    - file: apps/api/src/__tests__/integration/mood-pipeline.test.ts
+      scenarios:
+      - End-to-end mood analysis to image prompt flow
+      - Database persistence and retrieval
+      - LLM provider failover behavior
+      - Cache invalidation strategies
+    manual_testing:
+    - step: Submit sample novel chapter text via API
+      expected: Returns consistent mood descriptors with confidence > 0.8
+    - step: Verify mood results enhance image generation quality
+      expected: Generated images reflect analyzed atmospheric mood
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.6
+  progress:
+    status: not-started
+    checklist:
+    - task: '[HUMAN] Design mood taxonomy and classification schema'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Create Zod schemas for mood types in packages/shared'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate Supabase migration for mood_analysis table'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement MoodAtmosphereService class with LLM integration'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design LLM prompts for consistent mood extraction'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Create Fastify route handlers for all mood endpoints'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement caching layer with Supabase and Redis'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate comprehensive unit tests for service and routes'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create integration tests for mood-to-image pipeline'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Test mood consistency across long narrative samples'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Generate OpenAPI documentation and examples'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Code review focusing on LLM prompt quality and caching strategy'
+      done: false
+      ai_friendly: false
+- key: T56
+  title: Prompt Caching & Optimization
+  type: Task
+  milestone: M3 - Content Generation Pipeline
+  iteration: I4
+  priority: p1
+  effort: 2
+  area: image-gen
+  dependsOn:
+  - T50
+  agent_notes:
+    research_findings: '**Context:**
+
+      Prompt caching & optimization is critical for the Morpheus image generation
+      pipeline to reduce costs and improve performance. With comic generation requiring
+      multiple similar prompts (character consistency, style consistency across panels),
+      caching can dramatically reduce OpenAI/Anthropic API costs and RunPod inference
+      latency. This task addresses the need for intelligent prompt template management,
+      semantic similarity detection, and result caching to optimize the content generation
+      pipeline.
+
+
+      **Technical Approach:**
+
+      - Implement multi-layer caching: Redis for fast prompt-result pairs, PostgreSQL
+      for persistent template storage
+
+      - Use vector embeddings (sentence-transformers) to detect semantically similar
+      prompts
+
+      - Create prompt template system with variable substitution for character/scene
+      consistency
+
+      - Implement cache invalidation strategies based on model versions and prompt
+      similarity scores
+
+      - Add prompt optimization service that analyzes and suggests improvements to
+      prompts
+
+      - Create cache warming strategies for common comic generation patterns
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: Redis integration code, cache key generation, CRUD
+      operations for prompt templates, test suites, API endpoint implementations
+
+      - Medium AI effectiveness: Vector similarity algorithms, cache invalidation
+      logic, prompt template parsing
+
+      - Low AI effectiveness: Cache strategy architecture decisions, similarity threshold
+      tuning, business logic for when to cache vs regenerate
+
+
+      **Dependencies:**
+
+      - External: Redis client, vector embedding service, sentence-transformers API
+
+      - Internal: Image generation service, prompt management service, database schema
+      migrations
+
+
+      **Risks:**
+
+      - Cache invalidation complexity: Implement versioned caching with clear TTL
+      strategies
+
+      - Memory bloat from vector storage: Use approximate nearest neighbor search
+      with pruning
+
+      - Stale cache serving outdated results: Add model version tracking and automatic
+      invalidation
+
+      - Over-caching reducing generation quality: Implement similarity thresholds
+      and manual cache bypass options
+
+
+      **Complexity Notes:**
+
+      More complex than initially estimated due to vector similarity requirements
+      and multi-model caching (both LLM prompts and Stable Diffusion prompts). AI
+      agents can significantly accelerate implementation of caching infrastructure
+      but human oversight needed for similarity thresholds and cache strategies.
+
+
+      **Key Files:**
+
+      - apps/api/src/services/prompt-cache.ts: Core caching service implementation
+
+      - apps/api/src/services/vector-similarity.ts: Semantic similarity detection
+
+      - packages/shared/src/types/prompt-types.ts: Prompt template and cache interfaces
+
+      - apps/api/src/routes/image-gen.ts: Integration with existing image generation
+
+      - supabase/migrations/: New tables for prompt templates and cache metadata
+
+      '
+    design_decisions:
+    - decision: Use Redis + PostgreSQL hybrid caching approach
+      rationale: Redis for fast lookup of exact matches, PostgreSQL for persistent
+        prompt templates and metadata, vector similarity for semantic matching
+      alternatives_considered:
+      - Pure Redis solution
+      - PostgreSQL only with jsonb
+      - External vector database
+      ai_implementation_note: AI can generate most Redis operations and PostgreSQL
+        queries, focus human effort on cache strategy logic
+    - decision: Implement semantic similarity using sentence-transformers embeddings
+      rationale: Enables detection of semantically similar prompts that should share
+        cache entries, critical for comic character consistency
+      alternatives_considered:
+      - Simple string matching
+      - LLM-based similarity
+      - Custom similarity algorithm
+      ai_implementation_note: AI can implement embedding generation and similarity
+        calculations, human needed for threshold tuning
+    - decision: Version-aware caching with automatic invalidation
+      rationale: Model updates and prompt template changes must invalidate relevant
+        cache entries to maintain quality
+      alternatives_considered:
+      - Manual cache clearing
+      - Time-based TTL only
+      - No versioning
+      ai_implementation_note: AI can generate versioning infrastructure and invalidation
+        triggers
+    researched_at: '2026-02-08T18:41:06.826853'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:23:52.366981'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 80ee1697
+    planning_hash: 19a7990b
+  technical_notes:
+    approach: 'Create a multi-tiered prompt caching system with Redis for fast lookups,
+      PostgreSQL for persistent templates, and vector embeddings for semantic similarity.
+      Implement cache-aware modifications to existing image generation endpoints,
+      add prompt template management APIs, and create background jobs for cache optimization
+      and warming. Focus on character and style consistency patterns specific to comic
+      generation workflows.
+
+      '
+    external_dependencies:
+    - name: ioredis
+      version: ^5.3.2
+      reason: High-performance Redis client for Node.js with TypeScript support
+    - name: '@supabase/supabase-js'
+      version: ^2.39.0
+      reason: Already in use, extend for prompt template storage and metadata
+    - name: sentence-transformers
+      version: ^2.2.2
+      reason: Generate embeddings for semantic prompt similarity detection
+    - name: bull
+      version: ^4.12.2
+      reason: Background job processing for cache warming and optimization tasks
+    - name: faiss-node
+      version: ^0.5.1
+      reason: Efficient approximate nearest neighbor search for vector similarity
+    files_to_modify:
+    - path: apps/api/src/routes/image-gen.ts
+      changes: Add cache lookup before generation, cache results after successful
+        generation
+    - path: apps/api/src/services/image-generation.ts
+      changes: Integrate prompt template resolution and cache checking
+    - path: apps/api/src/lib/redis.ts
+      changes: Add prompt-specific Redis client configuration and connection pooling
+    new_files:
+    - path: apps/api/src/services/prompt-cache.ts
+      purpose: Core caching service with Redis operations and cache key management
+    - path: apps/api/src/services/vector-similarity.ts
+      purpose: Semantic similarity detection using sentence-transformers embeddings
+    - path: apps/api/src/services/prompt-template.ts
+      purpose: Template management, variable substitution, and character consistency
+    - path: apps/api/src/services/cache-optimizer.ts
+      purpose: Background jobs for cache warming, pruning, and performance optimization
+    - path: packages/shared/src/types/prompt-types.ts
+      purpose: TypeScript interfaces for prompt templates, cache entries, and similarity
+        results
+    - path: apps/api/src/routes/prompt-management.ts
+      purpose: CRUD APIs for prompt templates and cache management
+    - path: supabase/migrations/20241201000000_prompt_cache_tables.sql
+      purpose: Database schema for prompt templates, cache metadata, and analytics
+    - path: apps/api/src/middleware/cache-metrics.ts
+      purpose: Performance monitoring and cache hit/miss tracking
+  acceptance_criteria:
+  - criterion: Prompt caching reduces API calls by >70% for similar prompts (cosine
+      similarity >0.85)
+    verification: Monitor Redis hit rate metrics and API call logs during comic generation
+      pipeline tests
+  - criterion: Vector similarity detection identifies semantically similar prompts
+      within 100ms
+    verification: Unit tests with 1000+ prompt comparisons measuring response time
+      <100ms average
+  - criterion: Cache invalidation correctly handles model version changes and TTL
+      expiration
+    verification: Integration tests verify cached results purged when model version
+      incremented or TTL exceeded
+  - criterion: Prompt template system maintains character consistency across comic
+      panels
+    verification: E2E tests generate 5-panel comic sequence and verify character attributes
+      preserved via template variables
+  - criterion: System gracefully degrades when cache unavailable (Redis down)
+    verification: Integration test with Redis offline - image generation continues
+      with direct API calls
+  testing:
+    unit_tests:
+    - file: apps/api/src/services/__tests__/prompt-cache.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Cache hit/miss scenarios
+      - TTL expiration handling
+      - Redis connection failures
+      - Cache key generation consistency
+      - Batch operations
+    - file: apps/api/src/services/__tests__/vector-similarity.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Embedding generation and comparison
+      - Similarity threshold edge cases
+      - Large prompt handling (>2000 chars)
+      - Malformed input handling
+    - file: apps/api/src/services/__tests__/prompt-template.test.ts
+      coverage_target: 88%
+      scenarios:
+      - Template variable substitution
+      - Nested template inheritance
+      - Invalid template syntax
+      - Character consistency validation
+    integration_tests:
+    - file: apps/api/src/__tests__/integration/prompt-cache-pipeline.test.ts
+      scenarios:
+      - Full image generation with caching enabled
+      - Cache warming for comic generation patterns
+      - Multi-panel comic with character consistency
+      - Cache invalidation on model updates
+      - Performance benchmarks vs non-cached generation
+    manual_testing:
+    - step: Generate 10-panel comic with same character through UI
+      expected: Character appearance consistent, <2s average generation time after
+        first panel
+    - step: Monitor Redis dashboard during bulk comic generation
+      expected: Cache hit rate >70%, memory usage stable
+    - step: Test prompt optimization suggestions via API
+      expected: Returns actionable improvements for vague prompts
+  estimates:
+    development: 4
+    code_review: 0.5
+    testing: 1.5
+    documentation: 0.5
+    total: 6.5
+    ai_acceleration_factor: 0.55
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create TypeScript interfaces for prompt caching system in packages/shared/src/types/prompt-types.ts'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement Redis client setup and connection pooling in apps/api/src/lib/redis.ts'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Define cache invalidation strategy and similarity thresholds
+        (0.85 for high similarity)'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Build core prompt-cache.ts service with get/set/invalidate methods'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement vector similarity service using sentence-transformers
+        API integration'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create prompt template engine with variable substitution logic'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate database migration for prompt_templates and cache_metadata
+        tables'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Integrate caching into existing image-gen.ts routes with fallback
+        handling'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Review cache architecture and validate similarity threshold effectiveness'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement comprehensive test suites for all caching services'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Add cache metrics middleware and performance monitoring'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Performance testing and cache strategy optimization'
+      done: false
+      ai_friendly: false
+- key: T57
+  title: Generation Progress Tracking
+  type: Task
+  milestone: M3 - Content Generation Pipeline
+  iteration: I4
+  priority: p0
+  effort: 2
+  area: image-gen
+  dependsOn:
+  - T52
+  agent_notes:
+    research_findings: "**Context:**\nThis task addresses tracking the progress of\
+      \ comic panel generation, which is critical for user experience and system reliability.\
+      \ Users need real-time feedback when generating comics from novels, as the process\
+      \ involves multiple steps: story parsing, scene extraction, prompt generation,\
+      \ and image creation via RunPod Stable Diffusion. Without progress tracking,\
+      \ users face a black box experience that could timeout or fail silently. This\
+      \ is essential for M3 milestone as it enables proper UX for the content generation\
+      \ pipeline.\n\n**Technical Approach:**\nImplement a WebSocket-based progress\
+      \ tracking system using Fastify's WebSocket support. Create a ProgressTracker\
+      \ service that manages generation states (queued, processing, completed, failed)\
+      \ with granular step tracking. Use Redis for progress state persistence and\
+      \ pub/sub for real-time updates. Frontend should use React hooks for WebSocket\
+      \ connection management with automatic reconnection. Database schema needs generation_progress\
+      \ table with job_id, user_id, status, current_step, total_steps, metadata columns.\n\
+      \n**AI Suitability Analysis:**\n- High AI effectiveness: WebSocket event handlers,\
+      \ React progress hooks, database CRUD operations, progress UI components, Jest/Vitest\
+      \ unit tests, type definitions for progress states\n- Medium AI effectiveness:\
+      \ WebSocket connection management, error handling patterns, progress state machine\
+      \ logic, integration with existing generation pipeline\n- Low AI effectiveness:\
+      \ Progress tracking architecture decisions, WebSocket vs SSE choice, error recovery\
+      \ strategies, UX flow design for different failure modes\n\n**Dependencies:**\n\
+      - External: @fastify/websocket, ioredis, react-use-websocket, lucide-react (progress\
+      \ icons)\n- Internal: Existing generation service, authentication middleware,\
+      \ database models, UI component library\n\n**Risks:**\n- WebSocket connection\
+      \ drops: implement automatic reconnection with exponential backoff\n- Progress\
+      \ state inconsistency: use Redis transactions and implement progress reconciliation\n\
+      - Memory leaks from unclosed connections: implement proper cleanup in React\
+      \ useEffect and Fastify hooks\n- Scaling issues with many concurrent generations:\
+      \ consider connection pooling and progress state sharding\n\n**Complexity Notes:**\n\
+      Medium complexity - more involved than initial estimate due to real-time requirements\
+      \ and state synchronization across services. AI can significantly accelerate\
+      \ implementation of boilerplate WebSocket handlers and React hooks, but architectural\
+      \ decisions around state management and error recovery require human judgment.\
+      \ Progress UI components are highly AI-friendly.\n\n**Key Files:**\n- apps/api/src/services/ProgressTracker.ts:\
+      \ Core progress tracking service\n- apps/api/src/routes/generation/progress.ts:\
+      \ WebSocket endpoint handlers  \n- apps/dashboard/src/hooks/useGenerationProgress.ts:\
+      \ React WebSocket hook\n- apps/dashboard/src/components/ProgressIndicator.tsx:\
+      \ UI progress component\n- packages/database/src/schema/generation.sql: Progress\
+      \ tracking tables\n"
+    design_decisions:
+    - decision: Use WebSockets over Server-Sent Events for bidirectional communication
+      rationale: Allows client to send heartbeat/reconnection signals and supports
+        future interactive features like cancellation
+      alternatives_considered:
+      - Server-Sent Events
+      - Polling-based updates
+      - GraphQL subscriptions
+      ai_implementation_note: AI can generate WebSocket event handlers, connection
+        management logic, and error handling patterns effectively
+    - decision: Redis for progress state persistence with database backup
+      rationale: Fast in-memory operations for real-time updates with PostgreSQL for
+        durability and querying
+      alternatives_considered:
+      - Database-only approach
+      - In-memory only
+      - Message queue system
+      ai_implementation_note: AI excellent for Redis operations, data serialization,
+        and sync patterns between Redis/PostgreSQL
+    - decision: Granular step tracking with metadata support
+      rationale: Enables detailed progress feedback (e.g., 'Generating panel 3 of
+        8') and debugging capabilities
+      alternatives_considered:
+      - Simple percentage tracking
+      - Binary states only
+      - Time-based estimates
+      ai_implementation_note: AI can generate progress step enums, metadata types,
+        and progress calculation utilities
+    researched_at: '2026-02-08T18:41:33.316646'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:24:19.817527'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: a04b6f73
+    planning_hash: 0d300b16
+  technical_notes:
+    approach: 'Implement a layered progress tracking system with ProgressTracker service
+      managing state in Redis, WebSocket endpoints broadcasting updates, and React
+      hooks consuming real-time data. Use a standardized progress schema with job_id,
+      steps array, current status, and extensible metadata. Integrate progress updates
+      directly into existing generation pipeline services, ensuring atomic state transitions
+      and proper error propagation.
+
+      '
+    external_dependencies:
+    - name: '@fastify/websocket'
+      version: ^11.0.0
+      reason: Native WebSocket support for Fastify with proper lifecycle management
+    - name: ioredis
+      version: ^5.3.0
+      reason: Redis client for progress state persistence and pub/sub functionality
+    - name: react-use-websocket
+      version: ^4.8.0
+      reason: React hook for WebSocket connection management with reconnection logic
+    files_to_modify:
+    - path: apps/api/src/services/generation/comic-generator.ts
+      changes: Integrate ProgressTracker.updateProgress() calls at each generation
+        step
+    - path: apps/api/src/middleware/websocket-auth.ts
+      changes: Add WebSocket authentication middleware for progress endpoints
+    - path: apps/dashboard/src/pages/GenerationPage.tsx
+      changes: Import and use useGenerationProgress hook and ProgressIndicator component
+    - path: packages/database/src/migrations/001_initial.sql
+      changes: Add generation_progress table schema
+    new_files:
+    - path: apps/api/src/services/ProgressTracker.ts
+      purpose: Core progress tracking service with Redis persistence and pub/sub
+    - path: apps/api/src/routes/generation/progress.ts
+      purpose: WebSocket endpoint handlers for progress broadcasting
+    - path: apps/api/src/types/progress.ts
+      purpose: TypeScript interfaces for progress states and events
+    - path: apps/dashboard/src/hooks/useGenerationProgress.ts
+      purpose: React hook for WebSocket progress connection with reconnection logic
+    - path: apps/dashboard/src/components/ProgressIndicator.tsx
+      purpose: UI component for displaying generation progress with steps and status
+    - path: apps/dashboard/src/components/ProgressStep.tsx
+      purpose: Individual progress step component with status icons
+    - path: packages/database/src/schema/generation-progress.sql
+      purpose: Database schema for progress tracking tables
+  acceptance_criteria:
+  - criterion: WebSocket connection provides real-time progress updates for comic
+      generation with status, current_step, total_steps, and metadata
+    verification: Connect to /ws/generation/progress endpoint, trigger generation,
+      verify progress events received with correct schema
+  - criterion: Progress state persists across server restarts and WebSocket reconnections
+    verification: Check Redis contains progress data after server restart, verify
+      client reconnection restores correct progress state
+  - criterion: Progress tracking handles concurrent generations with isolated state
+      per job_id
+    verification: Start 3+ simultaneous generations, verify each receives only its
+      own progress updates
+  - criterion: System gracefully handles WebSocket disconnections with automatic reconnection
+      and exponential backoff
+    verification: Disconnect network, verify UI shows reconnection attempts with increasing
+      delays (1s, 2s, 4s, 8s max)
+  - criterion: Progress UI displays generation steps with visual indicators and error
+      states
+    verification: Manual test generation flow, verify progress bar, step labels, success/error
+      states render correctly
+  testing:
+    unit_tests:
+    - file: apps/api/src/services/__tests__/ProgressTracker.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Create and update progress states
+      - Handle invalid job_id and state transitions
+      - Redis connection failures
+      - Progress calculation accuracy
+    - file: apps/dashboard/src/hooks/__tests__/useGenerationProgress.test.ts
+      coverage_target: 85%
+      scenarios:
+      - WebSocket connection lifecycle
+      - Progress state updates
+      - Reconnection logic with exponential backoff
+      - Component unmount cleanup
+    - file: apps/dashboard/src/components/__tests__/ProgressIndicator.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Progress bar rendering at different percentages
+      - Step status display (pending, active, completed, error)
+      - Loading and error states
+    integration_tests:
+    - file: apps/api/src/__tests__/integration/progress-websocket.test.ts
+      scenarios:
+      - Full generation progress flow with WebSocket events
+      - Multi-client progress isolation
+      - Authentication and authorization for WebSocket connections
+    - file: apps/dashboard/src/__tests__/integration/progress-flow.test.ts
+      scenarios:
+      - End-to-end progress UI during mock generation
+      - Error handling and retry mechanisms
+    manual_testing:
+    - step: Start comic generation and monitor WebSocket network tab
+      expected: See progress events with increasing step counts and status updates
+    - step: Disconnect internet during generation, reconnect after 10 seconds
+      expected: UI shows reconnecting state, then resumes progress display
+    - step: Start multiple generations simultaneously in different tabs
+      expected: Each tab shows only its own generation progress
+  estimates:
+    development: 2.5
+    code_review: 0.5
+    testing: 0.8
+    documentation: 0.3
+    total: 4.1
+    ai_acceleration_factor: 0.55
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create TypeScript interfaces for progress states (ProgressState,
+        ProgressEvent, GenerationStep)'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design progress step definitions and state machine transitions'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement ProgressTracker service with Redis operations (get, set,
+        publish methods)'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create WebSocket endpoint handlers with authentication and event
+        broadcasting'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build React useGenerationProgress hook with WebSocket connection
+        and reconnection logic'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement ProgressIndicator and ProgressStep UI components with
+        Lucide icons'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Integrate progress tracking into existing comic generation pipeline'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Write comprehensive unit tests for all new services and components'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create integration tests for WebSocket functionality and progress
+        flow'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Manual testing of UX flows and error scenarios, performance validation'
+      done: false
+      ai_friendly: false
+- key: T59
+  title: SDXL Prompt Validation
+  type: Feature
+  milestone: M3 - Content Generation Pipeline
+  iteration: I4
+  priority: p0
+  effort: 2
+  area: image-gen
+  dependsOn:
+  - T50
+  agent_notes:
+    research_findings: '**Context:**
+
+      SDXL (Stable Diffusion XL) prompt validation is crucial for the comic generation
+      pipeline to ensure prompts sent to RunPod''s SDXL models are properly formatted,
+      optimized, and safe. This prevents generation failures, reduces API costs from
+      failed requests, and ensures consistent visual quality. Given that comic panels
+      require specific artistic styles, character consistency, and narrative coherence,
+      prompt validation becomes essential for maintaining quality while avoiding NSFW
+      content or prompts that could trigger content filters.
+
+
+      **Technical Approach:**
+
+      Implement a layered validation system using Zod schemas for type safety, with
+      specialized validators for SDXL-specific constraints. Create a prompt sanitization
+      pipeline that handles token limits (77 tokens per chunk), validates negative
+      prompts, checks for banned terms, and optimizes prompt structure for comic art
+      generation. Use a caching layer (Redis/Supabase) to avoid re-validating identical
+      prompts. Integrate with the existing ML pipeline and provide detailed validation
+      feedback for the dashboard.
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: Zod schema definitions, validation utility functions,
+      test cases, error message formatting, OpenAPI spec generation
+
+      - Medium AI effectiveness: Integration with existing image-gen service, caching
+      implementation, validation rule configuration
+
+      - Low AI effectiveness: SDXL-specific prompt optimization rules, artistic style
+      validation logic, content safety policy decisions
+
+
+      **Dependencies:**
+
+      - External: zod (^3.22.0), openai (existing), @anthropic-ai/sdk (existing)
+
+      - Internal: image-gen service, content moderation system, caching layer, audit
+      logging
+
+
+      **Risks:**
+
+      - Over-restrictive validation: Could block creative prompts - mitigate with
+      configurable rules and bypass mechanisms
+
+      - Performance bottleneck: Validation adds latency - mitigate with caching and
+      async validation for non-critical checks
+
+      - SDXL model changes: RunPod updates could break validation - mitigate with
+      versioned validation rules and fallback strategies
+
+
+      **Complexity Notes:**
+
+      More complex than initially estimated due to SDXL''s specific requirements (token
+      chunking, style modifiers, aspect ratio constraints). AI can accelerate implementation
+      of validation logic and tests significantly, but human expertise needed for
+      comic-specific optimization rules.
+
+
+      **Key Files:**
+
+      - packages/image-gen/src/validation/: New validation module
+
+      - packages/image-gen/src/services/sdxl-service.ts: Integrate validation
+
+      - packages/shared/src/types/prompt.ts: Type definitions
+
+      - apps/api/src/routes/image-gen.ts: API endpoint updates
+
+      '
+    design_decisions:
+    - decision: Use Zod for schema validation with custom refinements
+      rationale: Provides type safety, composable validation rules, and excellent
+        TypeScript integration matching existing codebase patterns
+      alternatives_considered:
+      - Joi validation
+      - Custom validation functions
+      - AJV JSON schema
+      ai_implementation_note: AI can generate comprehensive Zod schemas and validation
+        tests from specification
+    - decision: Implement tiered validation (fast/deep) with caching
+      rationale: Balances thoroughness with performance - fast validation for API
+        responses, deep validation for background processing
+      alternatives_considered:
+      - Single validation pass
+      - Always deep validation
+      - Client-side only validation
+      ai_implementation_note: AI excellent for implementing caching logic and validation
+        tier orchestration
+    - decision: Create SDXL-specific prompt optimization engine
+      rationale: Comic generation requires specific artistic prompts, character consistency
+        tokens, and panel composition guides
+      alternatives_considered:
+      - Generic prompt validation
+      - Manual prompt crafting
+      - LLM-based prompt enhancement
+      ai_implementation_note: AI can implement optimization rules once human defines
+        the comic-specific requirements
+    researched_at: '2026-02-08T18:41:58.419098'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:24:47.359908'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 6991526e
+    planning_hash: 091a9f9d
+  technical_notes:
+    approach: 'Build a validation pipeline that preprocesses prompts through sanitization,
+      validates against SDXL constraints using Zod schemas, applies comic-specific
+      optimization rules, and caches results. Integrate with the existing image-gen
+      service as middleware, providing both synchronous validation for API endpoints
+      and asynchronous deep validation for background processing. Use a plugin architecture
+      for extensible validation rules and maintain validation metrics for continuous
+      improvement.
+
+      '
+    external_dependencies:
+    - name: zod
+      version: ^3.22.4
+      reason: Type-safe schema validation with excellent TS integration
+    - name: tiktoken
+      version: ^1.0.10
+      reason: Accurate token counting for SDXL prompt limits
+    - name: profanity-check
+      version: ^1.1.0
+      reason: Content safety validation for generated prompts
+    files_to_modify:
+    - path: packages/image-gen/src/services/sdxl-service.ts
+      changes: Integrate prompt validation before API calls, add validation result
+        caching
+    - path: apps/api/src/routes/image-gen.ts
+      changes: Add validation middleware, return structured validation errors
+    - path: packages/shared/src/types/prompt.ts
+      changes: Add SDXL-specific prompt types and validation result interfaces
+    new_files:
+    - path: packages/image-gen/src/validation/index.ts
+      purpose: Main validation export interface
+    - path: packages/image-gen/src/validation/prompt-validator.ts
+      purpose: Core SDXL prompt validation logic using Zod schemas
+    - path: packages/image-gen/src/validation/prompt-sanitizer.ts
+      purpose: Prompt cleaning and normalization utilities
+    - path: packages/image-gen/src/validation/comic-optimizer.ts
+      purpose: Comic-specific prompt enhancement rules
+    - path: packages/image-gen/src/validation/content-safety.ts
+      purpose: NSFW and harmful content detection
+    - path: packages/image-gen/src/validation/schemas.ts
+      purpose: Zod validation schemas for SDXL prompts
+    - path: packages/image-gen/src/validation/cache.ts
+      purpose: Validation result caching implementation
+    - path: packages/image-gen/src/validation/config.ts
+      purpose: Configurable validation rules and constants
+  acceptance_criteria:
+  - criterion: SDXL prompts are validated for token limits (77 tokens per chunk),
+      negative prompts structure, and banned terms before API calls
+    verification: Unit tests pass for prompt validation with various token counts,
+      integration test shows RunPod API receives only valid prompts
+  - criterion: Comic-specific prompt optimization applies style modifiers, aspect
+      ratio constraints (1024x1024, 1152x896, etc.), and character consistency tags
+    verification: Test suite validates comic prompts get enhanced with 'comic book
+      style, cel shading, vibrant colors' and proper aspect ratios
+  - criterion: Validation results are cached to avoid re-processing identical prompts,
+      with 95th percentile response time under 50ms for cached results
+    verification: Performance test shows cache hit rate >80% and response times measured
+      via API metrics dashboard
+  - criterion: Content safety validation blocks NSFW and harmful content while allowing
+      creative comic art prompts
+    verification: Test cases verify blocked terms list prevents inappropriate content
+      while allowing 'action scenes, superhero costumes, dramatic lighting'
+  - criterion: Validation errors provide actionable feedback with suggested fixes
+      for prompt optimization
+    verification: API returns structured error responses with specific issues and
+      recommended prompt modifications
+  testing:
+    unit_tests:
+    - file: packages/image-gen/src/validation/__tests__/prompt-validator.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Valid SDXL prompts pass validation
+      - Token limit exceeded returns specific error
+      - Banned terms are detected and blocked
+      - Negative prompts format validation
+      - Comic-specific optimization rules applied
+      - Aspect ratio validation for SDXL
+    - file: packages/image-gen/src/validation/__tests__/prompt-sanitizer.test.ts
+      coverage_target: 85%
+      scenarios:
+      - HTML/script tags removed from prompts
+      - Special characters handled correctly
+      - Unicode normalization applied
+      - Prompt chunking for token limits
+    integration_tests:
+    - file: packages/image-gen/src/__tests__/integration/sdxl-validation-flow.test.ts
+      scenarios:
+      - End-to-end prompt validation in image generation pipeline
+      - Cache integration with Redis/Supabase
+      - Error propagation to API endpoints
+      - Validation metrics collection
+    manual_testing:
+    - step: Submit comic panel generation request with complex character description
+      expected: Prompt enhanced with comic style modifiers and character consistency
+        tags
+    - step: Submit prompt exceeding 77 tokens
+      expected: Clear error message with token count and chunking suggestion
+    - step: Submit prompt with borderline content
+      expected: Content safety validation provides specific feedback
+  estimates:
+    development: 2.5
+    code_review: 0.5
+    testing: 0.8
+    documentation: 0.3
+    total: 4.1
+    ai_acceleration_factor: 0.55
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create Zod schemas for SDXL prompt validation (token limits, aspect
+        ratios, negative prompts)'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement prompt sanitization utilities (HTML cleaning, normalization,
+        token chunking)'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Define comic-specific optimization rules and banned terms list
+        based on content policy'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Build core validation pipeline with error formatting and caching
+        integration'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create comprehensive unit test suites for all validation components'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Integrate validation middleware into existing SDXL service and API
+        routes'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Configure content safety rules and test edge cases for comic
+        art vs NSFW content'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement validation metrics collection and performance monitoring'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate OpenAPI documentation for validation endpoints and error
+        responses'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Code review focusing on security implications and content policy
+        compliance'
+      done: false
+      ai_friendly: false
+- key: T60
+  title: M3 Integration Testing
+  type: Task
+  milestone: M3 - Content Generation Pipeline
+  iteration: I4
+  priority: p0
+  effort: 5
+  area: image-gen
+  dependsOn:
+  - T54
+  - T57
+  - T59
+  agent_notes:
+    research_findings: '**Context:**
+
+      M3 Integration Testing is crucial for validating the end-to-end Content Generation
+      Pipeline that transforms novels into comics. This task ensures the entire workflow
+      - from text analysis through image generation to comic panel assembly - works
+      cohesively. Without comprehensive integration testing, issues could arise in
+      production where individual components work in isolation but fail when orchestrated
+      together. This is particularly critical given the complex ML pipeline involving
+      multiple AI services (OpenAI/Anthropic for text processing, RunPod for Stable
+      Diffusion image generation).
+
+
+      **Technical Approach:**
+
+      Implement multi-layer integration testing using Vitest for backend API integration
+      and Playwright for full end-to-end user flows. Create a test harness that can
+      mock expensive ML operations while still validating the pipeline orchestration.
+      Use Docker Compose for consistent test environments and implement contract testing
+      between services. Leverage Supabase''s test database features for isolated test
+      data. Structure tests around realistic user scenarios: uploading novel → generating
+      character profiles → creating scene breakdowns → generating images → assembling
+      comic panels.
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: Test data generation, mock API responses, CRUD test
+      boilerplate, assertion helpers, database fixtures
+
+      - Medium AI effectiveness: Test scenario scripting, Playwright selectors and
+      actions, API client integration code
+
+      - Low AI effectiveness: Test strategy design, complex async workflow validation,
+      ML pipeline orchestration logic, performance benchmarking criteria
+
+
+      **Dependencies:**
+
+      - External: @testcontainers/postgresql, msw (Mock Service Worker), dockerode,
+      faker-js/faker, playwright/test
+
+      - Internal: Existing backend services, ML pipeline components, database schemas,
+      authentication middleware
+
+
+      **Risks:**
+
+      - Flaky ML service integration: Use circuit breakers and fallback mocks for
+      external AI APIs
+
+      - Test environment inconsistency: Containerize all dependencies and use deterministic
+      test data
+
+      - Long test execution times: Implement parallel execution and smart test selection
+      based on code changes
+
+      - Resource consumption: Mock expensive operations and use smaller models for
+      testing
+
+
+      **Complexity Notes:**
+
+      More complex than initially estimated due to ML pipeline coordination and async
+      job processing. However, AI agents can significantly accelerate test case generation
+      and boilerplate creation, potentially offsetting 40-50% of manual coding effort.
+      The biggest complexity lies in orchestrating realistic test scenarios that mirror
+      production ML workflows without incurring costs.
+
+
+      **Key Files:**
+
+      - packages/backend/tests/integration/: New integration test suite structure
+
+      - packages/backend/src/services/pipeline/: Pipeline orchestration service
+
+      - apps/e2e/tests/: End-to-end Playwright tests
+
+      - docker-compose.test.yml: Test environment configuration
+
+      - packages/shared/test-utils/: Shared test utilities and factories
+
+      '
+    design_decisions:
+    - decision: Hybrid testing approach with mocked ML services and real database
+        operations
+      rationale: Balances test reliability with cost control - ML operations are expensive
+        and non-deterministic, but database interactions need real validation
+      alternatives_considered:
+      - Full mock approach
+      - Full integration with live APIs
+      - Record/replay pattern
+      ai_implementation_note: AI can generate comprehensive mock responses and test
+        data factories based on API schemas
+    - decision: Contract-based testing between microservices
+      rationale: Ensures service boundaries remain stable as the pipeline evolves,
+        preventing integration breaks
+      alternatives_considered:
+      - End-to-end only
+      - Unit tests with manual integration
+      - Shared test databases
+      ai_implementation_note: AI excels at generating contract tests from OpenAPI
+        specifications and TypeScript interfaces
+    researched_at: '2026-02-08T18:42:25.550826'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:25:17.005440'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: ca6fd657
+    planning_hash: 0a9ec664
+  technical_notes:
+    approach: 'Implement a three-tier testing strategy: (1) Service integration tests
+      using Testcontainers for isolated database testing, (2) Pipeline orchestration
+      tests with mocked ML services using MSW, and (3) Full E2E tests using Playwright
+      with a dedicated test environment. Create reusable test factories for generating
+      novel content, character profiles, and expected comic outputs. Use parallel
+      test execution and smart dependency management to keep test suite execution
+      under 10 minutes.
+
+      '
+    external_dependencies:
+    - name: '@testcontainers/postgresql'
+      version: ^10.7.0
+      reason: Isolated PostgreSQL instances for integration testing
+    - name: msw
+      version: ^2.0.0
+      reason: Mock ML API services to avoid costs and ensure deterministic responses
+    - name: '@faker-js/faker'
+      version: ^8.3.0
+      reason: Generate realistic test data for novels, characters, and comic content
+    - name: dockerode
+      version: ^4.0.0
+      reason: Docker container management for test environment orchestration
+    files_to_modify:
+    - path: packages/backend/src/services/pipeline/orchestrator.ts
+      changes: Add integration test hooks and test-mode configurations
+    - path: packages/backend/src/config/database.ts
+      changes: Add test database configuration and isolation helpers
+    - path: vitest.config.ts
+      changes: Configure integration test environment with Testcontainers
+    new_files:
+    - path: packages/backend/tests/integration/setup.ts
+      purpose: Global test setup with database seeding and service mocking
+    - path: packages/backend/tests/integration/fixtures/novels.ts
+      purpose: Test novel content and expected processing results
+    - path: packages/backend/tests/integration/fixtures/ml-responses.ts
+      purpose: Mock ML service responses for consistent testing
+    - path: packages/backend/tests/integration/helpers/pipeline-assertions.ts
+      purpose: Custom assertion helpers for pipeline state validation
+    - path: packages/shared/test-utils/factories/comic-generation.ts
+      purpose: Test data factories for comic generation objects
+    - path: docker-compose.test.yml
+      purpose: Isolated test environment with PostgreSQL and Redis
+    - path: packages/backend/tests/integration/README.md
+      purpose: Integration testing documentation and troubleshooting guide
+    - path: apps/e2e/playwright.config.ts
+      purpose: Playwright configuration for comic generation E2E tests
+    - path: packages/backend/src/services/__mocks__/ml-services.ts
+      purpose: MSW handlers for mocking ML service interactions
+  acceptance_criteria:
+  - criterion: Complete novel-to-comic pipeline integration testing covers text analysis
+      → character extraction → scene breakdown → image generation → comic assembly
+    verification: Run `npm run test:integration -- --grep 'full pipeline'` and verify
+      all stages complete successfully with realistic test data
+  - criterion: Service contract testing validates all ML service integrations (OpenAI,
+      Anthropic, RunPod) with proper fallback handling
+    verification: Execute `npm run test:contracts` and verify 100% pass rate with
+      both real and mocked service responses
+  - criterion: End-to-end user flows tested via Playwright covering novel upload through
+      comic generation and download
+    verification: Run `npm run test:e2e` and verify complete user journey with <5min
+      execution time
+  - criterion: Test suite execution performance remains under 10 minutes with parallel
+      execution and smart test selection
+    verification: CI pipeline shows test suite completion in <10min with coverage
+      >85% on integration code
+  - criterion: Integration test documentation provides clear setup instructions and
+      troubleshooting guide
+    verification: Check packages/backend/tests/integration/README.md contains environment
+      setup, mock configuration, and common failure solutions
+  testing:
+    integration_tests:
+    - file: packages/backend/tests/integration/pipeline/novel-processing.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Complete novel upload and text analysis pipeline
+      - Character profile extraction and consistency validation
+      - Scene breakdown with proper chapter segmentation
+      - Error handling for malformed novel content
+    - file: packages/backend/tests/integration/ml-services/image-generation.test.ts
+      coverage_target: 85%
+      scenarios:
+      - RunPod Stable Diffusion integration with mocked responses
+      - Image generation queue processing and status updates
+      - Service timeout and retry logic validation
+      - Cost tracking and rate limiting enforcement
+    - file: packages/backend/tests/integration/storage/comic-assembly.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Panel layout generation and image composition
+      - Comic page assembly with text overlays
+      - Final comic PDF/image export validation
+      - Supabase storage integration for comic artifacts
+    e2e_tests:
+    - file: apps/e2e/tests/comic-generation.spec.ts
+      scenarios:
+      - User uploads novel, configures settings, generates complete comic
+      - Progress tracking and real-time status updates
+      - Comic preview and download functionality
+    - file: apps/e2e/tests/pipeline-error-handling.spec.ts
+      scenarios:
+      - Graceful handling of ML service failures
+      - User notification system for processing errors
+      - Retry and resume functionality for interrupted jobs
+    contract_tests:
+    - file: packages/backend/tests/contracts/ml-services.test.ts
+      scenarios:
+      - OpenAI/Anthropic API contract validation
+      - RunPod image generation API contract validation
+      - Response schema validation and error code handling
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.55
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Setup test environment configuration and Docker Compose files'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate test data factories and fixtures for novels, characters,
+        and scenes'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Define integration test strategy and service boundaries'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement Testcontainers setup and database test helpers'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create MSW handlers for ML service mocking'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Write pipeline integration tests with realistic scenarios'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement contract tests for external ML services'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create Playwright E2E tests for user workflows'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Configure CI pipeline integration and performance thresholds'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Generate integration testing documentation and troubleshooting guides'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Review test coverage and validate production readiness'
+      done: false
+      ai_friendly: false
+- key: T61
+  title: ComfyUI Integration
+  type: Task
+  milestone: M3 - Content Generation Pipeline
+  iteration: I5
+  priority: p0
+  effort: 5
+  area: comic
+  dependsOn:
+  - T52
+  agent_notes:
+    research_findings: '**Context:**
+
+      ComfyUI is a powerful, node-based UI for Stable Diffusion that provides more
+      control and flexibility than traditional text-to-image APIs. For Morpheus, integrating
+      ComfyUI would enable advanced comic panel generation with better consistency,
+      style control, and workflow automation. This addresses current limitations where
+      basic Stable Diffusion API calls may produce inconsistent character appearances,
+      panel layouts, or art styles across comic pages. ComfyUI''s workflow system
+      allows for complex pipelines including ControlNet, LoRA models, inpainting,
+      and multi-step generation processes essential for professional comic creation.
+
+
+      **Technical Approach:**
+
+      Implement a ComfyUI service that manages workflow execution via ComfyUI''s REST
+      API. Create workflow templates for different comic generation tasks (character
+      consistency, panel layouts, style transfer). Use ComfyUI''s queue system for
+      async processing and webhook notifications. Integrate with existing RunPod infrastructure
+      by either deploying ComfyUI containers or using ComfyUI-enabled images. Store
+      workflow templates as JSON in Supabase and version them. Create a workflow builder
+      UI component for advanced users.
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: REST API client code, workflow template CRUD operations,
+      database schemas, basic UI components, unit tests for API interactions, JSON
+      schema validation
+
+      - Medium AI effectiveness: Workflow template generation, error handling patterns,
+      queue management logic, webhook processing
+
+      - Low AI effectiveness: ComfyUI workflow design decisions, optimal node configurations,
+      advanced image processing pipeline architecture, performance optimization strategies
+
+
+      **Dependencies:**
+
+      - External: ComfyUI Python package, custom ComfyUI nodes, workflow management
+      libraries
+
+      - Internal: Existing RunPod service integration, image storage service, job
+      queue system, notification service
+
+
+      **Risks:**
+
+      - ComfyUI API instability: Pin specific ComfyUI versions and maintain backward
+      compatibility layers
+
+      - Complex workflow debugging: Implement comprehensive logging and workflow visualization
+      tools
+
+      - Resource management: ComfyUI workflows can be memory-intensive, need proper
+      resource limits and monitoring
+
+      - Workflow template maintenance: As ComfyUI evolves, templates may break - implement
+      validation and migration systems
+
+
+      **Complexity Notes:**
+
+      More complex than initially estimated due to ComfyUI''s node-based architecture
+      requiring deep understanding of image processing pipelines. However, AI can
+      significantly accelerate the API integration and CRUD operations. The workflow
+      template system adds complexity but provides essential flexibility. Expect 2-3
+      week implementation with AI assistance.
+
+
+      **Key Files:**
+
+      - packages/api/src/services/comfyui-service.ts: Main ComfyUI integration service
+
+      - packages/api/src/routes/comfyui.ts: API endpoints for workflow management
+
+      - packages/database/migrations/: ComfyUI workflow and job tables
+
+      - packages/ui/src/components/workflow-builder/: Workflow management UI
+
+      - packages/shared/src/types/comfyui.ts: TypeScript interfaces
+
+      '
+    design_decisions:
+    - decision: Use ComfyUI's REST API with custom workflow templates stored in database
+      rationale: Provides flexibility to create reusable comic generation workflows
+        while maintaining version control and customization capabilities
+      alternatives_considered:
+      - Direct Python integration
+      - ComfyUI CLI wrapper
+      - Fork ComfyUI for custom modifications
+      ai_implementation_note: AI can generate the REST client, CRUD operations, and
+        template management system efficiently
+    - decision: Implement async workflow execution with webhook callbacks
+      rationale: Comic generation workflows can take several minutes, requiring proper
+        async handling and user feedback
+      alternatives_considered:
+      - Polling-based status checking
+      - WebSocket real-time updates
+      - Synchronous execution
+      ai_implementation_note: AI can generate queue management code and webhook handling
+        patterns
+    - decision: Deploy ComfyUI on RunPod with custom Docker images
+      rationale: Leverages existing RunPod infrastructure while providing isolation
+        and scalability for ComfyUI workloads
+      alternatives_considered:
+      - Dedicated ComfyUI servers
+      - Local ComfyUI instances
+      - Third-party ComfyUI services
+      ai_implementation_note: AI can help with Docker configuration and RunPod integration
+        code
+    researched_at: '2026-02-08T18:42:52.494879'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:25:42.787599'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: dbe741a1
+    planning_hash: 376e622e
+  technical_notes:
+    approach: 'Create a ComfyUI service layer that manages workflow templates, executes
+      them via REST API calls to ComfyUI instances, and handles async job processing.
+      Implement workflow templates for key comic generation tasks like character consistency,
+      panel generation, and style application. Integrate with existing RunPod infrastructure
+      for scalable ComfyUI deployment. Build admin UI for workflow management and
+      monitoring.
+
+      '
+    external_dependencies:
+    - name: comfyui-api-client
+      version: ^1.0.0
+      reason: TypeScript client for ComfyUI REST API interactions
+    - name: json-schema
+      version: ^0.4.0
+      reason: Validation for ComfyUI workflow JSON structures
+    - name: bull
+      version: ^4.12.0
+      reason: Queue management for async ComfyUI workflow execution
+    files_to_modify:
+    - path: packages/database/src/schema/index.ts
+      changes: Add ComfyUI workflow and job table schemas
+    - path: packages/api/src/index.ts
+      changes: Register ComfyUI routes and middleware
+    - path: packages/shared/src/types/index.ts
+      changes: Export ComfyUI type definitions
+    new_files:
+    - path: packages/shared/src/types/comfyui.ts
+      purpose: TypeScript interfaces for workflows, jobs, and API responses
+    - path: packages/api/src/services/comfyui-service.ts
+      purpose: Core ComfyUI integration service with workflow execution logic
+    - path: packages/api/src/routes/comfyui.ts
+      purpose: REST endpoints for workflow management and job control
+    - path: packages/api/src/clients/comfyui-client.ts
+      purpose: HTTP client for ComfyUI REST API communication
+    - path: packages/api/src/services/workflow-template-service.ts
+      purpose: Workflow template CRUD operations and validation
+    - path: packages/database/migrations/20240101000000_create_comfyui_tables.sql
+      purpose: Database tables for workflows, templates, and job tracking
+    - path: packages/ui/src/components/workflow-builder/WorkflowBuilder.tsx
+      purpose: Admin UI component for creating and editing workflow templates
+    - path: packages/ui/src/components/workflow-builder/JobMonitor.tsx
+      purpose: Real-time job status monitoring dashboard
+    - path: packages/ui/src/pages/admin/ComfyUIAdmin.tsx
+      purpose: Admin page for ComfyUI workflow management
+  acceptance_criteria:
+  - criterion: ComfyUI service can execute predefined workflow templates for comic
+      panel generation
+    verification: API call to POST /api/comfyui/workflows/{templateId}/execute returns
+      job ID and completes successfully
+  - criterion: System handles async workflow execution with status tracking and webhook
+      notifications
+    verification: Job status progresses through queued->running->completed states
+      with proper webhook callbacks
+  - criterion: Workflow templates can be created, updated, and versioned through admin
+      UI
+    verification: Admin panel allows CRUD operations on workflow templates with version
+      history visible
+  - criterion: ComfyUI integration works with existing RunPod infrastructure for scalable
+      deployment
+    verification: Workflows execute on RunPod ComfyUI instances with proper resource
+      allocation and cleanup
+  - criterion: Error handling and logging provide clear debugging information for
+      failed workflows
+    verification: Failed workflows show detailed error messages and logs in admin
+      dashboard
+  testing:
+    unit_tests:
+    - file: packages/api/src/services/__tests__/comfyui-service.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Workflow template validation
+      - API client error handling
+      - Job status transitions
+      - Webhook payload processing
+      - Resource cleanup on failure
+    - file: packages/api/src/routes/__tests__/comfyui.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Template CRUD operations
+      - Workflow execution endpoint
+      - Status polling endpoint
+      - Authentication and authorization
+    integration_tests:
+    - file: packages/api/src/__tests__/integration/comfyui-integration.test.ts
+      scenarios:
+      - End-to-end workflow execution with mock ComfyUI
+      - Database workflow template persistence
+      - RunPod service integration
+      - Webhook delivery and processing
+    - file: packages/ui/src/__tests__/workflow-builder.test.tsx
+      scenarios:
+      - Workflow template creation UI
+      - Template validation and preview
+      - Job monitoring dashboard
+    manual_testing:
+    - step: Create new comic panel workflow template via admin UI
+      expected: Template saves with valid JSON schema and appears in template list
+    - step: Execute workflow with test comic panel parameters
+      expected: Job completes successfully and generates expected image output
+    - step: Monitor workflow execution in real-time dashboard
+      expected: Status updates show progress through ComfyUI processing stages
+  estimates:
+    development: 8
+    code_review: 1.5
+    testing: 2
+    documentation: 1
+    total: 12.5
+    ai_acceleration_factor: 0.65
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create TypeScript interfaces and shared types for ComfyUI workflows'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement database schema and migrations for workflow storage'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design workflow template structure and validation rules'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Build ComfyUI REST API client with error handling'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement workflow template CRUD service'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create ComfyUI service with job queue and status tracking'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build REST API endpoints for workflow management'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Integrate with RunPod service and configure resource management'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Create React components for workflow builder UI'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement webhook handling for async job notifications'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Write comprehensive unit tests for all services'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create integration tests with mock ComfyUI responses'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Review workflow templates for comic generation use cases'
+      done: false
+      ai_friendly: false
+    - task: '[HUMAN] Performance testing and resource optimization'
+      done: false
+      ai_friendly: false
+- key: T62
+  title: Image Enhancement Pipeline
+  type: Feature
+  milestone: M3 - Content Generation Pipeline
+  iteration: I5
+  priority: p0
+  effort: 3
+  area: comic
+  dependsOn:
+  - T61
+  agent_notes:
+    research_findings: "**Context:**\nImage Enhancement Pipeline is crucial for the\
+      \ comic generation workflow, addressing the need to improve and standardize\
+      \ AI-generated panel images before final comic assembly. Raw outputs from Stable\
+      \ Diffusion often require post-processing for consistency, quality, and comic-specific\
+      \ formatting (panel borders, speech bubbles, etc.). This pipeline ensures professional-quality\
+      \ visual output that matches comic industry standards.\n\n**Technical Approach:**\n\
+      Implement a multi-stage image processing pipeline using Sharp.js for core operations\
+      \ and Canvas API for comic-specific enhancements. Architecture should follow\
+      \ a plugin-based approach with individual enhancement stages (upscaling, color\
+      \ correction, style transfer, panel formatting). Use a job queue system (Bull/BullMQ)\
+      \ for async processing and integrate with RunPod for GPU-intensive operations.\
+      \ Store processed images in Supabase Storage with metadata tracking in PostgreSQL.\n\
+      \n**AI Suitability Analysis:**\n- High AI effectiveness: Sharp.js boilerplate\
+      \ operations, image format conversions, basic filters, test suite generation,\
+      \ API endpoint CRUD operations, database schema and migrations\n- Medium AI\
+      \ effectiveness: Canvas drawing operations, job queue integration, error handling\
+      \ patterns, pipeline orchestration logic\n- Low AI effectiveness: Image quality\
+      \ assessment algorithms, comic-specific artistic decisions, performance optimization\
+      \ strategies, ML model integration choices\n\n**Dependencies:**\n- External:\
+      \ sharp, canvas, bullmq, ioredis, jimp (fallback), opencv4nodejs (advanced operations)\n\
+      - Internal: RunPod integration service, Supabase storage service, comic generation\
+      \ pipeline, progress tracking system\n\n**Risks:**\n- Memory leaks with large\
+      \ image processing: implement proper Sharp disposal and memory monitoring\n\
+      - Processing queue bottlenecks: design horizontal scaling with multiple workers\
+      \ and priority queues\n- Image quality degradation: establish quality gates\
+      \ and fallback enhancement strategies\n- Storage costs explosion: implement\
+      \ intelligent caching and cleanup policies\n\n**Complexity Notes:**\nMore complex\
+      \ than initially estimated due to comic-specific requirements (panel layouts,\
+      \ speech bubble integration, style consistency). However, AI can significantly\
+      \ accelerate development of the infrastructure code (90% of boilerplate). Human\
+      \ judgment critical for visual quality assessment and artistic enhancement algorithms.\n\
+      \n**Key Files:**\n- packages/api/src/services/image-enhancement.ts: core enhancement\
+      \ service\n- packages/api/src/workers/enhancement-worker.ts: background job\
+      \ processor  \n- packages/api/src/routes/images/enhance.ts: API endpoints\n\
+      - packages/shared/src/types/image-enhancement.ts: type definitions\n- apps/dashboard/src/components/ImageEnhancement/:\
+      \ UI components\n"
+    design_decisions:
+    - decision: Use Sharp.js as primary image processing library with Canvas API for
+        comic-specific operations
+      rationale: Sharp provides excellent performance for standard operations while
+        Canvas gives fine-grained control for comic panels, borders, and text overlays
+      alternatives_considered:
+      - Pure Canvas approach
+      - ImageMagick via spawn
+      - Web-based solutions
+      ai_implementation_note: AI can generate most Sharp operation chains and Canvas
+        drawing code from descriptive prompts
+    - decision: Implement plugin-based enhancement pipeline with configurable stages
+      rationale: Allows A/B testing different enhancement strategies and easy addition
+        of new effects without core changes
+      alternatives_considered:
+      - Monolithic processing function
+      - External microservice
+      - Client-side processing
+      ai_implementation_note: AI excellent at generating plugin interfaces and individual
+        enhancement functions
+    - decision: Use BullMQ for job queue management with Redis backing
+      rationale: Handles async processing, retry logic, and progress tracking out
+        of the box, integrates well with existing infrastructure
+      alternatives_considered:
+      - Supabase Functions
+      - AWS SQS
+      - In-memory queue
+      ai_implementation_note: AI can generate complete job queue setup, worker patterns,
+        and progress tracking
+    researched_at: '2026-02-08T18:43:19.482421'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:26:17.034798'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: fd48ba9d
+    planning_hash: 559cc9ac
+  technical_notes:
+    approach: 'Build a staged enhancement pipeline where images flow through configurable
+      processing steps (upscale → denoise → color correct → comic stylize → panel
+      format). Each stage runs as an async job with progress tracking and failure
+      recovery. Implement a plugin system for easy addition of new enhancement types.
+      Store original and enhanced versions with metadata for quality comparison and
+      rollback capabilities. Provide real-time progress updates to dashboard via WebSocket
+      connections.
+
+      '
+    external_dependencies:
+    - name: sharp
+      version: ^0.33.0
+      reason: High-performance image processing with excellent memory management
+    - name: canvas
+      version: ^2.11.2
+      reason: Comic-specific drawing operations like panel borders and speech bubbles
+    - name: bullmq
+      version: ^5.0.0
+      reason: Robust job queue system for async image processing
+    - name: ioredis
+      version: ^5.3.2
+      reason: Redis client for BullMQ backing store
+    - name: jimp
+      version: ^0.22.10
+      reason: Fallback image processing library for operations Sharp doesn't support
+    files_to_modify:
+    - path: packages/api/src/routes/images/index.ts
+      changes: Add enhancement endpoint imports and route registration
+    - path: packages/api/src/lib/supabase.ts
+      changes: Add image enhancement bucket configuration and helpers
+    - path: packages/shared/src/types/api.ts
+      changes: Add enhancement job status and progress types
+    - path: apps/dashboard/src/lib/websocket.ts
+      changes: Add enhancement progress event handlers
+    new_files:
+    - path: packages/api/src/services/image-enhancement.ts
+      purpose: Core image enhancement pipeline orchestration and stage management
+    - path: packages/api/src/services/enhancement-stages/upscaler.ts
+      purpose: Image upscaling using Sharp.js and RunPod GPU acceleration
+    - path: packages/api/src/services/enhancement-stages/denoiser.ts
+      purpose: Noise reduction and quality improvement algorithms
+    - path: packages/api/src/services/enhancement-stages/color-corrector.ts
+      purpose: Color balance, contrast, and saturation adjustments
+    - path: packages/api/src/services/enhancement-stages/comic-stylizer.ts
+      purpose: Apply comic-specific visual effects and style consistency
+    - path: packages/api/src/services/enhancement-stages/panel-formatter.ts
+      purpose: Add panel borders, optimize dimensions, prepare for comic layout
+    - path: packages/api/src/workers/enhancement-worker.ts
+      purpose: Background job processor for enhancement pipeline execution
+    - path: packages/api/src/routes/images/enhance.ts
+      purpose: REST API endpoints for enhancement job management
+    - path: packages/shared/src/types/image-enhancement.ts
+      purpose: TypeScript definitions for enhancement pipeline and job types
+    - path: apps/dashboard/src/components/ImageEnhancement/EnhancementPipeline.tsx
+      purpose: Main UI component for enhancement workflow management
+    - path: apps/dashboard/src/components/ImageEnhancement/ProgressIndicator.tsx
+      purpose: Real-time progress visualization with stage details
+    - path: apps/dashboard/src/components/ImageEnhancement/EnhancementPreview.tsx
+      purpose: Before/after image comparison and preview functionality
+    - path: packages/api/src/config/enhancement-config.ts
+      purpose: Configuration management for enhancement stages and parameters
+    - path: packages/api/src/lib/image-quality-assessment.ts
+      purpose: Quality scoring and validation utilities
+  acceptance_criteria:
+  - criterion: Pipeline processes images through configurable enhancement stages with
+      progress tracking
+    verification: POST /api/images/enhance with test image returns job ID, GET /api/jobs/{id}
+      shows progress through upscale→denoise→color-correct→comic-stylize→panel-format
+      stages
+  - criterion: System handles concurrent image processing without memory leaks or
+      crashes
+    verification: Load test with 10 concurrent enhancement jobs, monitor memory usage
+      stays under 2GB, all jobs complete successfully
+  - criterion: Enhanced images meet quality standards and maintain comic formatting
+    verification: Process test comic panel through pipeline, verify output has proper
+      dimensions (1024x1024), panel borders, and visual quality score >0.8
+  - criterion: Failed enhancements gracefully fallback with error reporting
+    verification: Submit corrupted image file, verify job fails with descriptive error,
+      original image remains accessible, cleanup occurs properly
+  - criterion: Dashboard displays real-time enhancement progress with preview capabilities
+    verification: Start enhancement job, verify WebSocket updates show stage progress,
+      intermediate results visible in UI preview component
+  testing:
+    unit_tests:
+    - file: packages/api/src/services/__tests__/image-enhancement.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Enhancement pipeline execution with all stages
+      - Individual stage processing (upscale, denoise, etc.)
+      - Error handling for invalid images
+      - Memory cleanup after processing
+      - Configuration validation
+    - file: packages/api/src/workers/__tests__/enhancement-worker.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Job processing lifecycle
+      - Progress reporting mechanisms
+      - Failure recovery and retry logic
+      - Queue priority handling
+    integration_tests:
+    - file: packages/api/src/__tests__/integration/image-enhancement-flow.test.ts
+      scenarios:
+      - Complete enhancement pipeline with real image
+      - WebSocket progress updates during processing
+      - Storage integration with Supabase
+      - RunPod GPU operation integration
+      - Concurrent job processing
+    e2e_tests:
+    - file: apps/dashboard/src/__tests__/e2e/image-enhancement.spec.ts
+      scenarios:
+      - Upload image, start enhancement, monitor progress, view results
+      - Cancel enhancement job mid-process
+      - Retry failed enhancement from dashboard
+    manual_testing:
+    - step: Upload various image formats (PNG, JPG, WebP) for enhancement
+      expected: All formats processed successfully with consistent output quality
+    - step: Monitor system resources during batch processing
+      expected: Memory usage stable, no memory leaks, CPU usage reasonable
+    - step: Test enhancement quality with different comic styles
+      expected: Output maintains artistic consistency and comic formatting standards
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.4
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create TypeScript type definitions for enhancement pipeline, job
+        status, and configuration'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement Sharp.js-based enhancement stages (upscaler, denoiser,
+        color-corrector)'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design comic-specific stylization algorithms and quality assessment
+        criteria'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Build BullMQ job queue integration with progress reporting and retry
+        logic'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create REST API endpoints for job submission, status checking, and
+        result retrieval'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Integrate RunPod GPU operations for computationally intensive
+        enhancement stages'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement Supabase storage integration for original and enhanced
+        image management'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build React components for enhancement workflow UI with real-time
+        progress updates'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create comprehensive unit test suite covering all enhancement stages
+        and error scenarios'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Conduct quality assessment testing and performance optimization'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Write integration tests for complete pipeline flow and WebSocket
+        communication'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Code review focusing on memory management, error handling, and
+        visual quality'
+      done: false
+      ai_friendly: false

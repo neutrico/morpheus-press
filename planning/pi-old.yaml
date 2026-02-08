@@ -1,0 +1,733 @@
+# ==========================================
+# Morpheus PI Planning
+# Single Source of Truth for Epic/Feature/Task structure
+# ==========================================
+
+project:
+  owner: neutrico
+  repo: morpheus
+  projectV2Number: 1  # Update with your actual Project number
+
+# ==========================================
+# PI (Program Increment) Configuration
+# ==========================================
+safe:
+  pi:
+    name: "PI-2026-Q1"
+    start: "2026-02-10"
+    iterationLengthDays: 14
+    iterations:
+      - "I1"
+      - "I2"
+      - "I3"
+      - "I4"
+    releaseMilestone: "Release PI-2026-Q1"
+    capacity:
+      pointsPerIteration: 20
+
+# ==========================================
+# GitHub Labels Configuration
+# ==========================================
+labels:
+  # Type hierarchy
+  type:
+    - "type: epic"
+    - "type: feature"
+    - "type: task"
+    - "type: bug"
+    - "type: chore"
+  
+  # Area (aligned with project structure)
+  area:
+    - "area: library"
+    - "area: ingestion"
+    - "area: analysis"
+    - "area: search"
+    - "area: image-gen"
+    - "area: ui"
+    - "area: api"
+    - "area: infra"
+    - "area: ml"
+    - "area: qa"
+  
+  # Priority (P0 = critical, P3 = low)
+  priority:
+    - "priority: p0"
+    - "priority: p1"
+    - "priority: p2"
+    - "priority: p3"
+  
+  # Status workflow
+  status:
+    - "status: triage"
+    - "status: ready"
+    - "status: in-progress"
+    - "status: blocked"
+    - "status: done"
+  
+  # Effort (Fibonacci scale)
+  effort:
+    - "effort: 1"
+    - "effort: 2"
+    - "effort: 3"
+    - "effort: 5"
+    - "effort: 8"
+  
+  # Risk level (optional)
+  risk:
+    - "risk: low"
+    - "risk: medium"
+    - "risk: high"
+
+# ==========================================
+# Projects v2 Custom Fields
+# These must match your actual Project field names
+# ==========================================
+projectFields:
+  priority:
+    name: "Priority"
+    type: "SINGLE_SELECT"
+    options: ["P0", "P1", "P2", "P3"]
+  
+  effort:
+    name: "Effort"
+    type: "NUMBER"
+  
+  iteration:
+    name: "Iteration"
+    type: "ITERATION"  # or SINGLE_SELECT if not using Iteration field
+  
+  risk:
+    name: "Risk"
+    type: "SINGLE_SELECT"
+    options: ["Low", "Medium", "High"]
+
+# ==========================================
+# EPICS → FEATURES → TASKS
+# ==========================================
+epics:
+  # ========== EPIC 1: Core Book Management ==========
+  - key: E1
+    title: "EPIC: Core Book Management & Library Foundation"
+    order: 10
+    dependsOn: []
+    labels:
+      - "type: epic"
+      - "area: library"
+      - "priority: p0"
+      - "status: ready"
+    fields:
+      Priority: "P0"
+      Risk: "Low"
+    description: |
+      Establish the foundational book management system with CRUD operations,
+      metadata handling, collections, and user permissions.
+    
+    features:
+      # ---------- Feature 1.1 ----------
+      - key: F1
+        title: "FEATURE: Book CRUD with metadata and validation"
+        order: 10
+        dependsOn: []
+        labels:
+          - "type: feature"
+          - "area: library"
+          - "priority: p0"
+          - "status: ready"
+        fields:
+          Priority: "P0"
+          Effort: 8
+          Iteration: "I1"
+        qa:
+          unit: required
+          integration: required
+          e2e: required
+          coverage:
+            statements: 95
+            branches: 90
+        
+        tasks:
+          - key: T1
+            title: "TASK: Define Book schema in Supabase with RLS policies"
+            area: library
+            priority: p0
+            effort: 2
+            dependsOn: []
+            qa:
+              unit: required
+              integration: optional
+              e2e: optional
+              coverage:
+                statements: 100
+          
+          - key: T2
+            title: "TASK: Implement DatabaseService.createBook with validation"
+            area: api
+            priority: p0
+            effort: 3
+            dependsOn: ["T1"]
+            qa:
+              unit: required
+              integration: required
+              e2e: optional
+              coverage:
+                statements: 95
+                branches: 90
+          
+          - key: T3
+            title: "TASK: Create Book list/detail UI in Dashboard with React Query"
+            area: ui
+            priority: p0
+            effort: 3
+            dependsOn: ["T2"]
+            qa:
+              unit: required
+              integration: optional
+              e2e: required
+              coverage:
+                statements: 90
+      
+      # ---------- Feature 1.2 ----------
+      - key: F2
+        title: "FEATURE: Collections, tags, and user permissions"
+        order: 20
+        dependsOn: ["F1"]
+        labels:
+          - "type: feature"
+          - "area: library"
+          - "priority: p1"
+          - "status: ready"
+        fields:
+          Priority: "P1"
+          Effort: 5
+          Iteration: "I1"
+        qa:
+          unit: required
+          integration: required
+          e2e: required
+          coverage:
+            statements: 90
+            branches: 85
+        
+        tasks:
+          - key: T4
+            title: "TASK: Design Collection schema with many-to-many Book relations"
+            area: library
+            priority: p1
+            effort: 2
+            dependsOn: ["T1"]
+            qa:
+              unit: required
+              integration: required
+          
+          - key: T5
+            title: "TASK: Implement tag system with search indexing"
+            area: library
+            priority: p1
+            effort: 3
+            dependsOn: ["T4"]
+            qa:
+              unit: required
+              integration: required
+              e2e: optional
+              coverage:
+                statements: 90
+
+  # ========== EPIC 2: Text Ingestion Pipeline ==========
+  - key: E2
+    title: "EPIC: Text Ingestion & Processing Pipeline"
+    order: 20
+    dependsOn: ["E1"]
+    labels:
+      - "type: epic"
+      - "area: ingestion"
+      - "priority: p0"
+      - "status: ready"
+    fields:
+      Priority: "P0"
+      Risk: "Medium"
+    description: |
+      Build robust ingestion pipeline for book uploads, chunking, storage,
+      and batch import from external sources (e.g., Wolne Lektury 7000+ books).
+    
+    features:
+      # ---------- Feature 2.1 ----------
+      - key: F3
+        title: "FEATURE: File upload, chunking, and cloud storage"
+        order: 10
+        dependsOn: ["F1"]
+        labels:
+          - "type: feature"
+          - "area: ingestion"
+          - "priority: p0"
+          - "status: ready"
+        fields:
+          Priority: "P0"
+          Effort: 8
+          Iteration: "I2"
+        qa:
+          unit: required
+          integration: required
+          e2e: required
+          coverage:
+            statements: 90
+            branches: 85
+        
+        tasks:
+          - key: T6
+            title: "TASK: Implement PreprocessingService.chunkText with deterministic splitting"
+            area: ingestion
+            priority: p0
+            effort: 3
+            dependsOn: ["T2"]
+            qa:
+              unit: required
+              integration: required
+              coverage:
+                statements: 100
+                branches: 95
+          
+          - key: T7
+            title: "TASK: Setup Supabase Storage bucket with RLS for book files"
+            area: infra
+            priority: p0
+            effort: 2
+            dependsOn: []
+            qa:
+              unit: optional
+              integration: required
+              e2e: required
+          
+          - key: T8
+            title: "TASK: Create upload endpoint with validation and virus scanning"
+            area: api
+            priority: p0
+            effort: 3
+            dependsOn: ["T6", "T7"]
+            qa:
+              unit: required
+              integration: required
+              e2e: required
+              coverage:
+                statements: 90
+      
+      # ---------- Feature 2.2 ----------
+      - key: F4
+        title: "FEATURE: Batch import from Wolne Lektury (7000+ books)"
+        order: 20
+        dependsOn: ["F3"]
+        labels:
+          - "type: feature"
+          - "area: ingestion"
+          - "priority: p1"
+          - "status: ready"
+        fields:
+          Priority: "P1"
+          Effort: 5
+          Iteration: "I2"
+        qa:
+          unit: required
+          integration: required
+          e2e: required
+          coverage:
+            statements: 85
+        
+        tasks:
+          - key: T9
+            title: "TASK: Extend WolneLekturyService with rate limiting and retry"
+            area: ingestion
+            priority: p1
+            effort: 2
+            dependsOn: ["T6"]
+            qa:
+              unit: required
+              integration: required
+              coverage:
+                statements: 90
+          
+          - key: T10
+            title: "TASK: Create batch import job with progress tracking"
+            area: api
+            priority: p1
+            effort: 3
+            dependsOn: ["T9"]
+            qa:
+              unit: required
+              integration: required
+              e2e: required
+              coverage:
+                statements: 85
+
+  # ========== EPIC 3: ML Text Analysis ==========
+  - key: E3
+    title: "EPIC: ML-Powered Text Analysis (Dialogue, Speaker, Propaganda)"
+    order: 30
+    dependsOn: ["E2"]
+    labels:
+      - "type: epic"
+      - "area: analysis"
+      - "priority: p1"
+      - "status: ready"
+    fields:
+      Priority: "P1"
+      Risk: "High"
+    description: |
+      Implement ML-based analysis services: dialogue detection, speaker attribution,
+      propaganda detection, and toxicity filtering with LLM integration.
+    
+    features:
+      # ---------- Feature 3.1 ----------
+      - key: F5
+        title: "FEATURE: Dialogue detection with hybrid LLM+ML approach"
+        order: 10
+        dependsOn: ["F3"]
+        labels:
+          - "type: feature"
+          - "area: analysis"
+          - "area: ml"
+          - "priority: p1"
+          - "status: ready"
+        fields:
+          Priority: "P1"
+          Effort: 8
+          Iteration: "I3"
+          Risk: "High"
+        qa:
+          unit: required
+          integration: required
+          e2e: required
+          coverage:
+            statements: 90
+            branches: 85
+        
+        tasks:
+          - key: T11
+            title: "TASK: Implement DialogueExtractionPipeline with deterministic splitting"
+            area: ml
+            priority: p1
+            effort: 5
+            dependsOn: ["T6"]
+            qa:
+              unit: required
+              integration: required
+              coverage:
+                statements: 95
+                branches: 90
+          
+          - key: T12
+            title: "TASK: Integrate Claude 3.5 Haiku for dialogue boundary detection"
+            area: ml
+            priority: p1
+            effort: 3
+            dependsOn: ["T11"]
+            qa:
+              unit: required
+              integration: required
+              e2e: optional
+              coverage:
+                statements: 85
+      
+      # ---------- Feature 3.2 ----------
+      - key: F6
+        title: "FEATURE: Speaker attribution with coreference resolution"
+        order: 20
+        dependsOn: ["F5"]
+        labels:
+          - "type: feature"
+          - "area: analysis"
+          - "area: ml"
+          - "priority: p1"
+          - "status: ready"
+        fields:
+          Priority: "P1"
+          Effort: 8
+          Iteration: "I3"
+          Risk: "High"
+        qa:
+          unit: required
+          integration: required
+          e2e: required
+          coverage:
+            statements: 85
+        
+        tasks:
+          - key: T13
+            title: "TASK: Design Speaker schema with Character entity linking"
+            area: analysis
+            priority: p1
+            effort: 2
+            dependsOn: ["T11"]
+            qa:
+              unit: required
+              integration: required
+          
+          - key: T14
+            title: "TASK: Implement SpeakerAttributionService with LLM prompting"
+            area: ml
+            priority: p1
+            effort: 5
+            dependsOn: ["T13", "T12"]
+            qa:
+              unit: required
+              integration: required
+              e2e: optional
+              coverage:
+                statements: 85
+          
+          - key: T15
+            title: "TASK: Add coreference resolution for pronoun attribution"
+            area: ml
+            priority: p2
+            effort: 3
+            dependsOn: ["T14"]
+            qa:
+              unit: required
+              integration: required
+              coverage:
+                statements: 80
+
+  # ========== EPIC 4: Search & Discovery ==========
+  - key: E4
+    title: "EPIC: Advanced Search, Filters, and Semantic Discovery"
+    order: 40
+    dependsOn: ["E1", "E3"]
+    labels:
+      - "type: epic"
+      - "area: search"
+      - "priority: p1"
+      - "status: ready"
+    fields:
+      Priority: "P1"
+      Risk: "Medium"
+    description: |
+      Build comprehensive search system with filters, semantic search via embeddings,
+      and advanced query composition for books, dialogues, and characters.
+    
+    features:
+      # ---------- Feature 4.1 ----------
+      - key: F7
+        title: "FEATURE: Full-text search with filters and facets"
+        order: 10
+        dependsOn: ["F1", "F5"]
+        labels:
+          - "type: feature"
+          - "area: search"
+          - "priority: p1"
+          - "status: ready"
+        fields:
+          Priority: "P1"
+          Effort: 5
+          Iteration: "I4"
+        qa:
+          unit: required
+          integration: required
+          e2e: required
+          coverage:
+            statements: 90
+            branches: 85
+        
+        tasks:
+          - key: T16
+            title: "TASK: Setup Postgres FTS indexes on Book and Dialogue tables"
+            area: search
+            priority: p1
+            effort: 2
+            dependsOn: ["T1", "T11"]
+            qa:
+              unit: optional
+              integration: required
+              e2e: required
+          
+          - key: T17
+            title: "TASK: Implement SearchService with deterministic query composition"
+            area: search
+            priority: p1
+            effort: 3
+            dependsOn: ["T16"]
+            qa:
+              unit: required
+              integration: required
+              e2e: required
+              coverage:
+                statements: 95
+                branches: 90
+      
+      # ---------- Feature 4.2 ----------
+      - key: F8
+        title: "FEATURE: Semantic search with vector embeddings (OpenAI)"
+        order: 20
+        dependsOn: ["F7"]
+        labels:
+          - "type: feature"
+          - "area: search"
+          - "area: ml"
+          - "priority: p2"
+          - "status: ready"
+        fields:
+          Priority: "P2"
+          Effort: 8
+          Iteration: "I4"
+          Risk: "Medium"
+        qa:
+          unit: required
+          integration: required
+          e2e: required
+          coverage:
+            statements: 85
+        
+        tasks:
+          - key: T18
+            title: "TASK: Integrate EmbeddingService with OpenAI Embeddings API"
+            area: ml
+            priority: p2
+            effort: 3
+            dependsOn: ["T17"]
+            qa:
+              unit: required
+              integration: required
+              coverage:
+                statements: 90
+          
+          - key: T19
+            title: "TASK: Setup pgvector extension and embedding storage schema"
+            area: infra
+            priority: p2
+            effort: 2
+            dependsOn: ["T18"]
+            qa:
+              unit: optional
+              integration: required
+              e2e: required
+          
+          - key: T20
+            title: "TASK: Implement vector similarity search with hybrid ranking"
+            area: search
+            priority: p2
+            effort: 3
+            dependsOn: ["T19"]
+            qa:
+              unit: required
+              integration: required
+              e2e: required
+              coverage:
+                statements: 85
+
+  # ========== EPIC 5: QA & Testing Infrastructure ==========
+  - key: E5
+    title: "EPIC: Comprehensive QA, Testing, and CI/CD Hardening"
+    order: 50
+    dependsOn: ["E1", "E2", "E3", "E4"]
+    labels:
+      - "type: epic"
+      - "area: qa"
+      - "priority: p0"
+      - "status: ready"
+    fields:
+      Priority: "P0"
+      Risk: "Low"
+    description: |
+      Establish testing standards, CI quality gates, E2E test suites,
+      performance testing, and monitoring/observability for production readiness.
+    
+    features:
+      # ---------- Feature 5.1 ----------
+      - key: F9
+        title: "FEATURE: Unit + Integration test coverage > 90%"
+        order: 10
+        dependsOn: ["F1", "F3", "F5", "F7"]
+        labels:
+          - "type: feature"
+          - "area: qa"
+          - "priority: p0"
+          - "status: ready"
+        fields:
+          Priority: "P0"
+          Effort: 8
+          Iteration: "I4"
+        qa:
+          unit: required
+          integration: required
+          e2e: optional
+          coverage:
+            statements: 100
+            branches: 100
+        
+        tasks:
+          - key: T21
+            title: "TASK: Audit existing test coverage and identify gaps"
+            area: qa
+            priority: p0
+            effort: 2
+            dependsOn: ["T2", "T6", "T11", "T17"]
+            qa:
+              unit: optional
+              integration: optional
+              e2e: optional
+          
+          - key: T22
+            title: "TASK: Add missing unit tests for all services (target 95%)"
+            area: qa
+            priority: p0
+            effort: 5
+            dependsOn: ["T21"]
+            qa:
+              unit: required
+              integration: optional
+              coverage:
+                statements: 95
+                branches: 90
+          
+          - key: T23
+            title: "TASK: Configure CI to enforce coverage thresholds"
+            area: infra
+            priority: p0
+            effort: 1
+            dependsOn: ["T22"]
+            qa:
+              unit: optional
+              integration: required
+              e2e: optional
+      
+      # ---------- Feature 5.2 ----------
+      - key: F10
+        title: "FEATURE: E2E test suite with Playwright (critical user flows)"
+        order: 20
+        dependsOn: ["F1", "F3"]
+        labels:
+          - "type: feature"
+          - "area: qa"
+          - "priority: p1"
+          - "status: ready"
+        fields:
+          Priority: "P1"
+          Effort: 5
+          Iteration: "I4"
+        qa:
+          unit: optional
+          integration: optional
+          e2e: required
+          coverage:
+            statements: 100
+        
+        tasks:
+          - key: T24
+            title: "TASK: Design E2E test scenarios for book upload flow"
+            area: qa
+            priority: p1
+            effort: 2
+            dependsOn: ["T8"]
+            qa:
+              unit: optional
+              integration: optional
+              e2e: required
+          
+          - key: T25
+            title: "TASK: Implement Playwright tests for Dashboard critical paths"
+            area: qa
+            priority: p1
+            effort: 3
+            dependsOn: ["T24"]
+            qa:
+              unit: optional
+              integration: optional
+              e2e: required

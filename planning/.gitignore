@@ -1,0 +1,14 @@
+# Generated files (can be regenerated from pi.yaml)
+pi-tree.md
+pi-schedule.md
+pi-graph.json
+
+# Optional: Exclude work-in-progress artifacts (uncomment if desired)
+# ../.copilot-tracking/research/*
+# ../.copilot-tracking/plans/*
+# ../.copilot-tracking/details/*
+# ../.copilot-tracking/prompts/*
+# ../.copilot-tracking/changes/*
+
+# Always commit publish specs and results for traceability
+!../.copilot-tracking/publish/

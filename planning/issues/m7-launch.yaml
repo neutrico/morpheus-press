@@ -1,0 +1,931 @@
+milestone: M7 - Launch & Release
+task_count: 3
+issues:
+- key: T91
+  title: Final Integration Testing
+  type: Task
+  milestone: M7 - Launch & Release
+  iteration: I7
+  priority: p0
+  effort: 5
+  area: release
+  dependsOn: []
+  agent_notes:
+    research_findings: '**Context:**
+
+      Final integration testing is the last comprehensive validation before production
+      deployment, ensuring all Morpheus platform components work together seamlessly.
+      This is critical for a complex system with multiple services (Fastify backend,
+      Next.js frontend, Supabase DB, external ML APIs) and user journeys spanning
+      novel upload, AI processing, comic generation, and e-commerce. The business
+      value is preventing production failures that could damage user trust and revenue
+      during launch.
+
+
+      **Technical Approach:**
+
+      Implement end-to-end testing with Playwright covering complete user workflows,
+      cross-service integration tests using Vitest for API layer validation, performance
+      testing under realistic load, and deployment pipeline validation. Use Docker
+      Compose for local environment consistency, database seeding for reproducible
+      test states, and parallel test execution in CI/CD. Focus on critical paths:
+      user onboarding, novel processing, payment flows, and comic delivery.
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: Test data generation, Playwright test scripts for standard
+      flows, API test suites, mock service implementations, test fixtures and factories
+
+      - Medium AI effectiveness: Complex workflow orchestration, cross-browser compatibility
+      testing, performance test analysis, CI/CD pipeline configuration
+
+      - Low AI effectiveness: Test strategy decisions, critical path prioritization,
+      production environment validation, incident response procedures
+
+
+      **Dependencies:**
+
+      - External: @playwright/test, dockerode, artillery.io for load testing, @faker-js/faker
+      for test data
+
+      - Internal: All existing services (auth, novel-processor, comic-generator, payment),
+      shared utilities, database migrations, API contracts
+
+
+      **Risks:**
+
+      - Flaky tests in CI/CD: Use proper waits, retries, and test isolation strategies
+
+      - Performance bottlenecks discovered late: Implement continuous performance
+      monitoring in test suite
+
+      - External API failures (OpenAI/RunPod): Mock critical paths with realistic
+      failure scenarios
+
+      - Database state pollution: Use transaction rollbacks and isolated test databases
+
+
+      **Complexity Notes:**
+
+      Higher complexity than typical integration testing due to ML service dependencies
+      and async workflows. AI can significantly accelerate test writing but human
+      oversight needed for test coverage strategy and production-like environment
+      setup. Estimated 40% faster development with AI assistance.
+
+
+      **Key Files:**
+
+      - apps/web/tests/e2e/: Full user journey tests
+
+      - packages/api/tests/integration/: Cross-service API tests
+
+      - .github/workflows/integration.yml: CI/CD integration test pipeline
+
+      - docker-compose.test.yml: Test environment orchestration
+
+      - packages/test-utils/: Shared testing utilities and fixtures
+
+      '
+    design_decisions:
+    - decision: Use Playwright for E2E testing with parallel execution
+      rationale: Best cross-browser support, reliable waits, and excellent CI/CD integration
+        for our Next.js frontend
+      alternatives_considered:
+      - Cypress
+      - Selenium WebDriver
+      - Puppeteer
+      ai_implementation_note: AI can generate comprehensive test scenarios and page
+        object models based on existing component structure
+    - decision: Implement test database per worker with Supabase branching
+      rationale: Enables parallel test execution without state conflicts, matches
+        production database structure
+      alternatives_considered:
+      - SQLite in-memory
+      - Shared test DB with cleanup
+      - Docker PostgreSQL per test
+      ai_implementation_note: AI can generate database seeding scripts and cleanup
+        utilities based on existing schema
+    - decision: Mock external ML services with realistic response times
+      rationale: Prevents test flakiness from external dependencies while maintaining
+        realistic performance characteristics
+      alternatives_considered:
+      - Live API testing
+      - Simple mocks
+      - Record/replay approach
+      ai_implementation_note: AI can create sophisticated mock implementations with
+        edge cases based on API documentation
+    researched_at: '2026-02-08T18:56:45.298790'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:39:59.830535'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 945c4559
+    planning_hash: 412060a3
+  technical_notes:
+    approach: 'Build a three-tier testing strategy: unit tests for individual services,
+      integration tests for API contracts and database operations, and end-to-end
+      tests for complete user workflows. Use Docker Compose to orchestrate test environments
+      with consistent state, implement parallel test execution with isolated databases
+      per worker, and integrate performance monitoring throughout. Focus on the critical
+      path from novel upload through comic generation and purchase, with comprehensive
+      error scenario coverage.
+
+      '
+    external_dependencies:
+    - name: '@playwright/test'
+      version: ^1.40.0
+      reason: Cross-browser E2E testing with excellent CI/CD support
+    - name: artillery
+      version: ^2.0.0
+      reason: Load testing and performance validation under realistic traffic
+    - name: '@faker-js/faker'
+      version: ^8.3.0
+      reason: Generate realistic test data for novels, users, and transactions
+    - name: dockerode
+      version: ^4.0.0
+      reason: Programmatic Docker container management for test environments
+    - name: msw
+      version: ^2.0.0
+      reason: Mock external API services (OpenAI, RunPod, payment providers)
+    files_to_modify:
+    - path: packages/api/src/lib/test-helpers.ts
+      changes: Add cross-service integration test utilities and database seeding functions
+    - path: .github/workflows/ci.yml
+      changes: Integrate full integration test suite with parallel execution and caching
+    - path: docker-compose.yml
+      changes: Add test-specific service configurations and isolated networks
+    new_files:
+    - path: apps/web/tests/e2e/workflows/complete-user-journey.spec.ts
+      purpose: End-to-end user workflow testing with Playwright
+    - path: packages/api/tests/integration/novel-workflow.test.ts
+      purpose: Cross-service integration testing for novel processing pipeline
+    - path: packages/api/tests/integration/user-journey.test.ts
+      purpose: Multi-service user authentication and data flow validation
+    - path: packages/api/tests/integration/external-apis.test.ts
+      purpose: External API integration testing with mocking and error scenarios
+    - path: packages/test-utils/src/fixtures/index.ts
+      purpose: Shared test data factories and database seeding utilities
+    - path: packages/test-utils/src/mocks/external-apis.ts
+      purpose: Mock implementations for OpenAI, RunPod, and Stripe APIs
+    - path: docker-compose.test.yml
+      purpose: Isolated test environment orchestration with dedicated databases
+    - path: tests/performance/load-testing.yml
+      purpose: Artillery.io performance testing configuration
+    - path: .github/workflows/integration.yml
+      purpose: Dedicated CI/CD pipeline for integration testing with parallel execution
+    - path: packages/database/seeds/integration-test-data.ts
+      purpose: Consistent test data seeding for reproducible integration tests
+  acceptance_criteria:
+  - criterion: Complete user workflow integration tests covering novel upload, AI
+      processing, comic generation, and purchase flow execute successfully with 95%
+      pass rate
+    verification: Run `npm run test:e2e` - all critical path tests in apps/web/tests/e2e/workflows/
+      must pass
+  - criterion: Cross-service API integration tests validate all service contracts
+      and error handling scenarios
+    verification: Run `npm run test:integration` - all tests in packages/api/tests/integration/
+      pass with 90%+ coverage
+  - criterion: 'Performance benchmarks meet requirements: <3s novel upload, <30s comic
+      generation, <2s payment processing'
+    verification: Run `npm run test:performance` - Artillery.io load tests show P95
+      response times within SLA
+  - criterion: CI/CD pipeline executes full integration test suite in under 15 minutes
+      with parallel execution
+    verification: GitHub Actions workflow .github/workflows/integration.yml completes
+      successfully within time limit
+  - criterion: Production-like environment validation with Docker Compose orchestration
+      and realistic data volumes
+    verification: Run `docker-compose -f docker-compose.test.yml up` - all services
+      healthy, seed data loads correctly
+  testing:
+    unit_tests:
+    - file: packages/novel-processor/src/__tests__/processor.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Novel text extraction and chunking
+      - OpenAI API error handling and retries
+      - Processing state management
+    - file: packages/comic-generator/src/__tests__/generator.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Image generation with RunPod API
+      - Panel layout and composition
+      - Error recovery and fallbacks
+    - file: packages/payment/src/__tests__/stripe-service.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Payment intent creation
+      - Webhook validation
+      - Subscription management
+    integration_tests:
+    - file: packages/api/tests/integration/novel-workflow.test.ts
+      scenarios:
+      - End-to-end novel processing pipeline
+      - Cross-service communication validation
+      - Database transaction consistency
+    - file: packages/api/tests/integration/user-journey.test.ts
+      scenarios:
+      - User registration through comic purchase
+      - Authentication across services
+      - File upload and storage integration
+    - file: packages/api/tests/integration/external-apis.test.ts
+      scenarios:
+      - OpenAI API integration with rate limiting
+      - RunPod API failover scenarios
+      - Stripe webhook processing
+    e2e_tests:
+    - file: apps/web/tests/e2e/workflows/complete-user-journey.spec.ts
+      scenarios:
+      - New user onboarding and novel upload
+      - Comic generation monitoring and completion
+      - Payment and delivery flow
+    - file: apps/web/tests/e2e/workflows/error-scenarios.spec.ts
+      scenarios:
+      - API timeout handling
+      - Payment failure recovery
+      - Invalid file upload handling
+    performance_tests:
+    - file: tests/performance/load-testing.yml
+      scenarios:
+      - Concurrent novel uploads (50 users)
+      - Comic generation queue stress test
+      - Payment processing under load
+    manual_testing:
+    - step: Deploy to staging environment and verify all services start correctly
+      expected: All health checks pass, services respond within SLA
+    - step: Test production monitoring and alerting integration
+      expected: Alerts trigger correctly for service failures and performance degradation
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.6
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Setup test utilities and shared fixtures in packages/test-utils/'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create Docker Compose test environment configuration'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate Playwright E2E test suite for critical user workflows'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement cross-service integration tests with Vitest'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create mock implementations for external APIs (OpenAI, RunPod, Stripe)'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Define test coverage strategy and critical path prioritization'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Setup performance testing with Artillery.io load scenarios'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Configure CI/CD pipeline with parallel test execution and caching'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Validate production-like environment setup and monitoring integration'
+      done: false
+      ai_friendly: false
+    - task: '[HUMAN] Review test results, analyze coverage gaps, and optimize flaky
+        tests'
+      done: false
+      ai_friendly: false
+- key: T92
+  title: Production Deployment
+  type: Task
+  milestone: M7 - Launch & Release
+  iteration: I7
+  priority: p0
+  effort: 3
+  area: release
+  dependsOn:
+  - T91
+  agent_notes:
+    research_findings: '**Context:**
+
+      Production deployment is the critical final step for launching the Morpheus
+      platform to real users. This task involves setting up robust, scalable infrastructure
+      for both the backend API and frontend applications, implementing CI/CD pipelines,
+      monitoring, and ensuring the system can handle real-world traffic. The business
+      value is enabling revenue generation and user acquisition by making the platform
+      publicly accessible with enterprise-grade reliability.
+
+
+      **Technical Approach:**
+
+      - **Hosting Strategy**: Vercel for Next.js frontends (dashboard + storefront)
+      leveraging their edge network and serverless functions
+
+      - **Backend Deployment**: Railway or Render for Fastify API with auto-scaling
+      and zero-downtime deployments
+
+      - **Database**: Supabase hosted PostgreSQL with connection pooling and read
+      replicas for production load
+
+      - **ML Services**: Keep RunPod for Stable Diffusion, implement request queuing
+      with Redis/BullMQ for handling concurrent image generation
+
+      - **CDN & Assets**: Cloudflare for static assets, comic images, and DDoS protection
+
+      - **Environment Management**: Separate staging and production environments with
+      infrastructure-as-code
+
+      - **Monitoring**: Sentry for error tracking, Grafana/Prometheus for metrics,
+      Supabase analytics for database monitoring
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: CI/CD pipeline configurations, Docker files, environment
+      variable management, health check endpoints, deployment scripts
+
+      - Medium AI effectiveness: Infrastructure configuration files (terraform/pulumi),
+      monitoring dashboard setup, load balancer configuration
+
+      - Low AI effectiveness: Architecture decisions (hosting provider selection),
+      capacity planning, security policies, cost optimization strategies
+
+
+      **Dependencies:**
+
+      - External: Vercel CLI, Docker, terraform/pulumi, sentry SDK, grafana/prometheus,
+      cloudflare workers
+
+      - Internal: All existing services must be production-ready, database migrations
+      system, environment configuration management
+
+      - Prerequisite tasks: Performance optimization, security hardening, comprehensive
+      testing suite
+
+
+      **Risks:**
+
+      - **Database Connection Limits**: Supabase connection pooling may not handle
+      peak load - implement pgbouncer or connection pool management
+
+      - **ML Service Bottlenecks**: RunPod API limits could cause user-facing timeouts
+      - implement job queuing and user notifications
+
+      - **Cold Start Latency**: Serverless functions may have high latency on first
+      requests - implement warming strategies
+
+      - **Cost Overruns**: ML API costs and bandwidth could spike unexpectedly - implement
+      usage monitoring and rate limiting
+
+      - **Data Loss**: Improper backup/migration procedures - establish automated
+      backup verification and rollback procedures
+
+
+      **Complexity Notes:**
+
+      Higher complexity than initially estimated due to ML service integration requirements
+      and multi-environment orchestration. AI agents will significantly accelerate
+      infrastructure configuration and monitoring setup, but human oversight crucial
+      for architecture decisions and capacity planning. The monorepo structure adds
+      complexity to deployment orchestration but Turborepo should handle build optimization
+      well.
+
+
+      **Key Files:**
+
+      - `.github/workflows/`: CI/CD pipeline configurations
+
+      - `docker/`: Container configurations for each service
+
+      - `terraform/` or `infra/`: Infrastructure as code
+
+      - `apps/api/src/config/`: Production environment configuration
+
+      - `package.json` (root): Deployment scripts and environment management
+
+      - `apps/dashboard/next.config.js`: Production build optimization
+
+      - `apps/storefront/next.config.js`: Production build optimization
+
+      '
+    design_decisions:
+    - decision: Use Vercel for frontend deployment with Railway for backend API
+      rationale: Vercel provides excellent Next.js optimization and global CDN, while
+        Railway offers better control over Node.js backend with built-in monitoring
+      alternatives_considered:
+      - Full AWS deployment
+      - Netlify + Heroku
+      - Digital Ocean App Platform
+      ai_implementation_note: AI can generate deployment configurations and environment
+        setup scripts for both platforms
+    - decision: Implement Redis-based job queue for ML operations
+      rationale: Prevents RunPod API timeouts from blocking user interface, enables
+        better user experience with progress tracking
+      alternatives_considered:
+      - Direct API calls with extended timeouts
+      - Database-based queue
+      - AWS SQS
+      ai_implementation_note: AI can generate BullMQ job processors and Redis connection
+        management boilerplate
+    - decision: Multi-environment deployment with staging mirror
+      rationale: Reduces production deployment risks and enables testing of full user
+        flows including payment processing
+      alternatives_considered:
+      - Direct to production
+      - Feature flags for gradual rollout
+      ai_implementation_note: AI can generate environment-specific configuration files
+        and deployment scripts
+    researched_at: '2026-02-08T18:57:15.550165'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:40:24.294206'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 4c604563
+    planning_hash: d8a48cbc
+  technical_notes:
+    approach: 'Implement a multi-stage deployment pipeline using GitHub Actions that
+      builds the monorepo, runs comprehensive tests, and deploys to staging for validation
+      before production. Set up Vercel for frontend applications with custom domains
+      and edge optimization. Deploy the Fastify backend to Railway with auto-scaling
+      and health monitoring. Implement a Redis-based job queue to handle ML operations
+      asynchronously, preventing user-facing timeouts. Establish comprehensive monitoring
+      with Sentry for errors and custom dashboards for business metrics.
+
+      '
+    external_dependencies:
+    - name: '@sentry/node'
+      version: ^7.0.0
+      reason: Production error tracking and performance monitoring
+    - name: bullmq
+      version: ^4.0.0
+      reason: Redis-based job queue for ML operations
+    - name: ioredis
+      version: ^5.3.0
+      reason: Redis client for job queue and caching
+    - name: '@vercel/analytics'
+      version: ^1.0.0
+      reason: Frontend analytics and performance monitoring
+    - name: prom-client
+      version: ^15.0.0
+      reason: Prometheus metrics collection for backend
+    files_to_modify:
+    - path: package.json
+      changes: Add deployment scripts for production builds and environment management
+    - path: apps/dashboard/next.config.js
+      changes: Configure production optimizations, CDN settings, environment variables
+    - path: apps/storefront/next.config.js
+      changes: Configure production optimizations, image domains, API endpoints
+    - path: apps/api/src/config/database.ts
+      changes: Add production connection pooling and read replica configuration
+    - path: apps/api/src/app.ts
+      changes: Add health check endpoints and production middleware
+    new_files:
+    - path: .github/workflows/deploy-production.yml
+      purpose: CI/CD pipeline for production deployments with staging validation
+    - path: .github/workflows/deploy-staging.yml
+      purpose: Automated staging environment deployment for testing
+    - path: docker/api.Dockerfile
+      purpose: Production-optimized container for Fastify backend
+    - path: docker/docker-compose.prod.yml
+      purpose: Production container orchestration configuration
+    - path: infra/terraform/main.tf
+      purpose: Infrastructure as code for cloud resources
+    - path: infra/terraform/variables.tf
+      purpose: Environment-specific configuration variables
+    - path: apps/api/src/services/queue.ts
+      purpose: Redis-based job queue for ML operations
+    - path: apps/api/src/routes/health.ts
+      purpose: Health check endpoints for load balancer monitoring
+    - path: scripts/deploy.sh
+      purpose: Deployment orchestration script
+    - path: scripts/rollback.sh
+      purpose: Emergency rollback procedure
+    - path: monitoring/grafana/dashboards/morpheus.json
+      purpose: Production monitoring dashboard configuration
+    - path: .env.production
+      purpose: Production environment variables template
+  acceptance_criteria:
+  - criterion: Production environments are live and accessible
+    verification: Dashboard at https://dashboard.morpheus.app and storefront at https://store.morpheus.app
+      return 200 status with proper content
+  - criterion: CI/CD pipeline deploys successfully with zero downtime
+    verification: GitHub Actions workflow completes without errors, health checks
+      pass during deployment, no service interruption during rollout
+  - criterion: System handles production load with <2s API response times
+    verification: Load testing shows 95th percentile API response times under 2 seconds
+      for 100 concurrent users
+  - criterion: Monitoring and alerting systems are operational
+    verification: Sentry captures errors, health check endpoints return service status,
+      alerts trigger for system failures
+  - criterion: ML image generation queuing system prevents timeouts
+    verification: Comic generation requests return job IDs immediately, users receive
+      status updates, completed images delivered within 5 minutes
+  testing:
+    unit_tests:
+    - file: apps/api/src/__tests__/health.test.ts
+      coverage_target: 90%
+      scenarios:
+      - Health endpoint returns system status
+      - Database connection check
+      - External service connectivity
+    - file: apps/api/src/__tests__/queue.test.ts
+      coverage_target: 85%
+      scenarios:
+      - Job queuing and processing
+      - Queue failure handling
+      - Job status updates
+    integration_tests:
+    - file: apps/api/src/__tests__/integration/deployment.test.ts
+      scenarios:
+      - End-to-end comic generation flow
+      - Database migration rollback
+      - Service communication under load
+    manual_testing:
+    - step: Deploy to staging environment
+      expected: All services start successfully, health checks pass
+    - step: Run production smoke tests
+      expected: Critical user flows work end-to-end
+    - step: Test rollback procedure
+      expected: Previous version restored within 5 minutes
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.5
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create CI/CD pipeline configurations for GitHub Actions'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Generate Dockerfile and container configurations'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Configure production hosting accounts (Vercel, Railway, Supabase)'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement health check endpoints and monitoring middleware'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Set up Redis job queue system for ML operations'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create infrastructure as code templates (Terraform)'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Configure production domains and SSL certificates'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement deployment and rollback scripts'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Set up Sentry error tracking and monitoring dashboards'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Load testing and capacity validation'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Write comprehensive deployment tests'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Security review and production readiness checklist'
+      done: false
+      ai_friendly: false
+- key: T93
+  title: Launch & Release Notes
+  type: Task
+  milestone: M7 - Launch & Release
+  iteration: I7
+  priority: p0
+  effort: 2
+  area: release
+  dependsOn:
+  - T92
+  agent_notes:
+    research_findings: '**Context:**
+
+      This task encompasses the final launch preparation and creation of comprehensive
+      release notes for the Morpheus v1.0 launch. It''s critical for communicating
+      value to users, stakeholders, and the development community. Release notes serve
+      as product documentation, marketing material, and technical changelog. For a
+      novel-to-comic platform, this includes showcasing AI capabilities, user workflows,
+      and technical achievements. The task likely includes preparing launch assets,
+      coordinating deployment, and creating multi-audience documentation.
+
+
+      **Technical Approach:**
+
+      Implement a comprehensive release management system using:
+
+      - Automated changelog generation with `@changesets/cli` or `conventional-changelog`
+
+      - Multi-format release notes (Markdown, HTML, JSON API endpoint)
+
+      - Integration with GitHub Releases API for automated publishing
+
+      - Dashboard admin interface for release note management
+
+      - Public-facing release notes page in storefront
+
+      - Email notification system for release announcements
+
+      - Semantic versioning automation with git tags
+
+      - Asset management for screenshots, videos, GIFs demonstrating features
+
+
+      **AI Suitability Analysis:**
+
+      - High AI effectiveness: Changelog parsing, release note templates, email template
+      generation, API endpoints for CRUD operations, test coverage for release workflows
+
+      - Medium AI effectiveness: GitHub API integration, notification system implementation,
+      admin UI components
+
+      - Low AI effectiveness: Content strategy decisions, feature prioritization for
+      highlights, marketing copy review, launch timing coordination, stakeholder communication
+
+
+      **Dependencies:**
+
+      - External: @octokit/rest (GitHub API), nodemailer (email notifications), marked
+      (Markdown parsing), date-fns (date formatting), zod (schema validation)
+
+      - Internal: Authentication system, admin dashboard layouts, email service infrastructure,
+      database schemas for release tracking, deployment pipeline integration
+
+
+      **Risks:**
+
+      - Content quality risk: AI-generated release notes may lack strategic messaging
+      - mitigation: human review workflow with approval gates
+
+      - Launch coordination complexity: Multiple systems need synchronization - mitigation:
+      automated deployment pipeline with rollback capability
+
+      - Performance impact: Large release note pages with media assets - mitigation:
+      CDN integration and lazy loading
+
+      - SEO considerations: Release notes need proper meta tags and structure - mitigation:
+      Next.js metadata API integration
+
+
+      **Complexity Notes:**
+
+      More complex than initially estimated due to multi-audience requirements (technical
+      users, business stakeholders, end users). AI can significantly accelerate content
+      generation and boilerplate, but human oversight essential for strategic messaging.
+      The technical implementation is straightforward, but coordination aspects add
+      complexity.
+
+
+      **Key Files:**
+
+      - apps/dashboard/src/pages/admin/releases/: Admin interface for managing releases
+
+      - apps/storefront/src/pages/releases/: Public release notes pages
+
+      - packages/database/src/schema/releases.sql: Release tracking schema
+
+      - packages/shared/src/types/releases.ts: TypeScript interfaces
+
+      - packages/api/src/routes/releases/: Release management APIs
+
+      - .github/workflows/release.yml: Automated release workflow
+
+      '
+    design_decisions:
+    - decision: Multi-format release notes system with admin management
+      rationale: Supports different audiences (technical changelog vs user-friendly
+        features) and allows non-technical team members to manage content
+      alternatives_considered:
+      - Static markdown files in repo
+      - Third-party release management service
+      - GitHub Releases only
+      ai_implementation_note: AI can generate complete CRUD interfaces, API endpoints,
+        and form validation logic for the admin system
+    - decision: Automated changelog generation with manual curation capability
+      rationale: Combines efficiency of automated git history parsing with human editorial
+        control for marketing messaging
+      alternatives_considered:
+      - Fully manual release notes
+      - Completely automated from commits
+      - External changelog service
+      ai_implementation_note: AI excellent for parsing git history, generating templates,
+        and creating structured data from commit messages
+    - decision: Integrated email notification system
+      rationale: Direct communication channel with users, supports launch marketing
+        and retention
+      alternatives_considered:
+      - Third-party email service integration
+      - No email notifications
+      - Push notifications only
+      ai_implementation_note: AI can generate email templates, handle subscriber management
+        CRUD, and create responsive email HTML
+    researched_at: '2026-02-08T18:57:42.654183'
+    researched_by: research-agent-claude-sonnet-4
+    planned_at: '2026-02-08T19:41:02.829964'
+    planned_by: planning-agent-claude-sonnet-4
+    content_hash: 15dd7723
+    planning_hash: 5ced760a
+  technical_notes:
+    approach: 'Build a comprehensive release management system with automated changelog
+      generation, multi-format output (web, email, API), and admin curation tools.
+      Implement GitHub API integration for automated publishing, email notification
+      system for announcements, and public-facing release pages with rich media support.
+      Use semantic versioning with git tags, automated deployment workflows, and structured
+      data schemas for release tracking and analytics.
+
+      '
+    external_dependencies:
+    - name: '@changesets/cli'
+      version: ^2.27.1
+      reason: Automated changelog generation and version management
+    - name: '@octokit/rest'
+      version: ^20.0.2
+      reason: GitHub API integration for automated release publishing
+    - name: marked
+      version: ^12.0.0
+      reason: Markdown parsing for release note content
+    - name: nodemailer
+      version: ^6.9.8
+      reason: Email notification system for release announcements
+    - name: date-fns
+      version: ^3.2.0
+      reason: Date formatting and manipulation for release timelines
+    - name: react-hook-form
+      version: ^7.49.3
+      reason: Form management for admin release note editing interface
+    files_to_modify:
+    - path: packages/database/src/schema/index.ts
+      changes: Add release tables import and export
+    - path: packages/shared/src/types/index.ts
+      changes: Export release-related TypeScript interfaces
+    - path: apps/dashboard/src/pages/admin/index.tsx
+      changes: Add releases section to admin navigation
+    - path: apps/storefront/src/components/Navigation.tsx
+      changes: Add releases link to main navigation
+    - path: .github/workflows/ci.yml
+      changes: Add release workflow trigger integration
+    new_files:
+    - path: packages/database/src/schema/releases.sql
+      purpose: Database schema for releases, changelogs, and publication status
+    - path: packages/shared/src/types/releases.ts
+      purpose: TypeScript interfaces for Release, Changelog, and ReleaseStatus types
+    - path: packages/shared/src/utils/changelog.ts
+      purpose: Utility functions for parsing git commits and generating changelogs
+    - path: packages/api/src/routes/releases/index.ts
+      purpose: Express router for release management endpoints
+    - path: packages/api/src/routes/releases/releases.ts
+      purpose: CRUD operations and business logic for releases
+    - path: packages/api/src/routes/releases/github.ts
+      purpose: GitHub API integration for automated release publishing
+    - path: packages/api/src/services/ReleaseService.ts
+      purpose: Core business logic for release management and workflow
+    - path: packages/api/src/services/ChangelogService.ts
+      purpose: Service for generating and managing changelogs from git history
+    - path: packages/api/src/services/NotificationService.ts
+      purpose: Email notification service for release announcements
+    - path: apps/dashboard/src/pages/admin/releases/index.tsx
+      purpose: Admin dashboard main releases listing page
+    - path: apps/dashboard/src/pages/admin/releases/[id].tsx
+      purpose: Individual release editing and management page
+    - path: apps/dashboard/src/pages/admin/releases/new.tsx
+      purpose: Create new release form and workflow
+    - path: apps/dashboard/src/components/releases/ReleaseEditor.tsx
+      purpose: Rich text editor component for release notes content
+    - path: apps/dashboard/src/components/releases/ChangelogPreview.tsx
+      purpose: Preview component for auto-generated changelog content
+    - path: apps/dashboard/src/components/releases/MediaUploader.tsx
+      purpose: Component for uploading and managing release media assets
+    - path: apps/storefront/src/pages/releases/index.tsx
+      purpose: Public releases listing page with SEO optimization
+    - path: apps/storefront/src/pages/releases/[version].tsx
+      purpose: Individual release notes page with rich media support
+    - path: apps/storefront/src/components/releases/ReleaseCard.tsx
+      purpose: Card component for displaying release summaries
+    - path: apps/storefront/src/components/releases/ReleaseContent.tsx
+      purpose: Component for rendering release notes content with media
+    - path: .github/workflows/release.yml
+      purpose: Automated release workflow with versioning and notifications
+  acceptance_criteria:
+  - criterion: Release management system can create, edit, and publish release notes
+      with automated changelog generation from git history
+    verification: Create release via admin dashboard, verify changelog auto-populates
+      from commits, publish and check GitHub Release API creates matching release
+  - criterion: Multi-format release notes generated (web page, email template, JSON
+      API) with rich media support and proper SEO metadata
+    verification: Check /releases/[version] page renders with images/videos, email
+      template generates correctly, API endpoint returns structured JSON, meta tags
+      present
+  - criterion: Automated deployment workflow triggers release process with semantic
+      versioning and stakeholder notifications
+    verification: Push git tag, verify GitHub Actions workflow runs, version increments
+      correctly, email notifications sent to configured recipients
+  - criterion: Admin interface allows content curation with approval workflow and
+      preview functionality
+    verification: Access /admin/releases, create draft release, preview changes, approve
+      for publication, verify published state matches preview
+  - criterion: Public release notes page performs well with CDN-optimized assets and
+      mobile-responsive design
+    verification: Lighthouse score >90, assets load from CDN, page renders correctly
+      on mobile devices, lazy loading works for media
+  testing:
+    unit_tests:
+    - file: packages/api/src/routes/releases/__tests__/releases.test.ts
+      coverage_target: 90%
+      scenarios:
+      - CRUD operations for release records
+      - Changelog generation from git commits
+      - Version parsing and semantic versioning
+      - Email template rendering
+      - Permission validation for admin users
+    - file: apps/dashboard/src/components/releases/__tests__/ReleaseEditor.test.tsx
+      coverage_target: 85%
+      scenarios:
+      - Release form validation and submission
+      - Rich text editor functionality
+      - Media upload and preview
+      - Draft/publish state management
+    - file: packages/shared/src/utils/__tests__/changelog.test.ts
+      coverage_target: 95%
+      scenarios:
+      - Git commit parsing and categorization
+      - Conventional commit format handling
+      - Breaking change detection
+    integration_tests:
+    - file: packages/api/src/__tests__/integration/release-workflow.test.ts
+      scenarios:
+      - End-to-end release creation and publication
+      - GitHub API integration for automated releases
+      - Email notification system integration
+      - Database consistency across release lifecycle
+    e2e_tests:
+    - file: apps/dashboard/src/__tests__/e2e/release-management.spec.ts
+      scenarios:
+      - Complete admin workflow from creation to publication
+      - Public release page rendering and navigation
+      - Mobile responsiveness and media loading
+    manual_testing:
+    - step: Create release with mixed content (text, images, videos)
+      expected: All media displays correctly with proper lazy loading
+    - step: Test email notifications with different user segments
+      expected: Appropriate emails sent to stakeholders, developers, and end users
+    - step: Verify SEO metadata and social media previews
+      expected: Proper Open Graph tags, Twitter cards, and meta descriptions
+  estimates:
+    development: 4
+    code_review: 1
+    testing: 1.5
+    documentation: 0.5
+    total: 7
+    ai_acceleration_factor: 0.55
+  progress:
+    status: not-started
+    checklist:
+    - task: '[AI] Create database schema for releases with proper relationships and
+        indexes'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement TypeScript interfaces and validation schemas for release
+        data'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Design release workflow and approval process architecture'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Build API endpoints for release CRUD operations with proper validation'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement changelog generation service from git commit history'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create GitHub API integration for automated release publishing'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Build admin dashboard components for release management'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Implement public-facing release notes pages with SEO optimization'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Create email notification system for release announcements'
+      done: false
+      ai_friendly: true
+    - task: '[AI] Set up automated deployment workflow with GitHub Actions'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Review content templates and messaging strategy for different
+        audiences'
+      done: false
+      ai_friendly: false
+    - task: '[AI] Implement comprehensive test suite including unit, integration,
+        and e2e tests'
+      done: false
+      ai_friendly: true
+    - task: '[HUMAN] Conduct final review of release process and stakeholder approval
+        workflow'
+      done: false
+      ai_friendly: false
