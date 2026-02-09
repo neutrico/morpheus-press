@@ -45,7 +45,7 @@ class TaskAutomationAgent:
             raise ValueError("ANTHROPIC_API_KEY not found in environment")
         
         self.client = anthropic.Anthropic(api_key=self.anthropic_key)
-        self.workspace_root = Path('/workspaces/morpheus')
+        self.workspace_root = Path('/workspaces/morpheus-press-press')
     
     def load_task_spec(self, task_key: str) -> Optional[Dict[str, Any]]:
         """Load task specification from planning/docs/ and planning/issues/"""
@@ -201,7 +201,7 @@ Return a JSON object with file paths and content:
 ```
 
 IMPORTANT:
-- Use relative paths from /workspaces/morpheus/
+- Use relative paths from /workspaces/morpheus-press/
 - Don't use placeholders like "...existing code..." - write COMPLETE files
 - If task requires manual steps (config changes, DB migrations), list in next_steps
 - Prefer creating new files over modifying existing ones
@@ -318,7 +318,7 @@ def main():
     
     if args.list:
         # List all HIGH AI tasks
-        effort_map_path = Path('/workspaces/morpheus/planning/estimates/effort-map.yaml')
+        effort_map_path = Path('/workspaces/morpheus-press/planning/estimates/effort-map.yaml')
         with open(effort_map_path, 'r') as f:
             effort_map = yaml.safe_load(f)
         
@@ -352,7 +352,7 @@ def main():
                 return
         
         # Load all HIGH AI tasks
-        effort_map_path = Path('/workspaces/morpheus/planning/estimates/effort-map.yaml')
+        effort_map_path = Path('/workspaces/morpheus-press/planning/estimates/effort-map.yaml')
         with open(effort_map_path, 'r') as f:
             effort_map = yaml.safe_load(f)
         

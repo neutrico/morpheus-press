@@ -6,7 +6,7 @@
 set -e
 
 TASK_KEY=${1:-"T24"}
-WORKSPACE_ROOT="/workspaces/morpheus"
+WORKSPACE_ROOT="/workspaces/morpheus-press"
 
 echo "🗄️  Supabase Setup Generator for $TASK_KEY"
 echo "============================================"

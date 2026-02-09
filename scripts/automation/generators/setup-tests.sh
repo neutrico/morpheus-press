@@ -8,7 +8,7 @@ set -e
 
 TASK_KEY=${1:-"T27"}
 TEST_TYPE=${2:-"unit"}
-WORKSPACE_ROOT="/workspaces/morpheus"
+WORKSPACE_ROOT="/workspaces/morpheus-press"
 
 echo "🧪 Test Suite Generator for $TASK_KEY"
 echo "======================================"

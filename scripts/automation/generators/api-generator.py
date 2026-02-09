@@ -9,7 +9,7 @@ import yaml
 from pathlib import Path
 from typing import Dict, List
 
-WORKSPACE_ROOT = Path('/workspaces/morpheus')
+WORKSPACE_ROOT = Path('/workspaces/morpheus-press')
 
 def load_task_spec(task_key: str) -> Dict:
     """Load task specification from planning files"""

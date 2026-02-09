@@ -17,7 +17,7 @@ import subprocess
 from pathlib import Path
 from typing import Dict, List, Optional
 
-WORKSPACE_ROOT = Path('/workspaces/morpheus')
+WORKSPACE_ROOT = Path('/workspaces/morpheus-press')
 
 def load_planning_data():
     """Load all planning data"""
@@ -71,6 +71,74 @@ def find_docs_for_task(task_key: str) -> Optional[str]:
     if docs_files:
         return str(docs_files[0].relative_to(WORKSPACE_ROOT))
     return None
+
+def create_milestones(dry_run: bool = False) -> Dict[str, int]:
+    """Create GitHub milestones via API and return milestone name -> number mapping"""
+    
+    milestones = [
+        {'title': 'M0 - Infrastructure & Setup', 'due_on': '2026-02-28T00:00:00Z', 'description': 'Project setup, CI/CD, devcontainer, Docker'},
+        {'title': 'M1 - Backend Services', 'due_on': '2026-03-31T00:00:00Z', 'description': 'Supabase, API routes, services, testing'},
+        {'title': 'M2 - Dashboard UI', 'due_on': '2026-04-30T00:00:00Z', 'description': 'Next.js dashboard, shadcn/ui components'},
+        {'title': 'M3 - Image Generation', 'due_on': '2026-05-31T00:00:00Z', 'description': 'RunPod, Stable Diffusion, ComfyUI integration'},
+        {'title': 'M4 - ML & Publishing', 'due_on': '2026-06-30T00:00:00Z', 'description': 'Propaganda detection, e-commerce, PDF generation'},
+    ]
+    
+    milestone_map = {}
+    
+    if dry_run:
+        print("\n📅 Would create milestones:")
+        for ms in milestones:
+            print(f"   • {ms['title']} (due: {ms['due_on'][:10]})")
+        # Return dummy mapping for dry-run
+        return {ms['title']: idx+1 for idx, ms in enumerate(milestones)}
+    
+    # Get existing milestones
+    try:
+        result = subprocess.run(
+            ['gh', 'api', '/repos/neutrico/morpheus-press/milestones', '--jq', '.[] | "\(.number)\t\(.title)"'],
+            capture_output=True, text=True, check=False
+        )
+        
+        existing = {}
+        if result.returncode == 0 and result.stdout.strip():
+            for line in result.stdout.strip().split('\n'):
+                if '\t' in line:
+                    num, title = line.split('\t', 1)
+                    existing[title] = int(num)
+        
+        print(f"\n📅 Found {len(existing)} existing milestones")
+    except Exception as e:
+        print(f"⚠️  Could not fetch existing milestones: {e}")
+        existing = {}
+    
+    # Create missing milestones
+    print("\n📅 Creating milestones...")
+    for ms in milestones:
+        title = ms['title']
+        
+        if title in existing:
+            milestone_map[title] = existing[title]
+            print(f"   ✓ {title} (already exists)")
+            continue
+        
+        try:
+            result = subprocess.run(
+                ['gh', 'api', '/repos/neutrico/morpheus-press/milestones',
+                 '-f', f"title={title}",
+                 '-f', f"due_on={ms['due_on']}",
+                 '-f', f"description={ms['description']}",
+                 '--jq', '.number'],
+                capture_output=True, text=True, check=True
+            )
+            
+            milestone_num = int(result.stdout.strip())
+            milestone_map[title] = milestone_num
+            print(f"   ✅ Created: {title} (#{milestone_num})")
+            
+        except subprocess.CalledProcessError as e:
+            print(f"   ❌ Failed to create {title}: {e.stderr}")
+    
+    return milestone_map
 
 def create_issue_body(issue: Dict) -> str:
     """Generate GitHub issue body"""
@@ -189,7 +257,7 @@ If AI Effectiveness = MEDIUM/LOW:
     
     return body
 
-def create_github_issue(issue: Dict, dry_run: bool = False) -> bool:
+def create_github_issue(issue: Dict, milestone_map: Dict[str, int], dry_run: bool = False) -> bool:
     """Create GitHub issue using gh CLI"""
     
     key = issue['key']
@@ -233,10 +301,19 @@ def create_github_issue(issue: Dict, dry_run: bool = False) -> bool:
         for label in labels:
             cmd.extend(['--label', label])
         
-        # Note: GitHub milestones must exist first
-        # Uncomment if you have milestones set up:
-        # if milestone:
-        #     cmd.extend(['--milestone', milestone])
+        # Add milestone if exists
+        if milestone:
+            # Extract M0, M1, etc. and find full milestone title
+            milestone_prefix = milestone.split(' ')[0]  # e.g., 'M0' from 'M0 - Infrastructure'
+            milestone_title = None
+            for ms_title in milestone_map.keys():
+                if ms_title.startswith(milestone_prefix):
+                    milestone_title = ms_title
+                    break
+            
+            if milestone_title and milestone_title in milestone_map:
+                # gh CLI accepts milestone NAME, not number
+                cmd.extend(['--milestone', milestone_title])
         
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
         
@@ -261,6 +338,9 @@ def main():
     
     print("🚀 GitHub Issue Creator")
     print("="*80)
+    
+    # Create milestones first
+    milestone_map = create_milestones(dry_run=args.dry_run)
     
     # Load planning data
     issues = load_planning_data()
@@ -292,7 +372,7 @@ def main():
     # Create issues
     success = 0
     for issue in issues:
-        if create_github_issue(issue, dry_run=args.dry_run):
+        if create_github_issue(issue, milestone_map, dry_run=args.dry_run):
             success += 1
     
     print(f"\n{'='*80}")
