@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Documentation
+    url: https://github.com/neutrico/morpheus-press/tree/main/docs
+    about: Read the project documentation
+  - name: 💬 Discussions
+    url: https://github.com/neutrico/morpheus-press/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: 🎯 Project Board
+    url: https://github.com/orgs/neutrico/projects/1
+    about: View the project kanban board and roadmap

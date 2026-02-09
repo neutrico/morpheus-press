@@ -1,0 +1,167 @@
+name: Development Task
+description: Technical implementation task (from planning or ad-hoc)
+title: "[TASK_KEY]: "
+labels: ["Task", "status:triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for technical development tasks, either from planning/docs/ or ad-hoc work.
+
+  - type: input
+    id: task-key
+    attributes:
+      label: Task Key
+      description: Task identifier (e.g., T24) or leave blank for ad-hoc tasks
+      placeholder: "T24"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: milestone
+    attributes:
+      label: Milestone
+      description: Which milestone does this task belong to?
+      options:
+        - "M0 - Infrastructure & Setup"
+        - "M1 - Backend Services"
+        - "M2 - ML Training & Development"
+        - "M3 - Content Generation Pipeline"
+        - "M4 - Dashboard & UI"
+        - "M5 - Product Assembly"
+        - "M6 - Commerce & Distribution"
+        - "M7 - Launch & Release"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which area does this task affect?
+      options:
+        - "area: setup"
+        - "area: backend"
+        - "area: ml"
+        - "area: ingestion"
+        - "area: image-gen"
+        - "area: comic"
+        - "area: distribution"
+        - "area: ecommerce"
+        - "area: release"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Task priority
+      options:
+        - "priority:p0 - Critical"
+        - "priority:p1 - High"
+        - "priority:p2 - Medium"
+        - "priority:p3 - Low"
+      default: 2
+    validations:
+      required: true
+
+  - type: input
+    id: estimated-days
+    attributes:
+      label: Estimated Days (AI-aware)
+      description: Estimated effort in days with AI assistance
+      placeholder: "2.5"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: ai-effectiveness
+    attributes:
+      label: AI Effectiveness
+      description: How effective is AI for this task?
+      options:
+        - "HIGH - Well-suited for automation"
+        - "MEDIUM - Partial automation possible"
+        - "LOW - Manual implementation required"
+      default: 1
+    validations:
+      required: false
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Task Description
+      description: Brief description of what needs to be implemented
+      placeholder: Describe the task
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: What needs to be done for this task to be complete?
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+        - [ ] Criterion 3
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: List any tasks that must be completed first
+      placeholder: |
+        - [ ] T23 (if any)
+        - [ ] T24 (if any)
+    validations:
+      required: false
+
+  - type: textarea
+    id: files
+    attributes:
+      label: Files to Modify/Create
+      description: List the main files that will be affected
+      placeholder: |
+        - apps/backend/src/routes/*.ts
+        - supabase/migrations/*.sql
+    validations:
+      required: false
+
+  - type: textarea
+    id: technical-notes
+    attributes:
+      label: Technical Notes
+      description: Implementation approach, patterns to follow, etc.
+      placeholder: Technical details and approach
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## 🤖 Automation
+
+        **For HIGH AI effectiveness tasks:**
+        1. Comment `/automate` after issue creation to trigger auto-generation
+        2. Wait for bot to create PR with starter code
+        3. Review PR and fix TODO comments
+        4. Test and refine
+
+        **For MEDIUM/LOW AI effectiveness tasks:**
+        1. Read detailed spec from `planning/docs/[task-key]*.md`
+        2. Implement manually following best practices
+        3. Use patterns from similar completed tasks
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other relevant information
+      placeholder: Links, references, or additional notes
+    validations:
+      required: false

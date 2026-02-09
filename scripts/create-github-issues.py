@@ -95,7 +95,7 @@ def create_milestones(dry_run: bool = False) -> Dict[str, int]:
     # Get existing milestones
     try:
         result = subprocess.run(
-            ['gh', 'api', '/repos/neutrico/morpheus-press/milestones', '--jq', '.[] | "\(.number)\t\(.title)"'],
+            ['gh', 'api', '/repos/neutrico/morpheus-press/milestones', '--jq', r'.[] | "\(.number)\t\(.title)"'],
             capture_output=True, text=True, check=False
         )
         

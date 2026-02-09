@@ -1,0 +1,152 @@
+name: Milestone Progress Tracking
+
+on:
+  issues:
+    types: [closed, reopened]
+  schedule:
+    # Run daily at 9 AM UTC
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  update-milestone-progress:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Calculate milestone progress
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: milestones } = await github.rest.issues.listMilestones({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+            
+            console.log(`Found ${milestones.length} open milestones`);
+            
+            for (const milestone of milestones) {
+              const total = milestone.open_issues + milestone.closed_issues;
+              const closed = milestone.closed_issues;
+              const progress = total > 0 ? Math.round((closed / total) * 100) : 0;
+              
+              console.log(`\n${milestone.title}:`);
+              console.log(`  Total issues: ${total}`);
+              console.log(`  Closed: ${closed}`);
+              console.log(`  Progress: ${progress}%`);
+              
+              // Update milestone description with progress
+              const descriptionLines = milestone.description.split('\n');
+              const baseDescription = descriptionLines.find(line => !line.includes('Progress:')) || milestone.description;
+              
+              const newDescription = `${baseDescription}\n\n**Progress:** ${closed}/${total} issues completed (${progress}%)`;
+              
+              // Only update if description changed
+              if (newDescription !== milestone.description) {
+                await github.rest.issues.updateMilestone({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  milestone_number: milestone.number,
+                  description: newDescription
+                });
+                
+                console.log(`  ✅ Updated milestone description`);
+              }
+            }
+
+  check-milestone-completion:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for completed milestones
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: milestones } = await github.rest.issues.listMilestones({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+            
+            for (const milestone of milestones) {
+              if (milestone.open_issues === 0 && milestone.closed_issues > 0) {
+                console.log(`🎉 Milestone "${milestone.title}" is complete!`);
+                
+                // Close the milestone
+                await github.rest.issues.updateMilestone({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  milestone_number: milestone.number,
+                  state: 'closed'
+                });
+                
+                // Create a celebration issue
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: `🎉 Milestone Complete: ${milestone.title}`,
+                  body: `Congratulations! All ${milestone.closed_issues} issues in **${milestone.title}** have been completed.\n\n**Milestone Description:**\n${milestone.description}\n\n**Next Steps:**\n- Review completed work\n- Plan next milestone\n- Celebrate the team's success! 🎊`,
+                  labels: ['milestone-complete', 'status:done']
+                });
+                
+                console.log(`Created celebration issue for ${milestone.title}`);
+              }
+            }
+
+  generate-milestone-report:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Generate weekly milestone report
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: milestones } = await github.rest.issues.listMilestones({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              sort: 'due_on',
+              direction: 'asc',
+              per_page: 100
+            });
+            
+            let report = '# 📊 Weekly Milestone Progress Report\n\n';
+            report += `Generated: ${new Date().toISOString().split('T')[0]}\n\n`;
+            
+            for (const milestone of milestones) {
+              const total = milestone.open_issues + milestone.closed_issues;
+              const closed = milestone.closed_issues;
+              const progress = total > 0 ? Math.round((closed / total) * 100) : 0;
+              const dueDate = milestone.due_on ? new Date(milestone.due_on).toISOString().split('T')[0] : 'No due date';
+              
+              report += `## ${milestone.title}\n`;
+              report += `- **Due Date:** ${dueDate}\n`;
+              report += `- **Progress:** ${closed}/${total} issues (${progress}%)\n`;
+              report += `- **Status:** `;
+              
+              if (progress === 100) {
+                report += '✅ Complete\n';
+              } else if (progress >= 75) {
+                report += '🟢 On Track\n';
+              } else if (progress >= 50) {
+                report += '🟡 In Progress\n';
+              } else if (progress > 0) {
+                report += '🟠 Early Stage\n';
+              } else {
+                report += '🔴 Not Started\n';
+              }
+              
+              report += '\n';
+            }
+            
+            console.log(report);
+            
+            // Could post this as a discussion or send to Slack/Discord
+            // For now, just log it

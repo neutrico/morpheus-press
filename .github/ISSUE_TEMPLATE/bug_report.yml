@@ -1,0 +1,112 @@
+name: Bug Report
+description: Report a bug or unexpected behavior
+title: "[BUG]: "
+labels: ["bug", "status:triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the form below.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which area of the project is affected?
+      options:
+        - "area: setup"
+        - "area: backend"
+        - "area: ml"
+        - "area: ingestion"
+        - "area: image-gen"
+        - "area: comic"
+        - "area: distribution"
+        - "area: ecommerce"
+        - "area: release"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How critical is this bug?
+      options:
+        - "priority:p0 - Critical (blocks development)"
+        - "priority:p1 - High (major feature broken)"
+        - "priority:p2 - Medium (minor feature broken)"
+        - "priority:p3 - Low (cosmetic or edge case)"
+      default: 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is
+      placeholder: What went wrong?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should have happened?
+      placeholder: Describe the expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: Describe the actual behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Provide details about your environment
+      placeholder: |
+        - OS: [e.g., Ubuntu 22.04]
+        - Browser: [e.g., Chrome 120]
+        - Node version: [e.g., 20.10.0]
+        - Docker version: [e.g., 24.0.7]
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or Screenshots
+      description: Add any relevant logs or screenshots
+      placeholder: Paste logs or drag screenshots here
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other context about the problem
+      placeholder: Additional information that might help
+    validations:
+      required: false
