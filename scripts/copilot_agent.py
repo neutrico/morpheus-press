@@ -36,8 +36,9 @@ def generate_copilot_instructions(
     """
     instructions = []
     
-    # Task header
-    instructions.append(f"# {task_key}: {task_data['task']}")
+    # Task header (support both 'task' and 'title' fields)
+    task_name = task_data.get('task') or task_data.get('title', 'Task')
+    instructions.append(f"# {task_key}: {task_name}")
     instructions.append("")
     
     # Task description
@@ -121,10 +122,15 @@ def select_custom_agent(task_data: Dict) -> Optional[str]:
         return 'backend-specialist'
     
     # Check task title/description (less reliable, use word boundaries)
-    task_text = (task_data.get('task', '') + ' ' + task_data.get('description', '')).lower()
+    task_title = task_data.get('task') or task_data.get('title', '')
+    task_desc = task_data.get('description', '')
+    task_text = (task_title + ' ' + task_desc).lower()
     
-    # Testing terms (avoid false positives with "test" alone)
-    if any(term in task_text for term in ['unit test', 'integration test', 'test coverage', 'test suite', 'vitest']):
+    # Testing terms - check title first for "testing" word
+    if 'testing infrastructure' in task_text or 'test infrastructure' in task_text:
+        return 'testing-specialist'
+    
+    if any(term in task_text for term in ['unit test', 'integration test', 'test coverage', 'test suite', 'vitest', 'playwright']):
         return 'testing-specialist'
     
     # Backend terms (check for backend-specific concepts)

@@ -2,17 +2,20 @@
 
 ## Overview
 
-Automated system to assign GitHub Copilot agent to the first ready-to-start task with custom context-aware instructions.
+Automated system to assign GitHub Copilot agent to the first ready-to-start task
+with custom context-aware instructions.
 
 ## Features
 
 ✅ **Automatic Task Selection**
+
 - Finds first task in milestone M0 or M1
 - Ensures task has no blocking dependencies
 - Prioritizes high AI effectiveness tasks
 - Considers priority (p0 > p1 > p2) and effort (smaller first)
 
 ✅ **Custom Prompt Generation**
+
 - Reads research findings from `planning/issues/*.yaml`
 - Includes implementation approach and design decisions
 - Adds technical requirements and quality standards
@@ -20,6 +23,7 @@ Automated system to assign GitHub Copilot agent to the first ready-to-start task
 - Specifies testing requirements (Vitest)
 
 ✅ **Full Integration**
+
 - Seamlessly integrated into `create-issues-api.py` workflow
 - Runs as Phase 3 after issue creation and relationships
 - Uses official GitHub GraphQL API (`addAssigneesToAssignable`)
@@ -38,9 +42,11 @@ scripts/
 ### Core Functions
 
 #### `generate_copilot_instructions(task_key, task_data)`
+
 Generates custom instructions from task metadata.
 
 **Input:**
+
 ```python
 task_data = {
     "task": "Supabase Database Setup",
@@ -59,41 +65,51 @@ task_data = {
 ```
 
 **Output:**
+
 ```markdown
 # T24: Supabase Database Setup
 
 ## Description
+
 Set up database schema with RLS policies
 
 ## Research Findings
+
 Supabase uses PostgreSQL with RLS...
 
 ## Implementation Approach
+
 Create migrations with proper indexes...
 
 ## Key Design Decisions
+
 - **Use RLS**: Security by default
 
 ## Technical Requirements
+
 - Priority: p0
 - Effort: 5 points
 - AI Effectiveness: high
 
 ## Quality Standards
+
 - Follow SOLID, DRY, KISS principles
 - Write unit tests (Vitest)
 - Add comprehensive error handling
 - Use TypeScript strict mode
 
 ## Expected Files
+
 - Refer to project structure in .github/copilot-instructions.md
 - Follow existing patterns from similar files
 ```
 
 #### `find_first_ready_task(all_tasks, created_issues, created_node_ids)`
+
 Finds the first task that's ready to start.
 
 **Selection Criteria:**
+
 1. ✅ Task must be created (in `created_issues`)
 2. ✅ No blocking dependencies (or all resolved)
 3. ✅ Milestone M0 or Iteration I1 (preferred)
@@ -103,9 +119,11 @@ Finds the first task that's ready to start.
 **Returns:** `(task_key, issue_number, node_id)` or `None`
 
 #### `assign_copilot_agent(issue_node_id, custom_instructions, base_ref="main")`
+
 Assigns Copilot agent using GitHub GraphQL API.
 
 **GraphQL Mutation:**
+
 ```graphql
 mutation($assignableId: ID!, $agentAssignment: AgentAssignmentInput) {
   addAssigneesToAssignable(input: {
@@ -125,11 +143,12 @@ mutation($assignableId: ID!, $agentAssignment: AgentAssignmentInput) {
 ```
 
 **AgentAssignmentInput:**
+
 ```json
 {
   "baseRef": "main",
   "customInstructions": "Generated prompt...",
-  "targetRepositoryId": "R_kgDORLroaw"  // optional
+  "targetRepositoryId": "R_kgDORLroaw" // optional
 }
 ```
 
@@ -150,6 +169,7 @@ python3 scripts/create-issues-api.py --milestone="M0 - Infrastructure & Setup" -
 ```
 
 **Output:**
+
 ```
 🚀 Creating issues...
    ✅ Created issue #164 (T24: Supabase Database Setup)
@@ -186,6 +206,7 @@ python3 scripts/test_copilot_agent.py 159
 ```
 
 **Output:**
+
 ```
 🧪 TEST: Assign Copilot agent to issue #159
 ================================================================================
@@ -227,6 +248,7 @@ python3 scripts/test_create_issues.py
 ```
 
 **Output includes Phase 4:**
+
 ```
 ...
 
@@ -267,6 +289,7 @@ input AgentAssignmentInput {
 ```
 
 **Node IDs:**
+
 - **Repository**: `R_kgDORLroaw` (neutrico/morpheus-press)
 - **Issue**: Get via `get_issue_node_id(issue_number)`
 - **Project**: `PVT_kwDOACzkfM4BOras` (Project #5)
@@ -302,6 +325,7 @@ pip3 install pyyaml
 ### Issue: `addAssigneesToAssignable` returns error
 
 **Error:**
+
 ```json
 {
   "errors": [
@@ -314,20 +338,24 @@ pip3 install pyyaml
 ```
 
 **Solutions:**
+
 1. Check Copilot beta access: https://github.com/features/copilot
 2. Verify GitHub CLI permissions: `gh auth status`
-3. Re-authenticate with full scopes: `gh auth login --scopes repo,project,copilot`
+3. Re-authenticate with full scopes:
+   `gh auth login --scopes repo,project,copilot`
 4. Check repository settings: Settings → Features → Copilot
 
 ### Issue: No ready tasks found
 
 **Message:**
+
 ```
 ⚠️  No ready tasks found for Copilot assignment
 💡 All tasks have dependencies or are not yet created
 ```
 
 **Solutions:**
+
 - Ensure at least one task has no `dependencies: []`
 - Check `planning/estimates/effort-map.yaml` for dependency graph
 - Manually create a standalone task for testing
@@ -335,11 +363,13 @@ pip3 install pyyaml
 ### Issue: Custom instructions too long
 
 **Error:**
+
 ```
 Variable customInstructions of type String exceeds maximum length
 ```
 
 **Solutions:**
+
 - Instructions are truncated to ~2000 chars automatically
 - If still failing, reduce research findings length in YAML
 - Consider summarizing design decisions
@@ -379,6 +409,7 @@ def test_find_first_ready_task():
 ### Integration Tests (test_copilot_agent.py)
 
 Tests against live GitHub API:
+
 - ✅ Get issue node ID
 - ✅ Generate custom instructions
 - ✅ Assign Copilot via GraphQL
@@ -387,6 +418,7 @@ Tests against live GitHub API:
 ### E2E Tests (test_create_issues.py)
 
 Full workflow test:
+
 - ✅ Create 5 test issues
 - ✅ Set parent/child relationships
 - ✅ Set blocking dependencies
@@ -397,7 +429,8 @@ Full workflow test:
 
 ### Why Empty `assigneeIds`?
 
-When using `agentAssignment`, GitHub automatically handles the Copilot bot assignment:
+When using `agentAssignment`, GitHub automatically handles the Copilot bot
+assignment:
 
 ```python
 # No explicit Copilot bot ID needed
@@ -413,13 +446,16 @@ addAssigneesToAssignable(input: {
 ### Prompt Length Limits
 
 GitHub GraphQL has input limits:
+
 - **Tested limit**: ~2000 characters for `customInstructions`
 - **Safe limit**: 1500 characters
-- **Auto-truncation**: `generate_copilot_instructions()` truncates research findings to 500 chars
+- **Auto-truncation**: `generate_copilot_instructions()` truncates research
+  findings to 500 chars
 
 ### Rate Limiting
 
 GitHub API rate limits:
+
 - **GraphQL**: 5000 points/hour
 - **Points per mutation**: ~1 point
 - **Sleep delays**: 0.3s between operations in scripts
@@ -427,17 +463,20 @@ GitHub API rate limits:
 ## Future Enhancements
 
 ### Priority 1 (Next Sprint)
+
 - [ ] Read `agent_notes` directly from `planning/issues/*.yaml` files
 - [ ] Support multiple Copilot assignments (parallel task execution)
 - [ ] Add webhook integration for auto-assignment on issue creation
 
 ### Priority 2 (Future)
+
 - [ ] Generate prompts from OpenAPI specs for API tasks
 - [ ] Include relevant code snippets in prompts
 - [ ] Track Copilot completion metrics (success rate, time to completion)
 - [ ] Auto-escalate if Copilot gets stuck (assign human after N hours)
 
 ### Priority 3 (Nice to Have)
+
 - [ ] Custom agent selection (`customAgent` field)
 - [ ] Multi-repository support (`targetRepositoryId`)
 - [ ] A/B testing different prompt formats
