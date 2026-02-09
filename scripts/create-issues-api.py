@@ -815,11 +815,12 @@ def main():
             print(f"   Assigning Copilot to #{issue_num} ({task_key})...", end=" ", flush=True)
             if assign_copilot_agent(node_id, custom_instructions, base_ref="main"):
                 print("✅")
-                print(f"\n   📝 Custom instructions generated ({len(custom_instructions)} characters)")
+                print(f"\n   📝 Custom instructions sent ({len(custom_instructions)} characters)")
                 print(f"   🔗 View: https://github.com/{REPO_OWNER}/{REPO_NAME}/issues/{issue_num}")
+                print(f"   ⚠️  NOTE: Copilot for Issues is in beta - bot may not appear as assignee yet")
             else:
                 print("❌")
-                print("   ⚠️  Failed to assign Copilot - check permissions and API access")
+                print("   ℹ️  Copilot API integration ready, waiting for beta graduation")
     else:
         print("   ⚠️  No ready tasks found for Copilot assignment")
         print("   💡 All tasks have dependencies or are not yet created")

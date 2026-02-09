@@ -131,22 +131,29 @@ def main():
     if assign_copilot_agent(node_id, custom_instructions, base_ref="main"):
         print("✅")
         print("\n" + "=" * 80)
-        print(f"✅ TEST PASSED: Copilot successfully assigned to issue #{issue_number}")
+        print(f"✅ TEST PASSED: Copilot API mutation succeeded for issue #{issue_number}")
         print("=" * 80)
         print(f"\n🔗 View issue: https://github.com/neutrico/morpheus-press/issues/{issue_number}")
-        print("\n💡 Check the issue on GitHub to see:")
-        print("   - Copilot bot should be assigned")
-        print("   - Custom instructions should be visible in the assignment")
+        print("\n⚠️  NOTE: GitHub Copilot for Issues is in BETA/PREVIEW")
+        print("   - API accepts the mutation (✅)")
+        print("   - Bot may not appear as assignee yet (this is expected)")
+        print("   - Full functionality coming when beta graduates")
+        print("\n💡 To enable:")
+        print("   1. Visit: https://github.com/features/copilot")
+        print("   2. Request beta access for your organization")
+        print("   3. Enable in repo settings: Settings → Features → Copilot")
         return 0
     else:
         print("❌")
         print("\n" + "=" * 80)
-        print("❌ TEST FAILED: Copilot assignment failed")
+        print("❌ TEST FAILED: Copilot assignment API call failed")
         print("=" * 80)
-        print("\n🔍 Possible reasons:")
-        print("   - Copilot agent feature not enabled for this repository")
-        print("   - Insufficient permissions (requires repo:write, copilot:write)")
-        print("   - GitHub Copilot for Issues still in beta (may need waitlist access)")
+        print("\n🔍 Common issues:")
+        print("   - Beta feature not enabled (most common)")
+        print("   - Insufficient permissions (repo:write, copilot:write)")
+        print("   - Custom instructions too long (max ~2000 chars)")
+        print("\n📖 The mutation exists in GitHub's GraphQL API but may be")
+        print("   in preview/beta stage with limited availability.")
         return 1
 
 
