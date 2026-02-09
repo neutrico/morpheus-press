@@ -114,3 +114,4 @@ apps/docs/public/reports/
 
 models/
 .env
+last_issue.txt

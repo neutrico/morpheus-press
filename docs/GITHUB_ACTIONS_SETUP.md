@@ -1,0 +1,508 @@
+# GitHub Actions Setup Guide
+
+Complete setup guide for all GitHub Actions workflows in the Morpheus project.
+
+## Overview
+
+This repository uses **15 GitHub Actions workflows** organized in three categories:
+
+### 1. Test Generation & Pre-PR Pipeline (Core)
+
+- `copilot-branch-pipeline.yml` - Main automation pipeline (test generation + quality gates)
+
+### 2. Phase 1: PR Quality & Security
+
+- `pr-quality-gate.yml` - Auto-labeling, PR validation, CODEOWNERS
+- `test-coverage.yml` - Coverage tracking with Codecov + PR comments
+- `security-scan.yml` - npm audit, Snyk, CodeQL, Docker scan, secret detection
+- `lighthouse.yml` - Performance monitoring for Dashboard + Storefront
+
+### 3. Phase 2: Deployment & Maintenance
+
+- `vercel-preview.yml` - Preview deployments with PR-specific URLs
+- `stale.yml` - Auto-close stale issues/PRs after inactivity
+
+---
+
+## Prerequisites
+
+### 1. Accounts Required
+
+- ✅ **GitHub** account with repository access (already have)
+- ✅ **OpenAI** account with API access (for test generation)
+- ✅ **Vercel** account (for preview deployments)
+- ✅ **Codecov** account (for coverage tracking) - Free for open source
+- ✅ **Snyk** account (for security scanning) - Free tier available
+
+---
+
+## Setup Instructions
+
+### Step 1: OpenAI API Key (Required for Test Generation)
+
+**Purpose**: Powers `generate_tests_from_scenarios.py` script to create Vitest tests from YAML scenarios.
+
+**Cost**: ~$0.02-0.05 per test file (GPT-4o-mini)
+
+**Setup**:
+
+1. Go to https://platform.openai.com/api-keys
+2. Create new API key: **"Morpheus Test Generation"**
+3. Copy the key (starts with `sk-proj-...`)
+4. Add to GitHub Secrets:
+   ```bash
+   # Repository → Settings → Secrets and variables → Actions → New secret
+   Name: OPENAI_API_KEY
+   Value: sk-proj-xxxxx...
+   ```
+
+**Verify**: Workflow shows `OPENAI_API_KEY: ***` (masked) in logs
+
+---
+
+### Step 2: Vercel Deployment (Required for Preview Deployments)
+
+**Purpose**: Deploy Dashboard + Storefront to PR-specific URLs for testing.
+
+**Preview URLs**:
+
+- Dashboard: `https://pr-123-dashboard.morpheus.vercel.app`
+- Storefront: `https://pr-123-storefront.morpheus.vercel.app`
+
+**Setup**:
+
+#### 2.1 Install Vercel CLI
+
+```bash
+npm i -g vercel
+vercel login  # Link your account
+```
+
+#### 2.2 Link Projects
+
+```bash
+# Dashboard
+cd apps/dashboard
+vercel link  # Answer prompts, select/create project
+
+# Storefront
+cd ../storefront
+vercel link  # Answer prompts, select/create project
+```
+
+#### 2.3 Get Project IDs
+
+```bash
+# Dashboard
+cd apps/dashboard && cat .vercel/project.json
+# Copy "projectId" value
+
+# Storefront
+cd ../storefront && cat .vercel/project.json
+# Copy "projectId" value
+```
+
+#### 2.4 Get Vercel Token
+
+1. Go to https://vercel.com/account/tokens
+2. Create new token: **"Morpheus GitHub Actions"**
+3. Copy the token
+
+#### 2.5 Get Organization ID
+
+```bash
+vercel teams list
+# Copy "id" from your team (or use personal account ID from .vercel/project.json → "orgId")
+```
+
+#### 2.6 Add GitHub Secrets
+
+```bash
+# Repository → Settings → Secrets and variables → Actions
+
+VERCEL_TOKEN=<token-from-step-2.4>
+VERCEL_ORG_ID=<org-id-from-step-2.5>
+VERCEL_DASHBOARD_PROJECT_ID=<dashboard-project-id-from-step-2.3>
+VERCEL_STOREFRONT_PROJECT_ID=<storefront-project-id-from-step-2.3>
+```
+
+**Verify**: Check workflow run for `Deployed to: https://pr-*-dashboard.morpheus.vercel.app`
+
+---
+
+### Step 3: Codecov (Optional but Recommended)
+
+**Purpose**: Track coverage trends over time + generate coverage badges.
+
+**Cost**: Free for open source repositories.
+
+**Setup**:
+
+1. Go to https://about.codecov.io/
+2. Sign up with GitHub
+3. Select `user/morpheus` repository
+4. Copy the **Upload Token** (shown on setup page)
+5. Add to GitHub Secrets:
+   ```bash
+   Name: CODECOV_TOKEN
+   Value: <token-from-codecov>
+   ```
+
+**Verify**: Go to https://app.codecov.io/gh/user/morpheus after PR runs
+
+**Badge** (optional):
+
+```markdown
+[![codecov](https://codecov.io/gh/user/morpheus/branch/main/graph/badge.svg)](https://codecov.io/gh/user/morpheus)
+```
+
+---
+
+### Step 4: Snyk Security Scanning (Optional but Recommended)
+
+**Purpose**: Scan dependencies + Docker images for vulnerabilities.
+
+**Cost**: Free for open source (unlimited tests).
+
+**Setup**:
+
+1. Go to https://snyk.io/
+2. Sign up with GitHub
+3. Authorize Snyk to access repository
+4. Go to **Account Settings → General → Auth Token**
+5. Copy the token
+6. Add to GitHub Secrets:
+   ```bash
+   Name: SNYK_TOKEN
+   Value: <token-from-snyk>
+   ```
+
+**Verify**: Check workflow run for `Snyk analysis: ✅ No high/critical vulnerabilities`
+
+---
+
+### Step 5: Lighthouse CI GitHub App (Optional)
+
+**Purpose**: Enhanced Lighthouse CI integration with GitHub Checks API.
+
+**Cost**: Free (uses GitHub App authentication).
+
+**Setup**:
+
+1. Go to https://github.com/apps/lighthouse-ci
+2. Install app on your repository
+3. Generate app token (automatically created)
+4. Add to GitHub Secrets (if not auto-detected):
+   ```bash
+   Name: LHCI_GITHUB_APP_TOKEN
+   Value: <auto-generated-token>
+   ```
+
+**Without this**: Workflow still works, but uses simpler PR comments instead of GitHub Checks.
+
+---
+
+## Secret Summary
+
+| Secret Name                      | Required? | Used By                        | Get From                      |
+| -------------------------------- | --------- | ------------------------------ | ----------------------------- |
+| `OPENAI_API_KEY`                 | ✅ YES    | copilot-branch-pipeline.yml    | OpenAI platform               |
+| `VERCEL_TOKEN`                   | ✅ YES    | vercel-preview.yml             | Vercel account settings       |
+| `VERCEL_ORG_ID`                  | ✅ YES    | vercel-preview.yml             | Vercel CLI / project.json     |
+| `VERCEL_DASHBOARD_PROJECT_ID`    | ✅ YES    | vercel-preview.yml             | Dashboard .vercel/project.json   |
+| `VERCEL_STOREFRONT_PROJECT_ID`   | ✅ YES    | vercel-preview.yml             | Storefront .vercel/project.json  |
+| `CODECOV_TOKEN`                  | ⚠️ RECOMMENDED | test-coverage.yml         | Codecov dashboard             |
+| `SNYK_TOKEN`                     | ⚠️ RECOMMENDED | security-scan.yml         | Snyk account settings         |
+| `LHCI_GITHUB_APP_TOKEN`          | ❌ OPTIONAL | lighthouse.yml             | GitHub App auto-generated     |
+
+---
+
+## Workflow Triggers
+
+### Automatic Triggers
+
+```yaml
+# copilot-branch-pipeline.yml
+push:
+  branches: [copilot/**, automation/**]
+
+# pr-quality-gate.yml, test-coverage.yml, lighthouse.yml
+pull_request:
+  types: [opened, synchronize, reopened]
+
+# security-scan.yml
+push:
+  branches: [main, develop]
+schedule:
+  - cron: '0 0 * * 1'  # Weekly Monday 00:00 UTC
+
+# stale.yml
+schedule:
+  - cron: '0 0 * * *'  # Daily 00:00 UTC
+
+# vercel-preview.yml
+pull_request:
+  types: [opened, synchronize, reopened]
+  paths:
+    - 'apps/dashboard/**'
+    - 'apps/storefront/**'
+```
+
+### Manual Triggers
+
+All workflows support manual trigger via GitHub UI:
+
+```
+Repository → Actions → Select workflow → Run workflow
+```
+
+---
+
+## Testing the Setup
+
+### Test 1: OpenAI Test Generation
+
+1. Create test issue with scenarios:
+
+```yaml
+## Test Scenarios
+```yaml
+test_scenarios:
+  unit:
+    - component: "DatabaseService.getBook"
+      test_cases:
+        - name: "Happy path - returns book"
+          arrange: "Mock Supabase client"
+          act: "const book = await db.getBook('123')"
+          assert:
+            - "book.id === '123'"
+```
+```
+
+2. Assign issue to `@copilot`
+3. Copilot creates branch `copilot/test-123`
+4. Workflow triggers automatically
+5. Check Actions tab for:
+   - ✅ Test generation job succeeded
+   - ✅ Tests committed to branch
+   - ✅ Tests run successfully
+
+### Test 2: Vercel Preview Deployment
+
+1. Create PR with Dashboard/Storefront changes
+2. Check workflow run for:
+   - ✅ Build succeeded
+   - ✅ Deployed to Vercel
+   - ✅ PR comment with preview URLs
+3. Click URLs to verify deployment
+
+### Test 3: Coverage Reporting
+
+1. Create PR with test changes
+2. Check PR for:
+   - ✅ Inline coverage comments (lcov-reporter-action)
+   - ✅ Codecov badge in PR description
+   - ✅ Coverage summary comment
+
+### Test 4: Security Scanning
+
+1. Push to `main` branch
+2. Check Actions → security-scan workflow
+3. Verify:
+   - ✅ npm audit passed
+   - ✅ Snyk scan passed
+   - ✅ CodeQL analysis passed
+   - ✅ No secrets detected
+
+---
+
+## Troubleshooting
+
+### Issue: "OPENAI_API_KEY not found"
+
+**Solution**:
+
+- Verify secret exists: `Repository → Settings → Secrets → OPENAI_API_KEY`
+- Check secret name is EXACT (case-sensitive)
+- Re-run workflow after adding secret
+
+### Issue: "Vercel deployment failed"
+
+**Solution**:
+
+- Check all 4 secrets present: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_DASHBOARD_PROJECT_ID`, `VERCEL_STOREFRONT_PROJECT_ID`
+- Verify project IDs match `.vercel/project.json` files
+- Re-run `vercel link` if projects not found
+
+### Issue: "Codecov upload failed"
+
+**Solution**:
+
+- Check `CODECOV_TOKEN` secret exists
+- Verify repository authorized in Codecov dashboard
+- Workflow continues even if Codecov upload fails (not critical)
+
+### Issue: "Snyk requires authentication"
+
+**Solution**:
+
+- Add `SNYK_TOKEN` secret
+- Authorize Snyk to access repository
+- Or disable Snyk job in `security-scan.yml` (comment out)
+
+### Issue: "Test generation creates invalid tests"
+
+**Solution**:
+
+- Check `test_scenarios.yaml` format in issue comment
+- Verify source file exists in `changed_files` list
+- Review OpenAI API logs in workflow run
+- GPT-4o-mini may need better prompt (edit `scripts/generate_tests_from_scenarios.py`)
+
+---
+
+## Cost Analysis
+
+### Monthly Costs (Estimated)
+
+**Assumption**: 50 PRs/month, 5 files changed per PR, 2 test iterations per PR
+
+| Service      | Cost | Usage                             | Notes                        |
+| ------------ | ---- | --------------------------------- | ---------------------------- |
+| OpenAI       | $5   | 250 test files × $0.02 each       | GPT-4o-mini pricing          |
+| Vercel       | $0   | 50 preview deployments            | Free tier: 100 deployments   |
+| Codecov      | $0   | Unlimited uploads                 | Free for open source         |
+| Snyk         | $0   | Unlimited scans                   | Free for open source         |
+| GitHub Actions | ~$2  | 500 workflow minutes              | Free tier: 2000 min/month    |
+| **TOTAL**    | **$7/month** | Saves 75% developer time | ROI: $100-150 saved per task |
+
+---
+
+## Maintenance
+
+### Weekly Tasks
+
+- Monitor security-scan workflow for new vulnerabilities
+- Review stale-bot closed issues (verify nothing important missed)
+
+### Monthly Tasks
+
+- Check Codecov trends (coverage should stay >80%)
+- Review Vercel deployment counts (ensure under free tier limit)
+- Audit OpenAI costs (should be <$10/month)
+
+### Quarterly Tasks
+
+- Update workflow actions to latest versions
+- Review and update `.github/labeler.yml` rules
+- Adjust `lighthouse-budget.json` if needed
+
+---
+
+## Workflow Diagram
+
+```
+┌────────────────────────────────────────────────────────────┐
+│ Developer creates issue with test_scenarios.yaml          │
+│ Assigns to @copilot                                        │
+└─────────────────┬──────────────────────────────────────────┘
+                  │
+                  ▼
+┌────────────────────────────────────────────────────────────┐
+│ Copilot reads issue, implements feature                    │
+│ Pushes to copilot/** branch                                │
+└─────────────────┬──────────────────────────────────────────┘
+                  │
+                  ▼
+┌────────────────────────────────────────────────────────────┐
+│ copilot-branch-pipeline.yml TRIGGERED                      │
+│   1. Extract issue # from branch name                      │
+│   2. Download test_scenarios.yaml from issue comment       │
+│   3. Generate tests (OpenAI GPT-4o-mini)                   │
+│   4. Commit tests back to branch                           │
+│   5. Run tests (Vitest)                                    │
+│   6. Check coverage (>80%)                                 │
+│   7. Run lint + type-check                                 │
+└─────────────────┬──────────────────────────────────────────┘
+                  │
+        ┌─────────┴─────────┐
+        │                   │
+        ▼                   ▼
+    ✅ PASS             ❌ FAIL
+        │                   │
+        ▼                   ▼
+┌──────────────┐    ┌──────────────────┐
+│ Create PR    │    │ Post feedback    │
+│ Auto-assign  │    │ to issue comment │
+│ Deploy preview│   └────────┬─────────┘
+└──────┬───────┘            │
+       │                    ▼
+       │         ┌────────────────────┐
+       │         │ Copilot reads      │
+       │         │ feedback, fixes    │
+       │         │ code, pushes again │
+       │         └────────┬───────────┘
+       │                  │
+       │                  ▼
+       │         (Workflow triggers again)
+       │         Loop until tests pass
+       │
+       ▼
+┌────────────────────────────────────────────────────────────┐
+│ PR Created → Phase 1 workflows trigger:                    │
+│   - pr-quality-gate.yml (auto-label, enforce rules)        │
+│   - test-coverage.yml (Codecov + inline comments)          │
+│   - security-scan.yml (npm audit, Snyk, CodeQL)            │
+│   - lighthouse.yml (performance monitoring)                │
+│   - vercel-preview.yml (preview deployments)               │
+└─────────────────┬──────────────────────────────────────────┘
+                  │
+                  ▼
+┌────────────────────────────────────────────────────────────┐
+│ Human reviews PR → Merges to main                          │
+└────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Best Practices
+
+### For Developers
+
+1. **Always include test scenarios** in issue description (YAML format)
+2. **Keep scenarios specific** - avoid generic "should work" assertions
+3. **Review generated tests** - Don't blindly trust AI output
+4. **Monitor workflow feedback** - Copilot fixes based on comments
+5. **Check preview deployments** - Test in production-like environment
+
+### For Repository Maintainers
+
+1. **Monitor OpenAI costs** - Should be <$10/month
+2. **Review security scan results weekly** - Fix vulnerabilities promptly
+3. **Check coverage trends** - Maintain >80% threshold
+4. **Update workflow actions quarterly** - Keep dependencies current
+5. **Adjust labeler.yml** - As codebase structure evolves
+
+---
+
+## Next Steps
+
+1. ✅ Add all required secrets (Step 1-2)
+2. ✅ Test OpenAI test generation (Test 1)
+3. ✅ Test Vercel preview deployment (Test 2)
+4. ✅ Optional: Add Codecov + Snyk (Step 3-4)
+5. ✅ Monitor first few workflow runs
+6. ✅ Adjust thresholds/budgets if needed
+
+**Need help?** Check workflow logs in `Actions` tab or create issue with `workflow:help` label.
+
+---
+
+## Reference Links
+
+- [OpenAI API Pricing](https://openai.com/api/pricing/)
+- [Vercel CLI Documentation](https://vercel.com/docs/cli)
+- [Codecov Documentation](https://docs.codecov.com/)
+- [Snyk Documentation](https://docs.snyk.io/)
+- [GitHub Actions Documentation](https://docs.github.com/en/actions)
+- [Lighthouse CI Documentation](https://github.com/GoogleChrome/lighthouse-ci/blob/main/docs/getting-started.md)

@@ -1,0 +1,64 @@
+# Auto-label PRs and Issues based on changed files and metadata
+# This is specific to morpheus-press repository structure
+
+# Planning documentation
+'type:planning':
+  - 'planning/docs/**'
+  - 'planning/issues/**'
+  - 'planning/estimates/**'
+
+# Milestones
+'milestone:m0':
+  - 'planning/docs/m0-*/**'
+  - 'planning/issues/m0-*.yaml'
+
+'milestone:m1':
+  - 'planning/docs/m1-*/**'
+  - 'planning/issues/m1-*.yaml'
+
+'milestone:m2':
+  - 'planning/docs/m2-*/**'
+  - 'planning/issues/m2-*.yaml'
+
+# Automation scripts
+'area:automation':
+  - 'scripts/**'
+  - '.github/agents/**'
+  - '.github/workflows/**'
+
+# Documentation
+'type:docs':
+  - '**/*.md'
+  - 'docs/**'
+  - 'README*'
+
+# Configuration
+'type:config':
+  - '**/*.config.js'
+  - '**/*.config.ts'
+  - '**/*.json'
+  - '.github/**/*'
+  - '!package.json'
+  - '!pnpm-lock.yaml'
+
+# Dependencies
+'type:dependencies':
+  - 'package.json'
+  - 'pnpm-lock.yaml'
+  - 'requirements.txt'
+
+# Issue templates
+'type:template':
+  - '.github/ISSUE_TEMPLATE/**'
+
+# Tools
+'tool:github-actions':
+  - '.github/workflows/**'
+
+'tool:python':
+  - 'scripts/**/*.py'
+  - 'requirements.txt'
+
+'tool:typescript':
+  - 'scripts/**/*.ts'
+  - '*.ts'
