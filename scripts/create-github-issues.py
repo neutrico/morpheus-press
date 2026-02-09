@@ -17,15 +17,20 @@ import subprocess
 from pathlib import Path
 from typing import Dict, List, Optional
 
-WORKSPACE_ROOT = Path('/workspaces/morpheus-press')
+WORKSPACE_ROOT = Path(__file__).parent.parent.resolve()
 
 def load_planning_data():
     """Load all planning data"""
     
-    # Load effort-map
+    # Load effort-map (if exists)
     effort_map_path = WORKSPACE_ROOT / 'planning/estimates/effort-map.yaml'
-    with open(effort_map_path, 'r') as f:
-        effort_map = yaml.safe_load(f)
+    effort_map = {'estimates': {}}
+    
+    if effort_map_path.exists():
+        with open(effort_map_path, 'r') as f:
+            effort_map = yaml.safe_load(f)
+    else:
+        print("⚠️  effort-map.yaml not found - using default estimates")
     
     # Load issues
     issues_dir = WORKSPACE_ROOT / 'planning/issues'
@@ -42,13 +47,17 @@ def load_planning_data():
     enriched_issues = []
     for issue in all_issues:
         key = issue['key']
-        estimate = effort_map['estimates'].get(key, {})
+        estimate = effort_map.get('estimates', {}).get(key, {})
+        
+        # Use effort from issue if no estimate
+        estimated_days = estimate.get('estimated_days', issue.get('effort', 0))
+        reasoning = estimate.get('reasoning', '')
         
         enriched_issues.append({
             **issue,
-            'estimated_days': estimate.get('estimated_days', 0),
-            'ai_effectiveness': extract_ai_effectiveness(estimate.get('reasoning', '')),
-            'reasoning': estimate.get('reasoning', ''),
+            'estimated_days': estimated_days,
+            'ai_effectiveness': extract_ai_effectiveness(reasoning),
+            'reasoning': reasoning,
         })
     
     return enriched_issues
