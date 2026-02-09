@@ -128,7 +128,7 @@ def main():
     print("\n📝 Step 3: Assigning Copilot agent...")
     print(f"   Calling GitHub API...", end=" ", flush=True)
     
-    if assign_copilot_agent(node_id, custom_instructions, base_ref="main"):
+    if assign_copilot_agent(node_id, custom_instructions, base_ref="main", repo_owner="neutrico", repo_name="morpheus-press"):
         print("✅")
         print("\n" + "=" * 80)
         print(f"✅ TEST PASSED: Copilot API mutation succeeded for issue #{issue_number}")

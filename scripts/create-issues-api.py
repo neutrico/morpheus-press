@@ -813,7 +813,7 @@ def main():
             
             # Assign Copilot
             print(f"   Assigning Copilot to #{issue_num} ({task_key})...", end=" ", flush=True)
-            if assign_copilot_agent(node_id, custom_instructions, base_ref="main"):
+            if assign_copilot_agent(node_id, custom_instructions, base_ref="main", repo_owner=REPO_OWNER, repo_name=REPO_NAME):
                 print("✅")
                 print(f"\n   📝 Custom instructions sent ({len(custom_instructions)} characters)")
                 print(f"   🔗 View: https://github.com/{REPO_OWNER}/{REPO_NAME}/issues/{issue_num}")

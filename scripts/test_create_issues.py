@@ -339,7 +339,7 @@ def main():
     
     # Build issue caches
     issue_cache = {key: created_node_ids[key]["number"] for key in created_node_ids.keys()}
-    node_id_cache = {key: created_node_ids[key]["id"] for key in created_node_ids.keys()}
+    node_id_cache = {key: created_node_ids[key]["node_id"] for key in created_node_ids.keys()}
     
     # Find first ready task (should be TT1 - no dependencies)
     ready_task = find_first_ready_task(all_tasks, issue_cache, node_id_cache)
@@ -356,7 +356,7 @@ def main():
             
             # Test Copilot assignment
             print(f"   Assigning Copilot agent...", end=" ", flush=True)
-            if assign_copilot_agent(node_id, custom_instructions, base_ref="main"):
+            if assign_copilot_agent(node_id, custom_instructions, base_ref="main", repo_owner="neutrico", repo_name="morpheus-press"):
                 print("✅")
                 print(f"\n   🎉 Copilot API mutation succeeded for issue #{issue_num}")
                 print(f"   🔗 View: https://github.com/{REPO_OWNER}/{REPO_NAME}/issues/{issue_num}")
