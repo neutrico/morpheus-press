@@ -8,7 +8,10 @@
     "plan:dry-run": "python3 scripts/planning/run-pipeline.py --dry-run",
     "automate": "python3 scripts/automation/task-automation-agent.py",
     "issues:create": "python3 scripts/create-github-issues.py",
-    "issues:high-ai": "python3 scripts/create-github-issues.py --ai-high-only"
+    "issues:high-ai": "python3 scripts/create-github-issues.py --ai-high-only",
+    "test:copilot": "python3 scripts/test_copilot_workflow_unit.py",
+    "test:copilot:e2e": "python3 scripts/test_172_copilot_workflow.py",
+    "test:172": "python3 scripts/test_copilot_workflow_unit.py"
   },
   "keywords": ["planning", "automation", "ai", "copilot", "github-actions"],
   "author": "neutrico",
