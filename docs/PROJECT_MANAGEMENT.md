@@ -6,6 +6,33 @@ This document explains how we use GitHub's project management features to organi
 
 We use a milestone-driven development approach with GitHub Issues, Milestones, Projects, and automated workflows to manage the project.
 
+## ⚙️ Setup Requirements
+
+Before using the automation features, configure the following:
+
+### GitHub Secrets
+
+1. **GH_PROJECT_TOKEN** (Optional but recommended)
+   - Required for automated project board integration
+   - Create a Personal Access Token with `project` scope
+   - Add to repository secrets: Settings → Secrets → Actions → New repository secret
+   - If not configured, workflows will fall back to `GITHUB_TOKEN` (limited permissions)
+
+2. **ANTHROPIC_API_KEY** (For task automation)
+   - Required for automated code generation
+   - Add to repository secrets for automation workflows
+
+### GitHub CLI Authentication
+
+For local script execution:
+```bash
+# Authenticate GitHub CLI
+gh auth login
+
+# Verify authentication
+gh auth status
+```
+
 ## 🎯 Milestones
 
 ### Milestone Structure
@@ -360,6 +387,8 @@ Defined in `package.json`:
 ```bash
 pnpm issues:create      # Create all issues
 pnpm issues:high-ai     # Create HIGH AI tasks only
+pnpm labels:create      # Create all labels
+pnpm labels:update      # Update existing labels
 ```
 
 ## 📚 Resources

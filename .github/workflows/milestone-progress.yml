@@ -42,7 +42,7 @@ jobs:
               
               // Update milestone description with progress
               const descriptionLines = milestone.description.split('\n');
-              const baseDescription = descriptionLines.find(line => !line.includes('Progress:')) || milestone.description;
+              const baseDescription = descriptionLines.filter(line => !line.includes('Progress:')).join('\n') || milestone.description;
               
               const newDescription = `${baseDescription}\n\n**Progress:** ${closed}/${total} issues completed (${progress}%)`;
               

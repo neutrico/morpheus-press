@@ -23,8 +23,8 @@ jobs:
             const labels = [];
             
             // Detect issue type from title prefix
-            if (title.startsWith('[bug]')) {
-              labels.push('bug');
+            if title.startsWith('[bug]')) {
+              labels.push('Bug');
             } else if (title.startsWith('[feature]')) {
               labels.push('Feature');
             } else if (title.startsWith('[task') || title.match(/^t\d+/i)) {
@@ -117,10 +117,12 @@ jobs:
     if: github.event.action == 'opened'
     steps:
       - name: Add issue to project board
+        # Note: This requires GH_PROJECT_TOKEN secret to be configured
+        # with permissions to modify the project board
         uses: actions/add-to-project@v0.5.0
         with:
           project-url: https://github.com/orgs/neutrico/projects/1
-          github-token: ${{ secrets.GH_PROJECT_TOKEN }}
+          github-token: ${{ secrets.GH_PROJECT_TOKEN || secrets.GITHUB_TOKEN }}
 
   comment-on-automation-trigger:
     runs-on: ubuntu-latest

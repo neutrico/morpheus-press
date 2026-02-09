@@ -14,7 +14,7 @@ import argparse
 import subprocess
 from pathlib import Path
 
-WORKSPACE_ROOT = Path('/home/runner/work/morpheus-press/morpheus-press')
+WORKSPACE_ROOT = Path(__file__).parent.parent.resolve()
 
 # Label color mapping
 LABEL_COLORS = {
