@@ -100,11 +100,15 @@ def run_graphql(query: str, variables: Optional[Dict] = None) -> Dict:
     """Run GitHub GraphQL API query."""
     cmd = ["gh", "api", "graphql", "-f", f"query={query}"]
     if variables:
+        # Use -F for JSON variables (non-string types)
         for key, value in variables.items():
-            if isinstance(value, dict) or isinstance(value, list):
-                cmd.extend(["-f", f"{key}={json.dumps(value)}"])
+            if isinstance(value, bool):
+                # Boolean values need lowercase true/false in JSON
+                cmd.extend(["-F", f"{key}={json.dumps(value)}"])
+            elif isinstance(value, (dict, list)):
+                cmd.extend(["-F", f"{key}={json.dumps(value)}"])
             else:
-                cmd.extend(["-f", f"{key}={value}"])
+                cmd.extend(["-F", f"{key}={json.dumps(value)}"])
     
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
@@ -381,23 +385,29 @@ def set_issue_type(issue_node_id: str, issue_type_id: str) -> bool:
     return "data" in result and "updateIssue" in result["data"]
 
 
-def set_parent_issue(child_node_id: str, parent_node_id: str) -> bool:
+def set_parent_issue(parent_node_id: str, sub_issue_node_id: str) -> bool:
     """
-    Set parent/sub-issue relationship (GitHub native feature).
+    Set parent/sub-issue relationship using official GitHub GraphQL API.
     This creates a parent → child link visible in the GitHub UI.
+    
+    Args:
+        parent_node_id: Node ID of the parent issue
+        sub_issue_node_id: Node ID of the child/sub-issue
+    
+    Returns:
+        True if successful, False otherwise
     """
     mutation = """
-    mutation($issueId: ID!, $parentIssueId: ID!) {
-      updateIssue(input: {
-        id: $issueId
-        parentIssueId: $parentIssueId
+    mutation($issueId: ID!, $subIssueId: ID!, $replaceParent: Boolean) {
+      addSubIssue(input: {
+        issueId: $issueId
+        subIssueId: $subIssueId
+        replaceParent: $replaceParent
       }) {
         issue {
           id
+          number
           title
-          parent {
-            title
-          }
         }
       }
     }
@@ -406,23 +416,51 @@ def set_parent_issue(child_node_id: str, parent_node_id: str) -> bool:
     result = run_graphql(
         mutation,
         variables={
-            "issueId": child_node_id,
-            "parentIssueId": parent_node_id,
+            "issueId": parent_node_id,
+            "subIssueId": sub_issue_node_id,
+            "replaceParent": True,
         },
     )
     
-    return "data" in result and "updateIssue" in result["data"]
+    return "data" in result and "addSubIssue" in result["data"]
 
 
-def link_issue_dependency(issue_id: str, depends_on_issue_id: str) -> bool:
+def link_issue_dependency(blocked_issue_node_id: str, blocking_issue_node_id: str) -> bool:
     """
-    Mark issue as blocked by another issue.
-    Note: This requires the issue_id and depends_on_issue_id in node format.
+    Mark issue as blocked by another issue using official GitHub GraphQL API.
+    This creates a "blocked by" relationship visible in the GitHub UI Relationships section.
+    
+    Args:
+        blocked_issue_node_id: Node ID of the issue that is blocked
+        blocking_issue_node_id: Node ID of the issue that is blocking
+    
+    Returns:
+        True if successful, False otherwise
     """
-    # GitHub doesn't have native "blocked by" in public API yet
-    # We'll add a comment to the issue body mentioning the dependency
-    # Alternatively, use Projects v2 custom fields or labels
-    return True  # Placeholder - GitHub API doesn't support this directly yet
+    mutation = """
+    mutation($issueId: ID!, $blockingIssueId: ID!) {
+      addBlockedBy(input: {
+        issueId: $issueId
+        blockingIssueId: $blockingIssueId
+      }) {
+        issue {
+          id
+          number
+          title
+        }
+      }
+    }
+    """
+    
+    result = run_graphql(
+        mutation,
+        variables={
+            "issueId": blocked_issue_node_id,
+            "blockingIssueId": blocking_issue_node_id,
+        },
+    )
+    
+    return "data" in result and "addBlockedBy" in result["data"]
 
 
 def create_github_issue(
@@ -437,27 +475,18 @@ def create_github_issue(
     title = f"{task_key}: {task_data['task']}"
     
     # Build issue body
+    # NOTE: Milestone and Dependencies are set via GitHub parameters (milestone field + relationships),
+    # so we don't duplicate them in the body text.
     body_parts = []
-    body_parts.append(f"## 📋 Task: {task_data['task']}")
-    body_parts.append(f"\n**Milestone**: {milestone_key}")
+    
+    # Task description with metadata
+    body_parts.append(f"## 📋 Description\n")
+    body_parts.append(f"{task_data.get('description', task_data['task'])}\n")
     body_parts.append(f"**AI Effectiveness**: {task_data.get('ai_effectiveness', 'unknown')}")
-    body_parts.append(f"**Estimated Days**: {task_data.get('estimated_days', '?')}")
+    body_parts.append(f"**Estimated Effort**: {task_data.get('estimated_days', '?')} days")
     
     if spec_file and spec_file.exists():
         body_parts.append(f"\n**Detailed Spec**: `{spec_file.relative_to(WORKSPACE_ROOT)}`")
-    
-    # Add dependencies
-    dependencies = task_data.get("dependencies", [])
-    if dependencies:
-        body_parts.append("\n## 🔗 Dependencies\n")
-        for dep in dependencies:
-            # Check if dependency issue exists in cache
-            if dep in created_issues_cache:
-                issue_num = created_issues_cache[dep]
-                body_parts.append(f"- #{issue_num} ({dep})")
-            else:
-                body_parts.append(f"- {dep} (not yet created)")
-
     
     # Add automation section
     body_parts.append("\n## 🤖 Automation Available\n")
@@ -725,6 +754,38 @@ def main():
             success_count += 1
     
     print(f"\n✅ Complete: {success_count}/{len(filtered_tasks)} issues created")
+    
+    # Phase 2: Set blocking relationships using persisted queries
+    print("\n🔗 Setting blocking relationships...\n")
+    relationships_count = 0
+    
+    for task_key, task_data in filtered_tasks:
+        dependencies = task_data.get("dependencies", [])
+        if not dependencies:
+            continue
+        
+        # Get this issue's node ID
+        blocked_issue_node_id = created_issues_node_ids.get(task_key)
+        if not blocked_issue_node_id:
+            continue
+        
+        blocked_issue_num = created_issues_cache.get(task_key)
+        
+        # Set blocking relationship for each dependency
+        for dep_key in dependencies:
+            blocking_issue_node_id = created_issues_node_ids.get(dep_key)
+            blocking_issue_num = created_issues_cache.get(dep_key)
+            
+            if blocking_issue_node_id and blocking_issue_num:
+                print(f"   #{blocked_issue_num} ({task_key}) blocked by #{blocking_issue_num} ({dep_key})...", end=" ", flush=True)
+                if link_issue_dependency(blocked_issue_node_id, blocking_issue_node_id):
+                    print("✅")
+                    relationships_count += 1
+                else:
+                    print("❌")
+                time.sleep(0.3)  # Rate limit protection
+    
+    print(f"\n✅ Set {relationships_count} blocking relationships")
     print(f"\n🔗 View issues: https://github.com/{REPO_OWNER}/{REPO_NAME}/issues")
     print(f"🔗 View project: https://github.com/orgs/{REPO_OWNER}/projects/{PROJECT_NUMBER}")
 
