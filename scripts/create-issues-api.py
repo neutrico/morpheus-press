@@ -14,6 +14,13 @@ from typing import Dict, List, Optional
 
 import yaml
 
+# Import Copilot agent functions
+from copilot_agent import (
+    assign_copilot_agent,
+    find_first_ready_task,
+    generate_copilot_instructions,
+)
+
 # Configuration
 WORKSPACE_ROOT = Path("/workspaces/morpheus-press")
 EFFORT_MAP_PATH = WORKSPACE_ROOT / "planning/estimates/effort-map.yaml"
@@ -786,8 +793,40 @@ def main():
                 time.sleep(0.3)  # Rate limit protection
     
     print(f"\n✅ Set {relationships_count} blocking relationships")
+    
+    # Phase 3: Assign Copilot agent to first ready task
+    print("\n🤖 Assigning Copilot agent to first ready task...\n")
+    
+    ready_task = find_first_ready_task(
+        filtered_tasks,
+        created_issues_cache,
+        created_issues_node_ids,
+    )
+    
+    if ready_task:
+        task_key, issue_num, node_id = ready_task
+        task_data = next((data for key, data in filtered_tasks if key == task_key), None)
+        
+        if task_data:
+            # Generate custom instructions
+            custom_instructions = generate_copilot_instructions(task_key, task_data)
+            
+            # Assign Copilot
+            print(f"   Assigning Copilot to #{issue_num} ({task_key})...", end=" ", flush=True)
+            if assign_copilot_agent(node_id, custom_instructions, base_ref="main"):
+                print("✅")
+                print(f"\n   📝 Custom instructions generated ({len(custom_instructions)} characters)")
+                print(f"   🔗 View: https://github.com/{REPO_OWNER}/{REPO_NAME}/issues/{issue_num}")
+            else:
+                print("❌")
+                print("   ⚠️  Failed to assign Copilot - check permissions and API access")
+    else:
+        print("   ⚠️  No ready tasks found for Copilot assignment")
+        print("   💡 All tasks have dependencies or are not yet created")
+    
     print(f"\n🔗 View issues: https://github.com/{REPO_OWNER}/{REPO_NAME}/issues")
     print(f"🔗 View project: https://github.com/orgs/{REPO_OWNER}/projects/{PROJECT_NUMBER}")
+
 
 
 if __name__ == "__main__":
