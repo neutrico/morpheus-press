@@ -96,6 +96,49 @@ def generate_copilot_instructions(
     return "\n".join(instructions)
 
 
+def select_custom_agent(task_data: Dict) -> Optional[str]:
+    """
+    Select appropriate custom agent based on task metadata.
+    
+    Args:
+        task_data: Task data from YAML containing labels, type, etc.
+    
+    Returns:
+        Custom agent name or None for default agent
+    """
+    # Check task labels for agent hints (most reliable)
+    labels = task_data.get('labels', [])
+    labels_str = ' '.join(str(label).lower() for label in labels)
+    
+    # Testing specialist for test-related tasks (check first - more specific)
+    testing_keywords = ['test', 'testing', 'vitest']
+    if any(keyword in labels_str for keyword in testing_keywords):
+        return 'testing-specialist'
+    
+    # Backend specialist for backend/API tasks
+    backend_labels = ['backend', 'fastify', 'database', 'supabase', 'service']
+    if any(keyword in labels_str for keyword in backend_labels):
+        return 'backend-specialist'
+    
+    # Check task title/description (less reliable, use word boundaries)
+    task_text = (task_data.get('task', '') + ' ' + task_data.get('description', '')).lower()
+    
+    # Testing terms (avoid false positives with "test" alone)
+    if any(term in task_text for term in ['unit test', 'integration test', 'test coverage', 'test suite', 'vitest']):
+        return 'testing-specialist'
+    
+    # Backend terms (check for backend-specific concepts)
+    backend_terms = [
+        'fastify', 'supabase', 'rls', 'row-level security',
+        'database service', 'backend api', 'api route', 'api endpoint',
+    ]
+    if any(term in task_text for term in backend_terms):
+        return 'backend-specialist'
+    
+    # Default: no custom agent (use general Copilot)
+    return None
+
+
 def assign_copilot_agent(
     issue_node_id: str,
     custom_instructions: str,
@@ -103,6 +146,7 @@ def assign_copilot_agent(
     base_ref: str = "main",
     repo_owner: str = "neutrico",
     repo_name: str = "morpheus-press",
+    custom_agent: Optional[str] = None,
 ) -> bool:
     """
     Assign Copilot agent to an issue with custom instructions.
@@ -117,6 +161,7 @@ def assign_copilot_agent(
         base_ref: Base branch (defaults to "main")
         repo_owner: Repository owner (for finding copilot bot)
         repo_name: Repository name (for finding copilot bot)
+        custom_agent: Custom agent name (e.g., "backend-specialist", "testing-specialist")
     
    Returns:
         True if mutation succeeded and bot assigned, False otherwise
@@ -177,15 +222,24 @@ def assign_copilot_agent(
     if len(escaped_instructions) > 2000:
         escaped_instructions = escaped_instructions[:1997] + "..."
     
+    # Build agentAssignment object
+    agent_assignment_parts = [
+        f'baseRef: "{base_ref}"',
+        f'customInstructions: "{escaped_instructions}"',
+    ]
+    
+    # Add customAgent if provided
+    if custom_agent:
+        agent_assignment_parts.append(f'customAgent: "{custom_agent}"')
+    
+    agent_assignment = "{ " + ", ".join(agent_assignment_parts) + " }"
+    
     mutation = f"""
     mutation {{
       addAssigneesToAssignable(input: {{
         assignableId: \"{issue_node_id}\"
         assigneeIds: [\"{bot_id}\"]
-        agentAssignment: {{
-          baseRef: \"{base_ref}\"
-          customInstructions: \"{escaped_instructions}\"
-        }}
+        agentAssignment: {agent_assignment}
       }}) {{
         assignable {{
           ... on Issue {{

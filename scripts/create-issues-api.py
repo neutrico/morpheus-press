@@ -19,6 +19,7 @@ from copilot_agent import (
     assign_copilot_agent,
     find_first_ready_task,
     generate_copilot_instructions,
+    select_custom_agent,
 )
 
 # Configuration
@@ -811,11 +812,24 @@ def main():
             # Generate custom instructions
             custom_instructions = generate_copilot_instructions(task_key, task_data)
             
+            # Select appropriate custom agent
+            custom_agent = select_custom_agent(task_data)
+            agent_info = f" with {custom_agent}" if custom_agent else ""
+            
             # Assign Copilot
-            print(f"   Assigning Copilot to #{issue_num} ({task_key})...", end=" ", flush=True)
-            if assign_copilot_agent(node_id, custom_instructions, base_ref="main", repo_owner=REPO_OWNER, repo_name=REPO_NAME):
+            print(f"   Assigning Copilot{agent_info} to #{issue_num} ({task_key})...", end=" ", flush=True)
+            if assign_copilot_agent(
+                node_id, 
+                custom_instructions, 
+                base_ref="main", 
+                repo_owner=REPO_OWNER, 
+                repo_name=REPO_NAME,
+                custom_agent=custom_agent,
+            ):
                 print("✅")
                 print(f"\n   📝 Custom instructions sent ({len(custom_instructions)} characters)")
+                if custom_agent:
+                    print(f"   🤖 Custom agent: {custom_agent}")
                 print(f"   🔗 View: https://github.com/{REPO_OWNER}/{REPO_NAME}/issues/{issue_num}")
                 print(f"   ⚠️  NOTE: Copilot for Issues is in beta - bot may not appear as assignee yet")
             else:
