@@ -1,0 +1,160 @@
+name: Issue Management Automation
+
+on:
+  issues:
+    types: [opened, edited, labeled, unlabeled]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  auto-label:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
+    steps:
+      - name: Auto-label based on title
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue = context.payload.issue;
+            const title = issue.title.toLowerCase();
+            const labels = [];
+            
+            // Detect issue type from title prefix
+            if title.startsWith('[bug]')) {
+              labels.push('Bug');
+            } else if (title.startsWith('[feature]')) {
+              labels.push('Feature');
+            } else if (title.startsWith('[task') || title.match(/^t\d+/i)) {
+              labels.push('Task');
+            }
+            
+            // Detect area from title or body
+            const body = issue.body ? issue.body.toLowerCase() : '';
+            const content = title + ' ' + body;
+            
+            if (content.includes('backend') || content.includes('api')) {
+              labels.push('area: backend');
+            } else if (content.includes('ml') || content.includes('machine learning')) {
+              labels.push('area: ml');
+            } else if (content.includes('image') || content.includes('sdxl')) {
+              labels.push('area: image-gen');
+            } else if (content.includes('setup') || content.includes('infrastructure')) {
+              labels.push('area: setup');
+            }
+            
+            // Add triage status if not already labeled
+            if (!issue.labels.find(l => l.name.startsWith('status:'))) {
+              labels.push('status:triage');
+            }
+            
+            if (labels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: labels
+              });
+              
+              console.log(`Added labels: ${labels.join(', ')}`);
+            }
+
+  assign-milestone:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened' || github.event.action == 'labeled'
+    steps:
+      - name: Auto-assign milestone based on labels
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue = context.payload.issue;
+            
+            // Skip if already has milestone
+            if (issue.milestone) {
+              console.log('Issue already has milestone');
+              return;
+            }
+            
+            // Get all milestones
+            const { data: milestones } = await github.rest.issues.listMilestones({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open'
+            });
+            
+            // Check issue labels
+            const labels = issue.labels.map(l => l.name);
+            
+            // Map labels to milestones
+            let targetMilestone = null;
+            
+            if (labels.includes('area: setup')) {
+              targetMilestone = milestones.find(m => m.title.includes('M0'));
+            } else if (labels.includes('area: backend')) {
+              targetMilestone = milestones.find(m => m.title.includes('M1'));
+            } else if (labels.includes('area: ml')) {
+              targetMilestone = milestones.find(m => m.title.includes('M2'));
+            } else if (labels.includes('area: image-gen')) {
+              targetMilestone = milestones.find(m => m.title.includes('M3'));
+            }
+            
+            if (targetMilestone) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                milestone: targetMilestone.number
+              });
+              
+              console.log(`Assigned to milestone: ${targetMilestone.title}`);
+            }
+
+  add-to-project:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
+    steps:
+      - name: Add issue to project board
+        # Note: This requires GH_PROJECT_TOKEN secret to be configured
+        # with permissions to modify the project board
+        uses: actions/add-to-project@v0.5.0
+        with:
+          project-url: https://github.com/orgs/neutrico/projects/1
+          github-token: ${{ secrets.GH_PROJECT_TOKEN || secrets.GITHUB_TOKEN }}
+
+  comment-on-automation-trigger:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.action == 'opened' &&
+      contains(github.event.issue.labels.*.name, 'Task') &&
+      contains(github.event.issue.body, 'HIGH')
+    steps:
+      - name: Comment with automation instructions
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const comment = `🤖 **Automation Available**
+            
+            This task has **HIGH AI effectiveness**. You can trigger automated code generation by commenting:
+            
+            \`\`\`
+            /automate
+            \`\`\`
+            
+            The automation will:
+            1. Analyze the task specification
+            2. Generate starter code with TODO comments
+            3. Create a PR with the generated code
+            4. Assign the PR to @copilot for review
+            
+            See [Task Automation README](../scripts/automation/README.md) for details.`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });

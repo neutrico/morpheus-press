@@ -1,0 +1,403 @@
+# Project Management Guide
+
+This document explains how we use GitHub's project management features to organize and track work on Morpheus Press.
+
+## 📊 Overview
+
+We use a milestone-driven development approach with GitHub Issues, Milestones, Projects, and automated workflows to manage the project.
+
+## ⚙️ Setup Requirements
+
+Before using the automation features, configure the following:
+
+### GitHub Secrets
+
+1. **GH_PROJECT_TOKEN** (Optional but recommended)
+   - Required for automated project board integration
+   - Create a Personal Access Token with `project` scope
+   - Add to repository secrets: Settings → Secrets → Actions → New repository secret
+   - If not configured, workflows will fall back to `GITHUB_TOKEN` (limited permissions)
+
+2. **ANTHROPIC_API_KEY** (For task automation)
+   - Required for automated code generation
+   - Add to repository secrets for automation workflows
+
+### GitHub CLI Authentication
+
+For local script execution:
+```bash
+# Authenticate GitHub CLI
+gh auth login
+
+# Verify authentication
+gh auth status
+```
+
+## 🎯 Milestones
+
+### Milestone Structure
+
+The project is organized into 8 major milestones representing phases of development:
+
+| Milestone | Focus | Timeline |
+|-----------|-------|----------|
+| **M0 - Infrastructure & Setup** | Dev environment, CI/CD, testing framework | Sprint 1-2 |
+| **M1 - Backend Services** | API layer, database, authentication | Sprint 3-5 |
+| **M2 - ML Training & Development** | Model training, evaluation, W&B integration | Sprint 6-8 |
+| **M3 - Content Generation Pipeline** | Image generation, ComfyUI integration | Sprint 9-11 |
+| **M4 - Dashboard & UI** | Web interface, preview components | Sprint 12-14 |
+| **M5 - Product Assembly** | Comic layout, PDF export | Sprint 15-17 |
+| **M6 - Commerce & Distribution** | E-commerce, storefront, distribution | Sprint 18-20 |
+| **M7 - Launch & Release** | Final integration, production deployment | Sprint 21-22 |
+
+### Creating Milestones
+
+Milestones can be created via:
+
+1. **GitHub UI**: Settings → Milestones → New milestone
+2. **GitHub CLI**:
+   ```bash
+   gh api /repos/neutrico/morpheus-press/milestones \
+     -f title="M0 - Infrastructure & Setup" \
+     -f due_on="2026-02-28T00:00:00Z" \
+     -f description="Project setup, CI/CD, devcontainer"
+   ```
+3. **Automation Script**:
+   ```bash
+   python3 scripts/create-github-issues.py
+   # Automatically creates milestones from planning/milestones.yaml
+   ```
+
+### Tracking Milestone Progress
+
+Progress is automatically tracked:
+- **Daily**: Automated workflow updates milestone descriptions with progress percentage
+- **On Issue Close/Reopen**: Progress recalculated immediately
+- **Completion**: When all issues are closed, milestone is auto-closed and celebration issue created
+
+View progress:
+```bash
+gh api /repos/neutrico/morpheus-press/milestones | jq '.[] | {title, open_issues, closed_issues}'
+```
+
+## 📝 Issues
+
+### Issue Types
+
+We use three main issue types:
+
+1. **Task** - Technical implementation work (from planning or ad-hoc)
+2. **Feature** - New user-facing functionality
+3. **Bug** - Defects and fixes
+
+### Creating Issues
+
+#### From GitHub UI
+
+Use the appropriate template:
+1. Go to Issues → New Issue
+2. Select template:
+   - **Bug Report**: For bugs with reproduction steps
+   - **Feature Request**: For new features with user stories
+   - **Development Task**: For technical tasks
+
+#### From Planning System
+
+For planned tasks from `planning/docs/`:
+
+```bash
+# Create all issues
+pnpm issues:create
+
+# Create specific task
+python3 scripts/create-github-issues.py T24
+
+# Create milestone issues
+python3 scripts/create-github-issues.py --milestone M1
+
+# Preview without creating
+python3 scripts/create-github-issues.py --dry-run
+
+# Only HIGH AI effectiveness tasks
+pnpm issues:high-ai
+```
+
+This reads from:
+- `planning/issues/*.yaml` - Issue definitions
+- `planning/docs/m*/*.md` - Detailed specifications
+- `planning/estimates/effort-map.yaml` - Effort estimates
+
+### Issue Lifecycle
+
+```
+┌─────────┐
+│ Triage  │ ← New issue created
+└────┬────┘
+     ↓
+┌─────────┐
+│  Ready  │ ← Approved, ready for work
+└────┬────┘
+     ↓
+┌─────────┐
+│Progress │ ← Being implemented
+└────┬────┘
+     ↓
+┌─────────┐
+│  Done   │ ← Completed & merged
+└─────────┘
+```
+
+**Special Status:**
+- `blocked` - Blocked by dependencies or external factors
+
+### Issue Labels
+
+Labels are automatically applied based on:
+
+#### Area (what part of the system)
+- `area: setup` - Infrastructure and project setup
+- `area: backend` - Backend API and services
+- `area: ml` - Machine learning and AI
+- `area: ingestion` - Book ingestion pipeline
+- `area: image-gen` - Image generation
+- `area: comic` - Comic assembly
+- `area: distribution` - Distribution channels
+- `area: ecommerce` - E-commerce and payments
+- `area: release` - Release and deployment
+
+#### Priority (how urgent)
+- `priority:p0` - Critical (blocks development)
+- `priority:p1` - High (major feature broken)
+- `priority:p2` - Medium (minor feature)
+- `priority:p3` - Low (enhancement)
+
+#### Status (where in workflow)
+- `status:triage` - Needs review
+- `status:ready` - Ready for implementation
+- `status:in-progress` - Being worked on
+- `status:blocked` - Blocked by dependencies
+- `status:done` - Completed
+
+#### Special Labels
+- `auto-generated` - Code generated by automation
+- `from-planning` - Created from planning system
+- `milestone-complete` - Milestone completion celebration
+
+### Creating Labels
+
+```bash
+# Create all labels from planning/labels.yaml
+python3 scripts/create-github-labels.py
+
+# Preview
+python3 scripts/create-github-labels.py --dry-run
+
+# Update existing labels
+python3 scripts/create-github-labels.py --update
+```
+
+## 🎯 GitHub Projects
+
+### Project Board
+
+We use GitHub Projects (v2) for kanban-style tracking:
+
+**Columns:**
+- **Backlog**: Not yet started
+- **Ready**: Ready for implementation
+- **In Progress**: Currently being worked on
+- **Review**: In PR review
+- **Done**: Completed
+
+**Views:**
+- **Board View**: Kanban board by status
+- **Table View**: Spreadsheet-style view with all fields
+- **Roadmap View**: Timeline view by milestone
+- **Priority View**: Grouped by priority
+
+### Automation
+
+The project board is automatically updated by:
+- **On Issue Open**: Added to Backlog
+- **On Label `status:ready`**: Moved to Ready
+- **On Label `status:in-progress`**: Moved to In Progress
+- **On PR Open**: Moved to Review
+- **On Issue Close**: Moved to Done
+
+### Adding Issues to Project
+
+Issues are automatically added via workflow, or manually:
+
+```bash
+# Via GitHub CLI
+gh issue edit 123 --add-project "Morpheus Press"
+
+# Via GraphQL API
+gh api graphql -f query='...' # Complex, see GitHub docs
+```
+
+## 🤖 Automated Workflows
+
+### Issue Management (`issue-management.yml`)
+
+Triggers: On issue open, edit, label change
+
+**Actions:**
+1. **Auto-label**: Detects type and area from title/body
+2. **Auto-assign milestone**: Based on area labels
+3. **Add to project**: Adds new issues to project board
+4. **Automation hint**: Comments on HIGH AI effectiveness tasks
+
+### Milestone Progress (`milestone-progress.yml`)
+
+Triggers: Daily at 9 AM UTC, on issue close/reopen, manual
+
+**Actions:**
+1. **Update progress**: Adds progress % to milestone description
+2. **Check completion**: Auto-closes completed milestones
+3. **Generate report**: Weekly progress report (logged)
+
+### Task Automation (`copilot-task-automation.yml`)
+
+Triggers: Comment `/automate` on issue
+
+**Actions:**
+1. Extracts task key from issue
+2. Runs code generation script
+3. Creates PR with generated code
+4. Assigns PR to @copilot
+
+## 📊 Tracking Progress
+
+### View Milestone Progress
+
+```bash
+# List all milestones
+gh api /repos/neutrico/morpheus-press/milestones | jq '.[] | {title, open_issues, closed_issues}'
+
+# Specific milestone
+gh api /repos/neutrico/morpheus-press/milestones/1
+```
+
+### View Issue Statistics
+
+```bash
+# Count by label
+gh issue list --label "area: backend" --state all --json state | jq 'group_by(.state) | map({state: .[0].state, count: length})'
+
+# Count by milestone
+gh issue list --milestone "M1 - Backend Services" --state all | wc -l
+
+# Open issues by priority
+gh issue list --label "priority:p0" --state open
+```
+
+### Generate Reports
+
+```bash
+# Trigger weekly report
+gh workflow run milestone-progress.yml
+
+# View workflow output
+gh run list --workflow=milestone-progress.yml
+```
+
+## 🔄 Sprint Planning
+
+### Planning Process
+
+1. **Sprint Goal**: Define goal for the sprint (2 weeks)
+2. **Select Issues**: Pull ready issues from backlog
+3. **Estimate**: Confirm estimates are reasonable
+4. **Assign**: Assign issues to team members
+5. **Track**: Monitor progress daily
+
+### Sprint Metrics
+
+Track these metrics per sprint:
+- **Velocity**: Story points completed
+- **Burndown**: Issues remaining over time
+- **Cycle Time**: Time from start to done
+- **Lead Time**: Time from created to done
+
+## 📈 Best Practices
+
+### For Maintainers
+
+1. **Triage Daily**: Review new issues, apply labels, assign milestones
+2. **Close Stale**: Close inactive issues after 30 days of inactivity
+3. **Update Milestones**: Keep milestone dates realistic
+4. **Review Progress**: Check milestone progress weekly
+5. **Celebrate Wins**: Acknowledge milestone completions
+
+### For Contributors
+
+1. **Search First**: Check if issue already exists
+2. **Use Templates**: Fill out issue templates completely
+3. **Link Issues**: Reference related issues with #123
+4. **Update Status**: Move issues through workflow
+5. **Close on Merge**: Use "Closes #123" in PR description
+
+### For Teams
+
+1. **Daily Standup**: Quick sync on progress and blockers
+2. **Weekly Review**: Review milestone progress
+3. **Retrospective**: Reflect on what worked/didn't
+4. **Refinement**: Groom backlog, update estimates
+
+## 🛠️ Tools
+
+### GitHub CLI (`gh`)
+
+Install: https://cli.github.com/
+
+Useful commands:
+```bash
+# List issues
+gh issue list --milestone "M1" --label "priority:p0"
+
+# Create issue
+gh issue create --title "Bug: Image timeout" --body "..." --label bug
+
+# View issue
+gh issue view 123
+
+# Close issue
+gh issue close 123
+
+# Reopen issue
+gh issue reopen 123
+
+# Add labels
+gh issue edit 123 --add-label "priority:p0"
+
+# View milestones
+gh api /repos/neutrico/morpheus-press/milestones
+```
+
+### Python Scripts
+
+Located in `scripts/`:
+- `create-github-issues.py` - Bulk issue creation
+- `create-github-labels.py` - Label management
+
+### Package Scripts
+
+Defined in `package.json`:
+```bash
+pnpm issues:create      # Create all issues
+pnpm issues:high-ai     # Create HIGH AI tasks only
+pnpm labels:create      # Create all labels
+pnpm labels:update      # Update existing labels
+```
+
+## 📚 Resources
+
+- [GitHub Issues Documentation](https://docs.github.com/en/issues)
+- [GitHub Projects Documentation](https://docs.github.com/en/issues/planning-and-tracking-with-projects)
+- [GitHub Actions Documentation](https://docs.github.com/en/actions)
+- [Contributing Guide](CONTRIBUTING.md)
+
+## 🤝 Support
+
+Questions? Open a [GitHub Discussion](https://github.com/neutrico/morpheus-press/discussions) or ask in the project channel.

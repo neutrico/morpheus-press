@@ -8,7 +8,9 @@
     "plan:dry-run": "python3 scripts/planning/run-pipeline.py --dry-run",
     "automate": "python3 scripts/automation/task-automation-agent.py",
     "issues:create": "python3 scripts/create-github-issues.py",
-    "issues:high-ai": "python3 scripts/create-github-issues.py --ai-high-only"
+    "issues:high-ai": "python3 scripts/create-github-issues.py --ai-high-only",
+    "labels:create": "python3 scripts/create-github-labels.py",
+    "labels:update": "python3 scripts/create-github-labels.py --update"
   },
   "keywords": ["planning", "automation", "ai", "copilot", "github-actions"],
   "author": "neutrico",

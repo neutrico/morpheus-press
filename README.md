@@ -63,6 +63,42 @@ python3 scripts/create-github-issues.py --ai-high-only
 **$0.75 LLM cost** for automation  
 **$4,500 dev cost saved**  
 
+## 📋 Project Management
+
+### Quick Links
+
+- 📊 [Project Board](https://github.com/orgs/neutrico/projects/1) - Kanban board and roadmap
+- 🎯 [Milestones](https://github.com/neutrico/morpheus-press/milestones) - Development phases (M0-M7)
+- 🐛 [Issues](https://github.com/neutrico/morpheus-press/issues) - Tasks, bugs, and features
+- 📚 [Contributing Guide](docs/CONTRIBUTING.md) - How to contribute
+- 🗺️ [Project Management Guide](docs/PROJECT_MANAGEMENT.md) - Detailed PM documentation
+
+### Milestones
+
+| Milestone | Description | Status |
+|-----------|-------------|--------|
+| **M0** | Infrastructure & Setup | 🟢 In Progress |
+| **M1** | Backend Services | 🔵 Planned |
+| **M2** | ML Training & Development | 🔵 Planned |
+| **M3** | Content Generation Pipeline | 🔵 Planned |
+| **M4** | Dashboard & UI | 🔵 Planned |
+| **M5** | Product Assembly | 🔵 Planned |
+| **M6** | Commerce & Distribution | 🔵 Planned |
+| **M7** | Launch & Release | 🔵 Planned |
+
+### Create Issues & Labels
+
+```bash
+# Create all issues from planning
+pnpm issues:create
+
+# Create specific task
+python3 scripts/create-github-issues.py T24
+
+# Create labels
+python3 scripts/create-github-labels.py
+```  
+
 ## 📚 Documentation
 
 - [SETUP_CHECKLIST.md](./SETUP_CHECKLIST.md) - 30min setup guide
