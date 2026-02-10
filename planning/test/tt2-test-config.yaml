@@ -1,0 +1,148 @@
+test_id: TT2
+test_key: TEST166
+test_name: Backend Core API - GitHub Integration Test
+type: integration_validation
+priority: p1
+estimated_effort: 2 days
+ai_effectiveness: high
+
+description: |
+  Test issue for validating GitHub Issues + Projects v2 integration
+  with Copilot agent assignment workflow.
+
+objectives:
+  - Validate GitHub GraphQL API integration for Copilot assignment
+  - Test custom instruction generation from YAML specifications
+  - Verify end-to-end automation pipeline
+  - Document integration findings for future tasks
+
+test_cases:
+  - id: TC1
+    name: GitHub GraphQL API Connectivity
+    description: Test connection to GitHub GraphQL API
+    steps:
+      - Authenticate with GitHub token
+      - Execute introspection query
+      - Verify response schema
+    expected_result: Successful API connection with valid schema
+    status: pending
+    
+  - id: TC2
+    name: Copilot Assignment via GraphQL
+    description: Test addAssigneesToAssignable mutation for Copilot
+    steps:
+      - Get test issue ID
+      - Prepare custom instructions
+      - Execute assignment mutation
+      - Verify assignee list
+    expected_result: Copilot successfully assigned with custom instructions
+    status: pending
+    
+  - id: TC3
+    name: Custom Instruction Generation
+    description: Generate context-rich instructions from task YAML
+    steps:
+      - Load task specification from planning/test/tt2.md
+      - Parse metadata (priority, effort, AI effectiveness)
+      - Generate instruction template
+      - Validate template structure
+    expected_result: Valid instruction template with all required fields
+    status: pending
+    
+  - id: TC4
+    name: Issue-to-PR Workflow
+    description: Test complete automation pipeline from issue to PR
+    steps:
+      - Create test issue with automation label
+      - Trigger automation workflow
+      - Generate code (if applicable)
+      - Create PR with metadata
+      - Assign Copilot for review
+    expected_result: PR created with proper labels and agent assignment
+    status: pending
+    
+  - id: TC5
+    name: Metadata Tracking
+    description: Verify proper metadata capture throughout workflow
+    steps:
+      - Check issue labels and fields
+      - Verify PR linkage to issue
+      - Validate project board updates
+      - Check automation status tracking
+    expected_result: All metadata properly tracked and linked
+    status: pending
+
+validation_criteria:
+  github_api:
+    - connectivity: true
+    - authentication: true
+    - rate_limit_status: healthy
+    
+  graphql_operations:
+    - introspection_query: success
+    - assignment_mutation: success
+    - custom_instructions: valid
+    
+  automation_pipeline:
+    - issue_detection: automatic
+    - code_generation: on-demand
+    - pr_creation: automatic
+    - agent_assignment: automatic
+    
+  quality_checks:
+    - instruction_template_valid: true
+    - metadata_complete: true
+    - error_handling: comprehensive
+    - documentation_updated: true
+
+test_environment:
+  repository: neutrico/morpheus-press
+  branch: copilot/test-backend-core-api
+  github_api_version: v4 (GraphQL)
+  required_permissions:
+    - read:org
+    - write:issues
+    - write:pull_requests
+    - write:projects
+
+expected_deliverables:
+  - planning/test/tt2.md (specification)
+  - planning/test/tt2-test-config.yaml (this file)
+  - planning/test/tt2-results.md (results report)
+  - docs/GITHUB_COPILOT_INTEGRATION.md (updated)
+
+success_metrics:
+  - all_test_cases_passed: true
+  - zero_api_errors: true
+  - documentation_complete: true
+  - integration_guide_created: true
+
+risks_and_mitigations:
+  - risk: GitHub API rate limiting
+    mitigation: Use exponential backoff, cache responses
+    
+  - risk: Copilot assignment permissions
+    mitigation: Verify org-level settings, fallback to manual assignment
+    
+  - risk: Custom instruction length limits
+    mitigation: Template compression, link to full docs
+    
+  - risk: Webhook propagation delays
+    mitigation: Add polling fallback, increase timeout windows
+
+notes: |
+  This is a test task specifically designed to validate the
+  GitHub Issues + Projects v2 integration and Copilot agent
+  assignment workflow. The focus is on testing infrastructure
+  and documentation, not production feature implementation.
+  
+  Key learnings from this test will be applied to automate
+  the 14 HIGH AI effectiveness tasks in the main PI planning.
+
+related_tasks:
+  - T2: GitHub Milestones & Issues Creation
+  - planning/AGENT_WORKFLOWS.md
+  - scripts/automation/task-automation-agent.py
+
+last_updated: 2026-02-09
+test_owner: github-copilot-agent
