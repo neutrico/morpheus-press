@@ -1,0 +1,44 @@
+# Test effort estimation map for TT1 validation
+# This is a minimal test file to validate infrastructure
+
+estimates:
+  TT1:
+    estimated_days: 2
+    reasoning: |
+      Test issue for infrastructure validation
+      
+      AI Impact: HIGH
+      - Automate validation script generation
+      - Automate test documentation creation
+      
+      Effort Breakdown:
+      - Create test spec: 0.5 days
+      - Create validation script: 0.5 days
+      - Run tests and document: 0.5 days
+      - Review and fixes: 0.5 days
+    
+    ai_effectiveness: high
+    risk: low
+    dependencies: []
+    
+  TEST165:
+    estimated_days: 2
+    reasoning: |
+      Test task to verify Copilot agent assignment
+      
+      AI Impact: HIGH
+      - Automated test generation
+      - Infrastructure validation
+      
+      Effort Breakdown:
+      - Setup: 1 day
+      - Validation: 1 day
+    
+    ai_effectiveness: high
+    risk: low
+    dependencies: []
+
+metadata:
+  version: "1.0.0"
+  last_updated: "2026-02-09"
+  purpose: "Test effort estimation for TT1 infrastructure setup validation"
